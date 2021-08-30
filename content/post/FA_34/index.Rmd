@@ -1,0 +1,1679 @@
+---
+title: "Confirmatory Factor Analysis"
+author: "Jinsong Chen"
+subtitle: "EDUR7109 Factor Analysis Week 3-4"
+output:
+  bookdown::html_document2:
+    # code_folding: hide
+    df_print: kable
+    number_sections: false
+    # theme: spacelab
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+  bookdown::word_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+  bookdown::pdf_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+editor_options:
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+
+body {
+  font-size: 2em;
+}
+
+```
+
+```{r setup, include=F}
+# if (!require(bookdown)) { install.packages("bookdown"); library(bookdown) }
+library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+library(lavaan)
+knitr::opts_chunk$set(echo = T) #print code by default
+options(digits=3)
+```
+
+
+<body>
+
+## **Introduction**
+
+* Similar to exploratory factor analysis (EFA), confirmatory factor analysis (CFA) is also considered as a common factor model where parameters such as loadings and factorial correlations can be estimated.
+
+* The estimation also proceeds by analyzing the constructs and patterns underlying the variance structure of the data (see Table \@ref(tab:cov-ex1-tab))
+  - Also known as covariance structure analysis
+
+```{r cov-ex1-tab,echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "")
+fn<-"FA03.csv"
+# write.csv(dat,fn,row.names=F)
+y<-read.csv(fn)
+COV<-cov(y,use="pairwise.complete.obs")
+# SD<-apply(y,2,sd,na.rm=T)
+is.na(COV) <- upper.tri(COV)
+
+COV %>%
+  kbl(caption = "Example Covariance Structure, N = 500",digits = 3)%>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Different from EFA, CFA is used to investigate the causal relations among latent and observed variables in a priori specified, theory-driven models.
+
+* Thus, CFA requires that researchers make predictions about the constructs and patterns underlying the observed variables, and provides a mechanism to test and compare different hypotheses about these constructs and patterns with corresponding models.
+
+* CFA's strength lies in its (dis)confirmatory nature: models or theories can be tested and rejected, and the results might also point toward potential modifications to be investigated in subsequent analyses.
+
+* CFA can be understood as a process ranging from model specification, identification, estimation, evaluation, comparison to potential modification.
+  - In an empirical research, specification and identification is part of the research design, while the rest belong to research implementation and analysis.
+  - Model parameters are the key to fully understand the entire modeling process; they are widely used in the equations, diagrams, and tables 
+
+* Notation system: **$y$ notation**
+  - All observed variables are represented as $y$s
+
+```{r echo=FALSE}
+library(kableExtra)
+
+df<-data.frame(
+  c1=c("$y$","$f$","$e$","$a$","$c$","$d$"),
+  c2=c("Y","$F$","$E$","$A$","$C$","$D$"),
+  c3=c("$J \\times 1$","$K \\times 1$","$J \\times 1$","$J \\times K$","$K \\times K$","$J \\times J$"),
+  c4=c("Indicator or item, observed variable","Factor, latent variable","Measurement error, latent variable","Loading, parameter","Factor covariance, parameter", "Error covariance, parameter")
+  )
+header<-c("Symbol", "Matrix Form", "Dimension", "Meaning")
+
+df %>%
+  kbl(booktabs = T,caption = "All $y$ Notation", col.names=header)  %>% 
+  kable_classic(full_width = F, html_font = "Cambria") %>% #,font_size = 20
+  # column_spec(2,italic = T) %>%
+  column_spec(2, bold = T)
+
+```
+
+
+## **Model Specification**
+
+* Specification is hypothesis-based and an important step in CFA, because results from later steps and data analysis assume that the model$—$the researcher's hypotheses$—$are correctly specified.
+  - Misspecification can render all subsequent analyses useless
+  - Meanwhile, it is often necessary to respecify the models based on data analysis, and respecification should respect the same principles as specification
+
+
+### General Representation
+
+* Remember that the common factor model underlies both exploratory and confirmatory factor analyses, and the equation for each indicator is:
+
+
+$$
+y_j =\sum_{k=1}^{K}a_{jk} f_k + e_j,
+(\#eq:fa-single)
+$$
+where $K$ is the number of factor, $J$ is the number of indicators and subscript $j=1...J$.
+
+* The more concise matrix form is:
+
+$$
+\mathbf{Y} =\mathbf{AF+E}.
+(\#eq:fa-matrix)
+$$
+
+* Implicit in the above equation is the factor covariance matrix $COV(\mathbf{F})=\mathbf{C}$ and error covariance matrix $COV(\mathbf{E}) =\mathbf{D}$.
+
+* All model parameters are contained in three matrices:
+  - $\mathbf{A}$ ($J \times K$)
+  - $\mathbf{C}$ ($K \times K$)
+  - $\mathbf{D}$ ($J \times J$)
+
+
+* The crucial difference in CFA comes from:
+
+  1. Specified number of factors $K$;
+  1. Restrictions imposed on the model parameters to specify how the parameters are addressed during modeling.
+    - It helps to reduce the actual number of parameters that need to be estimated to acceptable level
+
+* The status of each model parameter can be free or restricted as fixed or constrained depending on the researcher's specifications.
+
+* Constraints are usually imposed on the loading matrix $\mathbf{A}$: some elements are fixed to be zeros or ones. Here's a typically specified loading matrix with 9 items and 3 factors:
+  - Note the fixed and free loadings
+
+$$
+\underset{9 \times 3}{\mathbf{A}} = \begin{bmatrix}
+   1 & 0 &  0 \\
+   a_{21} & 0 &  0 \\
+   a_{31} & 0 &  0 \\
+   0 & 1 &  0 \\
+   0 & a_{52} &  0 \\
+   0 & a_{62} &  0 \\
+   0 & 0 &  1 \\
+   0 & 0 &  a_{83} \\
+   0 & 0 &  a_{93} \\
+ \end{bmatrix}.
+ (\#eq:mlambda)
+$$
+
+* A **free parameter** (also referred as unknown parameter) is to be freely estimated by the algorithm based on the sample data (i.e., no constraint).
+  - it includes the loading, factorial correlation, and error variance
+  - In the above loading matrix, there are six free loadings
+
+* In contrast, a **fixed parameter** is constrained or specified to equal a constant (e.g., 0 or 1). That is, the algorithm *accepts* this constant as the estimate of the parameter regardless of the data.
+  - In the above loading matrix, there are three loadings fixed at one, 18 loadings fixed at zero
+
+* Model specification should be based on substantive knowledge, hypotheses or assumptions.
+  - Thus, CFA provides not only estimates of model parameter, but also a hypothesis testing of the model structure, which can be further used for model comparisons and modification.
+
+
+### Standardized vs. Unstandardized Factor in Standard CFA
+
+* In a standard CFA model, indicators are unidimensional, factors are allowed to correlate (different from EFA) and the error terms are uncorrelated (similar to EFA).
+
+* The latent scale of the factor is required to be determined in advance, with two possible options: standardized vs. unstandardized factor
+  - Under EFA, factors are usually standardized
+
+* When the factors are standardized, and all loading parameters can be estimated (see Figure \@ref(fig:std-fac-fig)).
+  - Usually, the scales of the data (i.e., observed variables) are also standardized as one, and it is referred to as the standardized solution (similar to the EFA setting)
+  
+* In Figure \@ref(fig:std-fac-fig), free or unknown parameters $t$ include six terms of loading, six terms of error variance, and one term of factor covariance, the number of which equals to 13
+
+  
+```{r std-fac-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Standardized factors."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label='c@_{11}=1',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label='c@_{22}=1',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label='c@_{12}']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = 'a@_{11}']
+F1->y2 [label = 'a@_{21}']
+F1->y3 [label = 'a@_{31}']
+F2->y4 [label = 'a@_{42}']
+F2->y5 [label = 'a@_{52}']
+F2->y6 [label = 'a@_{62}']
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none]
+y2e [pos = '-2,4!', label = 'E@_{2}',shape=none]
+y3e[pos = '-1,4!', label = 'E@_{3}',shape=none]
+y4e[pos = '0,4!', label = 'E@_{4}',shape=none]
+y5e[pos = '1,4!', label = 'E@_{5}',shape=none]
+y6e[pos = '2,4!', label = 'E@_{6}',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* Alternatively, we can specify one of the indicator loadings as one so that factor variance can be estimated, which is referred to as unstandardized factors (see Figure \@ref(fig:unstd-fac-fig)).
+
+* It assigns to a factor a scale same as the explained (common) variance of the indicator, and the indicator fixed at one is known as **reference indicator**.
+
+* In Figure \@ref(fig:unstd-fac-fig), the reference indicator for $f_1$ and $f_2$ is $a_{11}$ and $a_{42}$, respectively
+  - Free or unknown parameters $t$ include four terms of loading, six terms of error variance, and three terms of factor covariance, the number of which is also 13
+
+```{r unstd-fac-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Unstandardized factors."}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label='c@_{11}',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label='c@_{22}',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label='c@_{12}']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = 'a@_{11}=1']
+F1->y2 [label = 'a@_{21}']
+F1->y3 [label = 'a@_{31}']
+F2->y4 [label = 'a@_{42}=1']
+F2->y5 [label = 'a@_{52}']
+F2->y6 [label = 'a@_{62}']
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none]
+y2e [pos = '-2,4!', label = 'E@_{2}',shape=none]
+y3e[pos = '-1,4!', label = 'E@_{3}',shape=none]
+y4e[pos = '0,4!', label = 'E@_{4}',shape=none]
+y5e[pos = '1,4!', label = 'E@_{5}',shape=none]
+y6e[pos = '2,4!', label = 'E@_{6}',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* The two methods of scaling the factors are mathematically equivalent, and generally result in the same overall fit of the model to the same data.
+
+* In some special situations (e.g., multiple groups, interaction constraint), the standardized method might not work well.
+
+* Thus, the unstandardized method (i.e., reference indicator) is usually the default CFA setting.
+  - Nevertheless, you are suggested to report both solutions whenever possible.
+
+* For the reference indicator, indicator with positive and high loading preferred.
+  - Since weak strength or negative relation between the factor and most indicators could cause problems of identification, stability, or estimation.
+
+### More Complex Structure
+
+* More complex loading patterns with cross-loadings or multidimensional indicators can be specified (see Figure \@ref(fig:cross-ld-fig)).
+  - Note that this is a reduced diagram without the parameter and error symbols, and the number of free parameters equals to the number of arrows (directional or bidirectional) excluding those with fixed values
+
+```{r cross-ld-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Cross Loading CFA."}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label = '',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label = '']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F1->y3 [label = '']
+F2->y4 [label = '1']
+F2->y5 [label = '']
+F2->y6 [label = '']
+
+F2->y3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+y1e[pos = '-3,4!', label = '',shape=none]
+y2e [pos = '-2,4!', label = '',shape=none]
+y3e[pos = '-1,4!', label = '',shape=none]
+y4e[pos = '0,4!', label = '',shape=none]
+y5e[pos = '1,4!', label = '',shape=none]
+y6e[pos = '2,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* Testing of individual parameter is also possible by re-specifying a previously fixed or constrained parameter as free parameter or vice versa.
+
+### Assumptions
+
+* Similar to hypothesis testing, CFA relies on the important assumption of random sampling. Namely, the observed variables are assumed to come from a random sample drawn from some defined population. Accordingly, estimates based on the sample are representative of the population parameters.
+
+* Moreover, the population is assumed to have a multivariate normal distribution, implying each item has a normal distribution and all item-pair associations are linear. More precisely, it's equivalent to assume $\bf{Y} \sim N(0,\mathbf{\Sigma})$, where $\mathbf{\Sigma}$ is the $J \times J$ population covariance matrix.
+
+* Note that the data or factors can be unstandardized, and thus $\mathbf{\Sigma}$ is not necessarily a correlation matrix.
+
+* Combining with Equation \@ref(eq:fa-matrix), we can further assume $\mathbf{F} \sim N(0,\mathbf{C})$, where $\mathbf{C}$ is the $K \times K$ factor covariance matrix.
+  - Namely, the factorial means are fixed as zero, but the scales are not necessarily fixed as EFA does.
+
+* The error terms $\mathbf{E} \sim N(0,\mathbf{D})$, where $\mathbf{D}$ is the $J \times J$ error covariance matrix. Although $\mathbf{D}$ is a diagonal matrix (i.e., local independence) by default, it can be non-diagonal under the CFA setting (but not EFA).
+
+* Similar to EFA, the factors and errors are independent of each other, namely $COV(\mathbf{F,E})=0$.
+
+* With the above assumptions and similar to what we did in EFA, the population covariance matrix $\bf{\Sigma}$ can be expressed as a function of the model parameters (also referred to as *model-implied* covariance matrix):
+
+$$
+\begin{aligned}
+\mathbf{\Sigma}=\mathbf{\Sigma(\omega)}= \mathbf{ACA^\text{T}+D}
+\end{aligned}
+(\#eq:dec-rot),
+$$
+where $\boldsymbol{\omega}$ contains all free parameters in $\mathbf{A, D,C}$.
+
+***
+## **Model Identification**
+
+* CFA models can be specified in many different ways as illustrated above. Unfortunately, it doesn't mean any specified model can be legitimately estimated.
+
+* A statistical model is said to be identified if it is analytically possible to derive a unique solution (i.e., unique estimate of each parameter).
+  - The word “analytically” emphasizes identification as a property of the model and not of the data. For example, if a model is not identified, then it remains so regardless of the sample size (100, 1,000, etc.).
+  - Model identification is concerned with three important concepts: the degree of freedom, number of observation, and number of free or unknown parameters.
+
+### Degree of Freedom
+
+* If there's no analytical solution or there are multiple solutions, the models are not identified and should be respecified; otherwise, attempts to analyze and estimate them may be fruitless.
+  - As an example, rotational indeterminacy results in infinite number of solutions, which is of concern in EFA.
+
+* Under CFA, indentification issue usually comes from the fact that the number of unknown parameters exceeds the number of observation, or the lack of degree of freedom.
+
+* In CFA, the number of **observations** $u$ is the number of *unique* elements in the data covariance matrix $\bf{\Sigma}$, which equals $J(J + 1)/2$ (due to the symmetry of the matrix above or below the diagonal).
+  - For example, there are $4(4 + 1)/2=10$ observations for a model with $4$ items, regardless of the sample size or how the model will be specified (e.g., number of factors).
+  - Note: This is also the number of unique equations one can possibly obtain in the model.
+
+* The degree of freedom $df$ in the model is defined as the difference between the number of observations $u$ and the number of free or unknown parameters $t$, namely, $df = u – t$.
+
+### From Under-Identification to Over-Identification
+
+* If $t > u$ or $df < 0$, there are infinite solutions since the number of unknown parameters is more than the number of observations or equations. The model is referred to as **under-identified**, which cannot be estimated and requires respecification within the CFA context.
+
+* In Figure \@ref(fig:under-id-fig), $t = 8 a + 4 d + 1 c = 13 > u=10$ and the model is under-identified. Actually, this is an EFA model without any constraint on the loading pattern.
+  - This is actually an EFA model
+  - By fixing some loadings as zero, the model can be simplified.
+
+```{r under-id-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Under-identification."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-2,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '0,3!', label = 'y@_{3}']
+y4[pos = '1,3!', label = 'y@_{4}']
+
+#Factors
+F1[pos = '-1.5,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '.5,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label = '1',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '1',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label = '']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '']
+F1->y2 [label = '']
+F2->y3 [label = '']
+F2->y4 [label = '']
+
+F2->y1 [label = '']
+F2->y2 [label = '']
+F1->y3 [label = '']
+F1->y4 [label = '']
+
+#Errors
+y1e[pos = '-2,4!', label = '',shape=none]
+y2e [pos = '-1,4!', label = '',shape=none]
+y3e[pos = '0,4!', label = '',shape=none]
+y4e[pos = '1,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* $t < u$ or $df >0$,the model is referred to as **over-identified**. There is very likely no **EXACT** solution since the number of unknown is less than the number of observations or equations.
+
+*  But we can get an approximate solution that will minimize the discrepancy between the observed covariance matrix $\bf{S}$ and model-implied covariance matrices $\bf{\Sigma}$ with certain estimation method and a set of parameters. Thus, the model is estimable.
+
+* After respecifying the above diagram by constraining the items as unidimensional, we have $t = 4 a + 4 d + 1 C = 9 < u=10$ and the model becomes over-identified (Figure \@ref(fig:under-id-fig)).
+
+* Note that cross-loading is often the source of under-identification, especially for complex models. This is one reason researchers try to avoid cross-loading in model specification.
+
+```{r over-id-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Over-identification."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-2,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '0,3!', label = 'y@_{3}']
+y4[pos = '1,3!', label = 'y@_{4}']
+
+#Factors
+F1[pos = '-1.5,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '.5,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label = '1',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '1',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label = '']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '']
+F1->y2 [label = '']
+F2->y3 [label = '']
+F2->y4 [label = '']
+
+
+#Errors
+y1e[pos = '-2,4!', label = '',shape=none]
+y2e [pos = '-1,4!', label = '',shape=none]
+y3e[pos = '0,4!', label = '',shape=none]
+y4e[pos = '1,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* If $t = u$ or $df =0$, the model is referred to as **just-identified**, or saturated (i.e., no degree of freedom). With the same number of unknown and equations, one will get exact solution.
+  - In Figure \@ref(fig:just-id-fig), $t = 3 a + 3 d  = 6 = u = 3(3+1)/2$
+
+* Necessary rule for identification: *If a standard CFA model with a single factor has at least three indicators, the model is identified. If a standard model with two or more factors has at least two indicators per factor, the model is identified.*
+
+```{r just-id-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Just-identification."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-1,3!', label = 'y@_{1}']
+y2 [pos = '0,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+
+#Factors
+F1[pos = '0,1!', label = 'f',shape=circle]
+
+F1->F1[dir=both,label = '1',tailport = 's', headport = 's'] 
+
+#Loadings
+F1->y1 [label = '']
+F1->y2 [label = '']
+F1->y3 [label = '']
+
+#Errors
+y1e[pos = '-1,4!', label = '',shape=none]
+y2e [pos = '0,4!', label = '',shape=none]
+y3e[pos = '1,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* Statistically however, this is usually not of much concern or interest, because it is just a linear transformation of the observations and you are NOT testing or (dis)confirming the model per se.
+  - So to speak, you've given up the most powerful nature of CFA. Nevertheless, it can serve as a baseline model for model comparisons.
+  
+
+### Necessary But Not Sufficient
+
+* So it is important to distinguish among under-, just-, or over-identified models. But over-identified model can become unidentified due to many reasons
+  - $t$-Rule: $t \le u$ or $df \ge 0$, it is a necessary, but not sufficient, condition for model identification
+
+* Ex1: Two uncorrelated factors: $u = 4(4+1)/2 = 10$; $t = 8$; the model is over-identified globally with $df = 2$ 
+  - But it is locally under-identified (i.e., one factor with two indicators)
+
+```{r local-uid-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Locally Underidentified."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-2,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '0,3!', label = 'y@_{3}']
+y4[pos = '1,3!', label = 'y@_{4}']
+
+#Factors
+F1[pos = '-1.5,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '.5,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label = '1',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '1',tailport = 'e', headport = 'e']
+# F1->F2[dir=both,label = '0']
+# dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '']
+F1->y2 [label = '']
+F2->y3 [label = '']
+F2->y4 [label = '']
+
+
+#Errors
+y1e[pos = '-2,4!', label = '',shape=none]
+y2e [pos = '-1,4!', label = '',shape=none]
+y3e[pos = '0,4!', label = '',shape=none]
+y4e[pos = '1,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* Ex2: Two weakly correlated factors: $u = 10$; $t = 9$; the model is over-identified with $df = 1$
+  - But it might be empirically under-identified during estimation (i.e., treated as one factor with two indicators by the computer program)
+
+
+```{r emp-uid-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Empirically Underidentified."}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-2,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '0,3!', label = 'y@_{3}']
+y4[pos = '1,3!', label = 'y@_{4}']
+
+#Factors
+F1[pos = '-1.5,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '.5,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label = '1',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '1',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label = '~0']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '']
+F1->y2 [label = '']
+F2->y3 [label = '']
+F2->y4 [label = '']
+
+
+#Errors
+y1e[pos = '-2,4!', label = '',shape=none]
+y2e [pos = '-1,4!', label = '',shape=none]
+y3e[pos = '0,4!', label = '',shape=none]
+y4e[pos = '1,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+***
+## **Model Estimation and Interpretation**
+
+* For just- or over-identified model, the population covariance matrix $\bf{\Sigma}$ can be expressed as a function of the model-implied covariance matrix $\boldsymbol{\Sigma(\omega)}$, where $\boldsymbol{\omega}$ contains all free parameters in $\mathbf{A, D,C}$, namely we have a basic hypothesis $\boldsymbol{\Sigma=\Sigma(\omega)}$
+  - For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)
+  - For over-identified model, there is no EXACT solution and we rely on estimation, which only produces approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error)
+  - Although this might appear to be disadvantageous, it actually offers one of the greatest strengths for CFA: fit statistics for model-data fit evaluation.
+  - During model estimation, it's the sample covariance matrix $\bf{S}$ that is being approximated with $\boldsymbol{\Sigma(\omega)}$ using specific estimation method, under the assumption of random sampling.
+
+* The most popular method is the maximum likelihood estimation, which is the default setting in most CFA or SEM programs.
+
+### Maximum Likelihood Estimation
+
+* In statistics, maximum likelihood (ML) estimation is a method of estimating the parameters of a probability distribution by maximizing a likelihood function, so that the chance to observe the data is most likely under the assumed statistical model.
+
+* The values of the parameters that maximize the likelihood function are called the maximum likelihood estimates.
+
+* Under the FA context, ML estimation relies on two key assumptions about the data: random sampling and normality.
+
+* First, a given set of observations is a random sample from an unknown population. The goal of ML estimation is to make inferences about the population parameters that are most likely to have generated the sample data.
+
+* Then, ML estimation maximizes the likelihood of observing the sample data from a multivariate normal distribution based on model parameters, $\bf{Y} \sim N[0,\boldsymbol{\Sigma(\omega)}]$, with $\boldsymbol{\Sigma(\omega)}= \mathbf{ACA^\text{T}+D}$.
+
+* Statistically, it is equivalent to minimize the discrepancy between $\boldsymbol{\Sigma(\omega)}$ and the sample covariance matrix $\bf{S}$ through the fitting or discrepancy function:
+
+$$
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(J+K)
+(\#eq:obj-fun),
+$$
+where $tr(\cdot)$ denotes the trace of a square matrix trace, $\bf{S}$ is the sample covariance matrix, and $J$ and $K$ are the number of indicators and factors, respectively. 
+
+* The estimation algorithm starts the fitting function with a set of initial parameter values $\omega_0$, and iterates with different parameter estimates $\hat{\omega}$ until the discrepancy is small enough (below a predefined minimum value). The estimates are then retained and considered as the maximum likelihood estimates.
+
+* One important feature of ML estimation is that it provides the uncertainty (i.e. standard error) of the estimate, or the interval estimate.
+
+### Advantages and Issues
+
+* The ML method is generally both scale free and scale invariant.
+  - The former means that if a variable's scale is linearly transformed, a parameter estimated for the transformed variable can be mathematically converted back to the original metric.
+  - The latter means the value of the fitting function in a particular sample remains the same regardless of the scale of the observed variables (Kaplan, 2000).
+  - However, ML estimation may lose these properties if a correlation matrix is analyzed instead of a covariance matrix.
+
+* Other properties of the ML estimation: 
+  - Consistency: as the number of indicators gets larger, factor estimates get closer to true values
+  - Asymptotic normality and efficiency: as sample size gets larger, parameter estimates are more reliable (i.e., smaller standard error)
+  - Different initial values converge to same estimates
+
+* CFA with the ML method is large-sample technique, and requires moderate to large sample size. Parameter estimates will not be reliable when the sample size is small.
+
+* When a raw data file is analyzed, standard ML estimation assumes that there is no missing value. A special form of ML estimation is needed for raw data files where some observations are missing at random
+
+* Although usually not a problem when analyzing identified models, a converged solution may be inadmissible in ML estimation and other iterative methods.
+  - This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates)
+
+* Heywood cases can be caused by many factors: specification errors, nonidentification of the model, the presence of outlier cases, a combination of small sample sizes (e.g., N < 100) and only two indicators per factor, or extremely high or low population correlations that result in empirical underidentification (Chen, Bollen, Paxton, Curran, & Kirby, 2001)
+  - When you have Heywood case, it's not necessarily bad things since it can be used as diagnostic information about the model. Researchers should attempt to determine the source of the problem instead of constraining an error variance to be positive in a computer program.
+
+### Interpretation of Parameter Estimates
+
+* However complex the mathematics of MLE, the interpretation of parameter estimates for CFA models is relatively straightforward.
+
+* Table \@ref(tab:est-std-tab) presents all parameter estimates based on the standard models in Figure \@ref(fig:unstd-fac-fig) (unstandardized factors solution) and Figure \@ref(fig:std-fac-fig) (standardized factors solution), with the covariance structure in Table \@ref(tab:cov-ex1-tab).
+
+
+```{r est-std-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+y<-read.csv(fn)
+m<-'f1=~y1 + y2 + y3 
+    f2=~y4 + y5 + y6'
+
+res<-cfa(m,sample.cov=cov(y),sample.nobs=nrow(y))
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{31}$","$a_{42}$","$a_{52}$", "$a_{62}$","$d_{11}$","$d_{22}$","$d_{33}$","$d_{44}$","$d_{55}$","$d_{66}$","$c_{11}$","$c_{22}$","$c_{12}$")
+df<-cbind(Par,est[,4:7],est0[,4:7])
+
+df %>%
+  kbl(caption = "Parameter Estimates, Standard CFA",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Under the unstandardized solution, the loading values should be explained relative to the reference indicator and the factorial covariance matrix is obtained.
+
+* Under the standardized solution, the loading values are standardized within one, and the factorial correlation matrix is obtained.
+  - We can obtain the proportion of explained variance (similar to the $R^2$ or coefficient of determination in regression analysis) for $y_j$, which is $1-d_{jj}$.
+
+* We can also fit the more complex model in Figure \@ref(fig:cross-ld-fig) to the same covariance structure in Table \@ref(tab:est-comx-tab).
+
+```{r est-comx-tab, echo=FALSE}
+# library(kableExtra)
+# opts <- options(knitr.kable.NA = "NA")
+# library(lavaan)
+# y<-read.csv(fn)
+m1<-'f1=~y1 + y2 + y3
+    f2=~ NA*y3 + 1*y4 + y5 + y6'
+
+res<-cfa(m1,sample.cov=cov(y),sample.nobs=nrow(y))
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{31}$","$a_{32}$","$a_{42}$","$a_{52}$", "$a_{62}$","$d_{11}$","$d_{22}$","$d_{33}$","$d_{44}$","$d_{55}$","$d_{66}$","$c_{11}$","$c_{22}$","$c_{12}$")
+df<-cbind(Par,est[,4:7],est0[,4:7])
+
+df %>%
+  kbl(caption = "Parameter Estimates, Cross-Loading CFA",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Comparing to Table \@ref(tab:cov-ex1-tab), the estimates are generally close, with one clear difference: the added loading $a_{32}$ is close to zero, and its $p$-value is insignificant, which suggest the loading is unnecessary.
+
+
+* When raw data are analyzed, it is possible to calculate factor scores for each case.
+  - Because factors are not measured directly but instead through their indicators, such scores are only estimates of cases’ relative standings on the factor.
+  - There is more than one way to calculate factor scores, however, and although scores derived using different methods tend to be highly correlated, they generally do not all yield identical rank orderings of the cases.
+  - Given the above, Bollen’s (1989) perspective on this matter is pertinent: researchers should probably refrain from making too fine a comparison on estimated factor scores.
+
+
+***
+## **Model Evaluation**
+
+* For over-identified model, model estimation is approximate (i.e., no exact solution). There is thus a need to evaluate how well the model fits the data, or how close the parameter estimates and population values are.
+
+* Model estimation is also known as model fitting, which is equivalent to test or confirm the null hypothesis $H_0: \boldsymbol{\Sigma=\Sigma(\omega)}$ based on the chi-square statistics.
+
+* A variety of fit indexes are available for model evaluation, some of which are more commonly used  than others and will be introduced below.
+
+### Model Chi-Square
+
+* When the population is multivariate distributed and the model is correctly specified, the ML-based discrepancy function $F_{ML}$ is related to chi-square distribution. More precisely, $(N – 1)F_{ML}$ is distributed as a Pearson chi-square statistic with the model's degrees of freedom, $df_M$.
+  - Note: $N$ is the sample size, and Sometimes, $N \times F_{ML}$ is used
+
+* This statistic is referred to as the model chi-square $\chi_M^2$, or model test statistics $T_M$, which is assumed to follow the $\chi^2$ distribution with $df_M$ degree of freedom
+  - Thus, one can obtain $p$ value to reject or accept the null hypothesis based on χ2
+  - It is also known as the likelihood ratio chi-square or generalized likelihood ratio.
+  
+* As a fit index, it is actually a *badness-of-fit* index because the higher its value, the worse the model's fitness to the data.
+  - For a just-identified model, it generally equals zero and has no degrees of freedom because the model perfectly fits the data.
+
+* The model chi-square is affected by sample size: if the sample size is large, which is required in order to interpret the index as a test statistic, the value of $\chi_M^2$ may lead to rejection of the model even with slight discrepancy.
+  - Indeed, rejection of basically any over-identified model based on $\chi_M^2$ requires only a sufficiently large number of cases.
+  - In practice, the index is often revised to develop more sophisticated fit indexes less affected by sample size and have interpretive norms.
+
+
+### Root Mean Square Error of Approximation
+
+* Root mean square error of approximation (RMSEA) is a parsimony-adjusted index defined as:
+
+$$\text{RMSEA}=\sqrt{\frac{\delta_M}{df_M(N-1)}}$$
+
+where $\delta_M=max(\chi_M^2-df_M,0)$ is the noncentrality parameter for a noncentral chi-square distribution adjusting for the model degree of freedom.
+
+* This equation shows that the RMSEA estimates the amount of error of approximation per model degree of freedom and takes sample size into account. Note that the result RMSEA = 0 says only that $\chi_M^2 \leq df_M$, not that $\chi_M^2 = 0$ (i.e., not perfect fit).
+
+* A rule of thumb is that RMSEA $\leq .05$ indicates close approximate fit, values between .05
+and .08 suggest reasonable error of approximation, and $RMSEA \geq .10$ suggests poor fit
+
+* The 90% confidence interval (CI) of the RMSEA is also useful
+  - lower bound $\leq.05$: the null hypothesis of **close fit** is not rejected
+  - upper bound $\geq.10$: the null hypothesis of **poor fit** is not rejected
+
+* Ex: Suppose that RMSEA $= .045$ with the 90% CI of (0, .15):
+  - Based on the lower bound, the null hypothesis of close fit is not rejected.
+  - Based on the upper bound, the null hypothesis of poor fit is not rejected.
+  - Thus, the result RMSEA = .045 for this example is subject to a fair amount of sampling error because it is just as possible a good fit as a poor fit.
+  - This type of “mixed” outcome is more likely to happen in smaller samples. A larger sample may be required in order to obtain more precise results
+
+### Comparative Fit Index
+
+* Comparative fit index (CFI) is an incremental index which assesses the relative improvement in fit of the researcher's model compared with a *baseline model*.
+  - The baseline model is typically the independence or null model, which assumes zero population covariance among the indicators (i.e., indicators are assumed uncorrelated).
+  - When means are not analyzed, the only parameters are the population variances of the indicators.
+  - Thus, the baseline model should fit the data poorly, with large model chi-square $\chi_B^2$ and related noncentrality parameter $\delta_B=max(\chi_B^2-df_B,0)$ 
+
+* The CFI is define as:
+
+$$
+\text{CFI}=1-\delta_M / \delta_B
+$$
+
+* A rule of thumb for the CFI (and other incremental indexes) is that values greater than roughly .90 may indicate reasonably good fit of the researcher's model (Hu & Bentler, 1999).
+  - However, CFI = 1.0 means only that $\chi_M^2 < df_M$, not that the model has perfect fit.
+
+* All incremental fit indexes have been criticized for using the independence (null) model as the baseline model, because the assumption of uncorrelated indicators is scientifically implausible in many (probably most) applications.
+  - Therefore, a high CFI value may not be very impressive - necessary but not sufficient
+
+### Standardized Root Mean Square Residual
+
+* The standardized root mean square residual (SRMR) is based on transforming both the sample covariance matrix and the predicted covariance matrix into correlation matrices:
+
+$$
+\text{SRMR}=\sqrt{2\sum_{i=1}^{J}\sum_{j=1}^{i}[(s_{ij}-\hat{\sigma})/(s_{ii}s_{jj})]^2/J(J+1 )}
+$$
+
+
+* It is thus a measure of the mean absolute correlation residual, the average difference between the observed and predicted correlations. Values of the SRMR less than .10 are generally considered favorable.
+
+
+### Joint Criteria and Example
+
+* It turns out that no single index can work well. In practice, several indexes are often used together for model evaluation.
+  - The above indexes are strongly suggested to report in any official research
+  - Don't cherry pick, and point out the (in)consistency among the indexes, with possible explanation
+
+* Figure \@ref(fig:mul-mod-fig1) presents four different model specifications on the same covariance structure in last Chapter, and related fitting indexes can be found in Table \@ref(tab:fit-dms-tab). Based on the RMSEA, its 90% interval, CFI, and SRMR, it is quite clear Model (a) and (c) are acceptable, whereas Model (b) and (d) are problematic.
+
+
+```{r mul-mod-fig1, echo=FALSE, fig.align='center', fig.cap="Different Model Specifications", message=FALSE, warning=FALSE, cache=FALSE}
+
+par(mar = c(0, 0, 0, 0))
+plot1<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+aname [pos = '0,0!', width=2, label='(a) Standard',shape = plaintext]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label='',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label='',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label='']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F1->y3 [label = '']
+F2->y4 [label = '1']
+F2->y5 [label = '']
+F2->y6 [label = '']
+
+#Errors
+y1e[pos = '-3,4!', label = '',shape=none]
+y2e [pos = '-2,4!', label = '',shape=none]
+y3e[pos = '-1,4!', label = '',shape=none]
+y4e[pos = '0,4!', label = '',shape=none]
+y5e[pos = '1,4!', label = '',shape=none]
+y6e[pos = '2,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+
+bname [pos = '6,0!', width=1, label='(b) Uneven Loading',shape = plaintext]
+# Items
+by1 [pos = '3,3!', label = 'y@_{1}']
+by2 [pos = '4,3!', label = 'y@_{2}']
+by3[pos = '5,3!', label = 'y@_{3}']
+by4[pos = '6,3!', label = 'y@_{4}']
+by5[pos = '7,3!', label = 'y@_{5}']
+by6[pos = '8,3!', label = 'y@_{6}']
+
+#Factors
+bF1[pos = '4,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '7,1!', label = 'f@_{2}',shape=circle]
+bF1->bF1[dir=both,label='',tailport = 'w', headport = 'w'] # &#x3D5
+bF2->bF2[dir=both,label='',tailport = 'e', headport = 'e']
+bF1->bF2[dir=both,label='']
+bdummy [pos = '5.5,1!', height=1, label='', color=white]
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF2->by3 [label = '']
+bF2->by4 [label = '1']
+bF2->by5 [label = '']
+bF2->by6 [label = '']
+
+# bF2->by3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+by1e[pos = '3,4!', label = '',shape=none]
+by2e [pos = '4,4!', label = '',shape=none]
+by3e[pos = '5,4!', label = '',shape=none]
+by4e[pos = '6,4!', label = '',shape=none]
+by5e[pos = '7,4!', label = '',shape=none]
+by6e[pos = '8,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+
+}")
+
+plot1
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE, cache=FALSE}
+
+# par(mar = c(0, 0, 0, 0))
+plot2<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+cname [pos = '0,0!', width=2, label='(c) Cross-loading',shape = plaintext]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label='',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label='',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label='']
+dummy [pos = '-.5,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F1->y3 [label = '']
+F2->y4 [label = '1']
+F2->y5 [label = '']
+F2->y6 [label = '']
+
+F2->y3 [label = '']
+
+#Errors
+y1e[pos = '-3,4!', label = '',shape=none]
+y2e [pos = '-2,4!', label = '',shape=none]
+y3e[pos = '-1,4!', label = '',shape=none]
+y4e[pos = '0,4!', label = '',shape=none]
+y5e[pos = '1,4!', label = '',shape=none]
+y6e[pos = '2,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+
+dname [pos = '6,0!', width=1, label='(d) Orthogonal Factors & cross-loading',shape = plaintext]
+# Items
+by1 [pos = '3,3!', label = 'y@_{1}']
+by2 [pos = '4,3!', label = 'y@_{2}']
+by3[pos = '5,3!', label = 'y@_{3}']
+by4[pos = '6,3!', label = 'y@_{4}']
+by5[pos = '7,3!', label = 'y@_{5}']
+by6[pos = '8,3!', label = 'y@_{6}']
+
+#Factors
+bF1[pos = '4,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '7,1!', label = 'f@_{2}',shape=circle]
+bF1->bF1[dir=both,label='',tailport = 'w', headport = 'w'] # &#x3D5
+bF2->bF2[dir=both,label='',tailport = 'e', headport = 'e']
+# bF1->bF2[dir=both,label='']
+# bdummy [pos = '5.5,1!', height=1, label='', color=white]
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF2->by4 [label = '1']
+bF2->by5 [label = '']
+bF2->by6 [label = '']
+
+bF2->by3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+by1e[pos = '3,4!', label = '',shape=none]
+by2e [pos = '4,4!', label = '',shape=none]
+by3e[pos = '5,4!', label = '',shape=none]
+by4e[pos = '6,4!', label = '',shape=none]
+by5e[pos = '7,4!', label = '',shape=none]
+by6e[pos = '8,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+
+}")
+
+plot2
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+```{r fit-dms-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+y<-read.csv(fn)
+m<-'f1=~y1 + y2 + y3 
+    f2=~y4 + y5 + y6'
+m1<-'f1=~y1 + y2
+    f2=~ NA*y3 + 1*y4 + y5 + y6'
+m2<-'f1=~y1 + y2 + y3
+    f2=~ NA*y3 + 1*y4 + y5 + y6'
+m3<-'f1=~y1 + y2 + y3
+    f2=~ NA*y3 + 1*y4 + y5 + y6
+    f1 ~~ 0*f2'
+
+sm<-c("m", "m1", "m2","m3")
+len<-length(sm)
+flist<-c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper",
+                  "cfi","srmr","aic","bic")
+df<-NULL
+
+for (i in 1:len){
+  res<-cfa(get(sm[i]),sample.cov=cov(y),sample.nobs=nrow(y))
+  tmp<-fitMeasures(res,flist, output = "matrix")
+  df<-cbind(df,tmp)
+}
+colnames(df)<-c("a","b","c","d")
+rownames(df)<-toupper(rownames(df))
+
+df %>%
+  kbl(caption = "Fit Indexes for Different Model Specifications",digits = 3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+***
+## **Model Comparisons**
+
+* As illustrated, one can encounter different model specifications. In fact, it's Strongly suggested to investigate multiple models in any empirical research
+  - Similar to specify multiple hypotheses in hypothesis testing
+  - The fit indexes described above can help to reject inappropriate models (e.g., b and d in Table \@ref(tab:fit-dms-tab))
+  - But it's likely that multiple models fit the data well (e.g., a and b in the table)
+
+* Model evaluation described above is considered as absolute fit
+  - Evaluate if the model fits the data on absolute standards
+  
+* In contrast, model comparison is to select the best model among competing candidates
+  - Relative fit: by their nature, such judgments are relative, not absolute
+  - It should follow the absolute fit evaluation; otherwise, the models might not fit the data well, rendering the comparison as practically meaningless
+
+* Comparative judgments about model-data fit depend on the “nested” or “non-nested” nature of the models in question
+
+### Nested or Hierarchical Models
+
+* Two models are **hierarchical** or **nested** if one is a subset of the other
+  - Unrestricted: the one with more parameters to estimate 
+  - Restricted model: the one with less parameters to estimate 
+  - The unrestricted model can be transformed into the restricted model by imposing constraints on the parameters
+  - The restricted model can be transformed into the unrestricted model by relaxing constraints on the parameters
+
+* Example in Figure \@ref(fig:mul-mod-fig1): the unrestricted model is c, with different restricted models
+  - a: the associated par is the (cross-)loading from $y_3$ on $f_2$
+  - b: the associated par is the loading from $y_3$ on $f_1$
+  - d: the associated par is the correlation between $f_1$ on $f_2$
+
+* When two models are nested and both fit the data well in absolute sense:
+  - The restricted model is simpler with more degrees of freedom (i.e., less parameters to be estimated) than the unrestricted model
+  - But it also has worse absolute fit (i.e., larger $F_{ML}$ or $\chi_M^2$) than the unrestricted model (e.g., Model a vs. c in Figure \@ref(fig:mul-mod-fig1) and Table \@ref(tab:fit-dms-tab))
+  - It makes sense: the simpler the model, the worse the model-data fit (same logic that the saturated model has perfect fit)
+  
+* So the question we should ask: Is the decrease in absolute fit worthy the increase of simplicity (more degree of freedom or less free parameters)?
+
+* To answer the question, We will rely on the likelihood ratio test (LRT) of significance and the assumption $\chi_M^2$ is a chi-square distribution with $df_M$ degree of freedom:
+  - The chi-square difference statistic, $\chi_D^2=\chi_{M,res}^2-\chi_{M,unr}^2$
+  - Its degrees of freedom, $df_D=df_{M,res}-df_{M,unr}$
+  - The $\chi_D^2$ statistic tests the null hypothesis that the difference is insignificant, namely identical fit of the two nested models in the population, at specific significance level (e.g., .05)
+  - When one fails to reject the null hypothesis, the restricted model is preferred due to its simplicity (the Principle of parsimony)
+  - When the (one-tailed) null hypothesis is rejected, the unrestricted model is preferred due to significantly better fit
+  
+* Ex: in Table \@ref(tab:fit-dms-tab), the chi-square difference statistic between Model a and c, with $df_D=1$ is:
+  - $\chi_D^2(1)=9.286 - 7.252 = 2.034$, $p=.154$ 
+  - The null hypothesis of identical fit retains (at $\alpha=.1$ significant level), and Model a is preferred due to simplicity (see Figure \@ref(fig:mul-mod-fig1))
+  
+* The significance testing for nested models also has important implications for model modification
+
+
+### Model Modification and the Modification Index
+
+* When the model is slightly modified, the original and modified models are usually nested with each other
+  - Ex: Models c vs. a, b, or d in Figure \@ref(fig:mul-mod-fig1)
+  - We can apply the same chi-square difference statistic $\chi_D^2$ to compare the models
+  - Similarly, the simpler model is preferred in case of insignificance, and the more complex model is preferred in case of significance
+
+* A modification index (MI) is the $\chi_D^2$ statistic with a single degree of freedom. That is, it estimates $\chi_D^2(1)$ for **adding** a parameter (e.g, cross-loading, factorial correlation, or correlated error).
+  - It reflects, approximately, the amount by which the model chi-square statistic, $\chi_M^2$, would *decrease* if a fixed (usually fixed-to-zero) parameter was freely estimated.
+  - Thus, large values indicate potentially useful parameters: the greater the value of a modification index, the better the predicted improvement in overall fit if that parameter was added to the model
+  - Usually, MI values larger than significant at $.05$ level, or $\chi_D^2(1)>3.84$, should be of concern, and the largest value should be prioritized.
+
+* Associated with the MI is the expected parameter change statistic (EPC), which reflects the approximate value of the new parameter if added to the model.
+
+* Table \@ref(tab:mi-ex-tab) presents the MI values of significant parameter changes for Model (b) in Figure \@ref(fig:mul-mod-fig1):
+
+```{r mi-ex-tab, echo=FALSE}
+library(kableExtra)
+
+res<-cfa(m1,sample.cov=cov(y),sample.nobs=nrow(y))
+mod<-modindices(res,minimum.value=3.84)
+
+par<- c("$a_{31}$","$a_{41}$","$d_{13}$","$d_{14}$","$d_{23}$","$d_{26}$","$d_{34}$","$d_{36}$","$d_{46}$")
+
+df<-cbind(par,mod[,4:6])
+colnames(df)<-c("Par","MI","EPC","Std EPC")
+rownames(df)<-NULL
+
+df %>%
+  kbl(caption = "Modification Indexes above 3.84",digits = 3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Indicators with poor loading estimates can be removed from the model given the removal is not negatively influential to:
+  - Model identification
+  - Substantive representation
+  - Model fit statistics
+
+* Caveats:
+  - Parameter should be added or dropped one by one (but note the MI is only for adding parameter)
+  - Explanation is always needed to justify the modifications
+  - Usually it is fine for a small number of modifications, i.e., no more than a few parameters are changed
+  - When many parameters are changed this way, the theory-driven CFA is becoming the data-driven EFA per se
+
+### Non-Nested Models
+
+* If two models are not nested (i.e., neither model's parameters form a subset of the other model's parameters), the above chi-square difference statistic cannot be used for model comparison
+  - Absolute fit can be still adopted for model evaluation, which is usually the first step
+
+* To compare non-nested models, We can employ the information criteria indexes, which takes into consideration both the absolute fit and model parsimony:
+  - Akaike Information Criterion (AIC) compensates the absolute fit with the number of free parameters $t$, as
+
+$$
+AIC=-2LL+2t
+$$
+  - Bayesian Information Criterion (BIC) compensates the absolute fit with both the number of free parameters $t$ and the sample size $N$
+  
+$$
+BIC=-2LL+t \times ln(N)
+$$
+where $LL$ is the log maximum likelihood 
+  - For both indexes, the smaller the values the better the model
+  
+* Ex: Model (a) and (b) in Figure \@ref(fig:mul-mod-fig1) are non-nested. According to Table \@ref(tab:fit-dms-tab), Model a is better than b based on either the AIC or BIC
+
+
+## **Extensions**
+
+* CFA can be specified in many different ways, and specification of other complex structures (e.g, higher-order, correlated errors) are also possible.
+
+
+### Local Dependence or Orthogonal Factors
+
+* In factor analysis, it's common to assume that the measurement errors of different indicators are uncorrelated, which is also referred to as the **local independence assumption**
+  - It means that the indicators are conditionally independent of each other or have nothing in common after controlling for the common factors
+  - Namely, the factors are the only cause of the common variance that the indicators share with each other
+  - The assumption is strictly followed under the EFA setting and its violation can cause serious problems (e.g., over-extraction of factors)
+  
+* Under CFA, the assumption can be relaxed by specifying the correlated errors as shown in Model (c) of Figure \@ref(fig:equ-mod-fig)
+  - In practice, it's uncommon to specify the correlated errors based on a priori hypothesis
+  - Instead, they are usually re-specified based on the modification indexes
+
+
+* In a CFA model with multiple factors, it's possible to hypothesize that the factors are uncorrelated (orthogonal)
+  - This can result in a simpler structure and more freedom to estimate the loading matrix. It's often related to the bifactor model in the literature
+  - Ex: In Model (d) of Figure \@ref(fig:equ-mod-fig), the two factors are uncorrelated; instead, there are two cross-loadings
+
+### Equivalent Models
+
+* With many possible model specifications, **equivalent models** should be considered.
+  - Equivalent models are mathematically identical models but with a different configuration of model structure
+  - They are usually transformations of constraints on the same variables
+  - They also have equal goodness-of-fit indexes, including $\chi_M^2$ (and degree of freedom) and all other fit statistics described earlier
+  - Thus, the researchers need to explain why their final model should be preferred over other equivalent models.
+
+* Ex: Model (b), (c), and (d) are equivalent to Model (a) in Figure \@ref(fig:equ-mod-fig) by, respectively:
+  - Introducing a higher-order factor
+  - Allowing local dependence
+  - Introducing a bifactor structure
+
+* The four models are mathematically equivalent, and if any of the special models rather than the standard model (a) is adopted, be prepared to provide substantive rationale
+
+```{r equ-mod-fig, echo=FALSE, fig.align='center', fig.cap="Equivalent Models", message=FALSE, warning=FALSE, cache=FALSE}
+
+par(mar = c(0, 0, 0, 0))
+plot1<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+aname [pos = '0,-1!', width=2, label='(a) Standard',shape = plaintext]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '2,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '-1.5,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '1.5,1!', label = 'f@_{2}',shape=circle]
+F1->F1[dir=both,label='',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label='',tailport = 'e', headport = 'e']
+F1->F2[dir=both,label='']
+dummy [pos = '0,1!', height=1, label='', color=white]
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F1->y3 [label = '']
+F1->y4 [label = '']
+F2->y5 [label = '1']
+F2->y6 [label = '']
+
+#Errors
+y1e[pos = '-3,4!', label = '',shape=none]
+y2e [pos = '-2,4!', label = '',shape=none]
+y3e[pos = '-1,4!', label = '',shape=none]
+y4e[pos = '0,4!', label = '',shape=none]
+y5e[pos = '1,4!', label = '',shape=none]
+y6e[pos = '2,4!', label = '',shape=none]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+
+bname [pos = '8,-1!', width=1, label='(b) Higher-Order',shape = plaintext]
+# Items
+by1 [pos = '5,3!', label = 'y@_{1}']
+by2 [pos = '6,3!', label = 'y@_{2}']
+by3[pos = '7,3!', label = 'y@_{3}']
+by4[pos = '8,3!', label = 'y@_{4}']
+by5[pos = '9,3!', label = 'y@_{5}']
+by6[pos = '10,3!', label = 'y@_{6}']
+
+#Factors
+bF1[pos = '6.5,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '9.5,1!', label = 'f@_{2}',shape=circle]
+bF3[pos = '8,0!', label = 'f@_{3}',shape=circle]
+bF3->bF1 [label = '1']
+bF3->bF2 [label = '1']
+bF3->bF3[dir=both,label = '',tailport = 's', headport = 's']
+
+bf1e[pos = '5.5,0!', label = '',shape=none]
+bf2e[pos = '10.5,0!', label = '',shape=none]
+bf1e->bF1 [label = '']
+bf2e->bF2 [label = '']
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF1->by4 [label = '']
+bF2->by5 [label = '1']
+bF2->by6 [label = '']
+
+# bF2->by3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+by1e[pos = '5,4!', label = '',shape=none]
+by2e [pos = '6,4!', label = '',shape=none]
+by3e[pos = '7,4!', label = '',shape=none]
+by4e[pos = '8,4!', label = '',shape=none]
+by5e[pos = '9,4!', label = '',shape=none]
+by6e[pos = '10,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+
+}")
+
+plot1
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+```{r, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE, cache=FALSE}
+
+# par(mar = c(0, 0, 0, 0))
+plot2<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+cname [pos = '0,0!', width=2, label='(c) Correlated Errors',shape = plaintext]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-2,3!', label = 'y@_{2}']
+y3[pos = '-1,3!', label = 'y@_{3}']
+y4[pos = '0,3!', label = 'y@_{4}']
+y5[pos = '1,3!', label = 'y@_{5}']
+y6[pos = '3,3!', label = 'y@_{6}']
+
+#Factors
+F1[pos = '0,1!', label = 'f@_{1}',shape=circle]
+F1->F1[dir=both,label='',tailport = 's', headport = 's'] # &#x3D5
+
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F1->y3 [label = '']
+F1->y4 [label = '']
+F1->y5 [label = '']
+F1->y6 [label = '']
+
+#Errors
+y1e[pos = '-3,4!', label = '',shape=none]
+y2e [pos = '-2,4!', label = '',shape=none]
+y3e[pos = '-1,4!', label = '',shape=none]
+y4e[pos = '0,4!', label = '',shape=none]
+y5e[pos = '1,4!', label = '',shape=none,height=.1] #fixedsize = true
+y6e[pos = '3,4!', label = '',shape=none,height=.1]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+
+y5e->y6e[dir=both,label='', splines=curved, tailport = 'n', headport = 'n']
+dummy [pos = '2,4!', height=1, label='', color=white]
+
+dname [pos = '8,0!', width=1, label='(d) Bifactor',shape = plaintext]
+# Items
+by1 [pos = '5,3!', label = 'y@_{1}']
+by2 [pos = '6,3!', label = 'y@_{2}']
+by3[pos = '7,3!', label = 'y@_{3}']
+by4[pos = '8,3!', label = 'y@_{4}']
+by5[pos = '9,3!', label = 'y@_{5}']
+by6[pos = '10,3!', label = 'y@_{6}']
+
+#Factors
+bF1[pos = '7.5,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '9.5,1!', label = 'f@_{2}',shape=circle]
+bF1->bF1[dir=both,label='',tailport = 's', headport = 's'] # &#x3D5
+bF2->bF2[dir=both,label='',tailport = 's', headport = 's']
+
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF1->by4 [label = '']
+bF1->by5 [label = '']
+bF1->by6 [label = '']
+bF2->by5 [label = '1']
+bF2->by6 [label = '1']
+
+#Errors
+by1e[pos = '5,4!', label = '',shape=none]
+by2e [pos = '6,4!', label = '',shape=none]
+by3e[pos = '7,4!', label = '',shape=none]
+by4e[pos = '8,4!', label = '',shape=none]
+by5e[pos = '9,4!', label = '',shape=none]
+by6e[pos = '10,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+
+}")
+
+plot2
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+### Reporting CFA
+
+* One important goal of reporting is to ensure others can replicate your results and agree with your findings, even without using the same software. The following information and procedures are suggested in official report:
+  - Model specification: Path diagram and/or structural equations with the parameter matrices
+    + when multiple models are compared, provide specification for each one
+    + Explanation of possible identification issue preferred
+    + Substantive definitions of indicators and factors, preferably using tables
+  - Summary statistics such as sample size, sample covariance structure, mean, and skewness and kurtosis
+  - For model evaluation, these fit statistics are suggested (likely with others): $\chi_M^2$ with $df$ and $p$-value; $RMSEA$ with the 90% CI; $CFI$; $SRMR$; $AIC$; $BIC$
+  - For model estimation: parameter estimates (both unstd. and std.) with SE, $z$-scores and $p$-values
+    + Explanation of parameter estimates preferred, e.g., if the magnitude of important estimates (e.g., loadings, factor correlations) are substantively meaningful.
+    + In some cases, especially due to large sample size, parameter estimates can be statistically significant but substantively trivial (e.g., .1)
+  - For model comparisons, fit statistics for each model needed, plus LR testing for nested models or $AIC$ and $BIC$ comparisons for nonnested models
+  - For model modification, report any adjustments or changes to the original model, with substantive rationale
+
+
+## **Further Understanding**
+
+### Factor Analysis vs. Latent Variable Modeling
+
+* Factor analysis can be considered as one part of a big family latent variable model (LVM)
+  - The modeling of latent variables through observed variables
+  - In LVM, both the latent and observed variables can be continuous or categorical
+
+* Shared characteristics or assumptions of LVM:
+  - The observed variable is considered as an imperfect measure of latent variables (i.e., with measurement errors)
+  - All models are based on linear or nonlinear structural equations: related to SEM
+  - The assumption of local independence is usually assumed: the observed variables are conditionally independent or have nothing in common after controlling for the latent variables
+
+* Nature of the observed and latent variable determines the modeling framework in LVM
+  - Generally, there are four modeling frameworks under LVM, which can be considered as four different ways to establish correspondence between the observed behavior and latent variable
+
+
+```{r echo=FALSE}
+library(kableExtra)
+df<-data.frame(
+  c0= c("Latent", "Variable"),
+  # c0= rep("Latent Variable", 2),
+  c1=c("Continuous","Categorical"),
+  c2=c("Factor Analysis","Latent Profile Analysis, Mixture Model"),
+  c3=c("Latent Trait Analysis, Item Response Theory","Latent Class Analysis, Cognitive Diagnosis Model")
+)
+
+colnames(df)<-c("","","Continuous","Categorical") # rownames(df)<-
+
+
+kbl(df,booktabs = T,caption = "Latent Variable Modeling Framework") %>%
+  add_header_above(c(" "=2, "Observed Variable" = 2),align='l',  bold = T) %>%
+  column_spec(1, bold = T) %>%  
+  kable_classic(full_width = F, html_font = "Cambria")#
+  # collapse_rows(columns = 1:1, valign = "middle")
+
+```
+
+
+### Partially CFA
+
+* One key difference between CFA and EFA is that a CFA model needs to be well specified based on substantive knowledge or hypothesis.
+
+* In practice, we might have partial knowledge, especially on the loading matrix - Partially Confirmatory Factor Analysis (PCFA)
+  - Ex: Figure \@ref(fig:pcfa-fig)
+  - Some loadings can be specified as free to estimate
+  - For other loadings, it's unclear if they should be fixed as zero (and removed from the model) or free
+
+* PCFA actually gives us more freedom during model specification and identification
+  - refer to Chen (2020; 2021) for more details
+
+```{r pcfa-fig, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Partially Confirmatory Factor Analysis"}
+# library(DiagrammeR)
+# library(DiagrammeRsvg)
+# library(rsvg)
+# par(mar = c(.1, .1, .1, .1))
+a<-"digraph SEM {
+
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       outputorder = edgesfirst,
+       splines=true]
+
+node [shape = rectangle]
+
+y1 [pos = '-6,4!', label = 'y1']
+y11[pos = '-6,5!', label = ' ',shape=none]
+y2 [pos = '-4,4!', label = 'y2']
+y22 [pos = '-4,5!', label = ' ',shape=none]
+y3[pos = '-2,4!', label = 'y3']
+y33[pos = '-2,5!', label = ' ',shape=none]
+y4[pos = '0,4!', label = 'y4']
+y44[pos = '0,5!', label = ' ',shape=none]
+y5[pos = '2,4!', label = 'y5']
+y55[pos = '2,5!', label = ' ',shape=none]
+y6[pos = '4,4!', label = 'y6']
+y66[pos = '4,5!', label = ' ',shape=none]
+y7[pos = '6,4!', label = 'y7']
+y77[pos = '6,5!', label = ' ',shape=none]
+y8[pos = '8,4!', label = 'y8']
+y88[pos = '8,5!', label = ' ',shape=none]
+y9[pos = '10,4!', label = 'y9']
+y99[pos = '10,5!', label = ' ',shape=none]
+y10[pos = '12,4!', label = 'y10']
+y1010[pos = '12,5!', label = ' ',shape=none]
+F1[pos = '0,0!', label = 'f@_{1}',shape=circle]
+F2[pos = '6,0!', label = 'f@_{2}',shape=circle]
+
+y11->y1
+y22->y2
+y33->y3
+y44->y4
+y55->y5
+y66->y6
+y77->y7
+y88->y8
+y99->y9
+y1010->y10
+F1->y1
+F1->y2
+F1->y3
+F1->y4
+F1->y5
+F1->y6[style = 'dashed']
+F1->y7[style = 'dashed']
+F1->y8[style = 'dashed']
+F1->y9[style = 'dashed']
+F1->y10[style = 'dashed']
+F2->y1[style='dashed']
+F2->y2[style='dashed']
+F2->y3[style='dashed']
+F2->y4[style='dashed']
+F2->y5[style='dashed']
+F2->y6
+F2->y7
+F2->y8
+F2->y9
+F2->y10
+
+
+F1->F2[dir=both]
+dummy [pos = '3,0!', height=1, label='', color=white]
+
+}"
+grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig2_2.png'))
+
+```
+
+
+
+
+</body>

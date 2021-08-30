@@ -1,0 +1,2464 @@
+---
+title: "Confirmatory Factor Analysis"
+author: "Jinsong Chen"
+subtitle: "EDUR7109 Factor Analysis Week 3-4"
+output:
+  bookdown::html_document2:
+    # code_folding: hide
+    df_print: kable
+    number_sections: false
+    # theme: spacelab
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+  bookdown::word_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+  bookdown::pdf_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+editor_options:
+  chunk_output_type: console
+---
+
+<script src="{{< blogdown/postref >}}index_files/header-attrs/header-attrs.js"></script>
+<script src="{{< blogdown/postref >}}index_files/kePrint/kePrint.js"></script>
+<link href="{{< blogdown/postref >}}index_files/lightable/lightable.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/htmlwidgets/htmlwidgets.js"></script>
+<script src="{{< blogdown/postref >}}index_files/viz/viz.js"></script>
+<link href="{{< blogdown/postref >}}index_files/DiagrammeR-styles/styles.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/grViz-binding/grViz.js"></script>
+
+
+<style type="text/css">
+
+body {
+  font-size: 2em;
+}
+
+</style>
+<body>
+<div id="introduction" class="section level2">
+<h2><strong>Introduction</strong></h2>
+<ul>
+<li><p>Similar to exploratory factor analysis (EFA), confirmatory factor analysis (CFA) is also considered as a common factor model where parameters such as loadings and factorial correlations can be estimated.</p></li>
+<li><p>The estimation also proceeds by analyzing the constructs and patterns underlying the variance structure of the data (see Table <a href="#tab:cov-ex1-tab">1</a>)</p>
+<ul>
+<li>Also known as covariance structure analysis</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:cov-ex1-tab">Table 1: </span>Example Covariance Structure, N = 500
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+y1
+</th>
+<th style="text-align:right;">
+y2
+</th>
+<th style="text-align:right;">
+y3
+</th>
+<th style="text-align:right;">
+y4
+</th>
+<th style="text-align:right;">
+y5
+</th>
+<th style="text-align:right;">
+y6
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+y1
+</td>
+<td style="text-align:right;">
+0.763
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y2
+</td>
+<td style="text-align:right;">
+0.499
+</td>
+<td style="text-align:right;">
+0.862
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y3
+</td>
+<td style="text-align:right;">
+0.419
+</td>
+<td style="text-align:right;">
+0.453
+</td>
+<td style="text-align:right;">
+0.739
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y4
+</td>
+<td style="text-align:right;">
+0.189
+</td>
+<td style="text-align:right;">
+0.197
+</td>
+<td style="text-align:right;">
+0.214
+</td>
+<td style="text-align:right;">
+0.791
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y5
+</td>
+<td style="text-align:right;">
+0.219
+</td>
+<td style="text-align:right;">
+0.221
+</td>
+<td style="text-align:right;">
+0.210
+</td>
+<td style="text-align:right;">
+0.443
+</td>
+<td style="text-align:right;">
+0.727
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y6
+</td>
+<td style="text-align:right;">
+0.225
+</td>
+<td style="text-align:right;">
+0.193
+</td>
+<td style="text-align:right;">
+0.210
+</td>
+<td style="text-align:right;">
+0.468
+</td>
+<td style="text-align:right;">
+0.414
+</td>
+<td style="text-align:right;">
+0.754
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Different from EFA, CFA is used to investigate the causal relations among latent and observed variables in a priori specified, theory-driven models.</p></li>
+<li><p>Thus, CFA requires that researchers make predictions about the constructs and patterns underlying the observed variables, and provides a mechanism to test and compare different hypotheses about these constructs and patterns with corresponding models.</p></li>
+<li><p>CFA’s strength lies in its (dis)confirmatory nature: models or theories can be tested and rejected, and the results might also point toward potential modifications to be investigated in subsequent analyses.</p></li>
+<li><p>CFA can be understood as a process ranging from model specification, identification, estimation, evaluation, comparison to potential modification.</p>
+<ul>
+<li>In an empirical research, specification and identification is part of the research design, while the rest belong to research implementation and analysis.</li>
+<li>Model parameters are the key to fully understand the entire modeling process; they are widely used in the equations, diagrams, and tables</li>
+</ul></li>
+<li><p>Notation system: <strong><span class="math inline">\(y\)</span> notation</strong></p>
+<ul>
+<li>All observed variables are represented as <span class="math inline">\(y\)</span>s</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-2">Table 2: </span>All <span class="math inline">\(y\)</span> Notation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Symbol
+</th>
+<th style="text-align:left;">
+Matrix Form
+</th>
+<th style="text-align:left;">
+Dimension
+</th>
+<th style="text-align:left;">
+Meaning
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(y\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+Y
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Indicator or item, observed variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(f\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+<span class="math inline">\(F\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(K \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Factor, latent variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(e\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+<span class="math inline">\(E\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Measurement error, latent variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+<span class="math inline">\(A\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times K\)</span>
+</td>
+<td style="text-align:left;">
+Loading, parameter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+<span class="math inline">\(C\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(K \times K\)</span>
+</td>
+<td style="text-align:left;">
+Factor covariance, parameter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+<span class="math inline">\(D\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times J\)</span>
+</td>
+<td style="text-align:left;">
+Error covariance, parameter
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="model-specification" class="section level2">
+<h2><strong>Model Specification</strong></h2>
+<ul>
+<li>Specification is hypothesis-based and an important step in CFA, because results from later steps and data analysis assume that the model<span class="math inline">\(—\)</span>the researcher’s hypotheses<span class="math inline">\(—\)</span>are correctly specified.
+<ul>
+<li>Misspecification can render all subsequent analyses useless</li>
+<li>Meanwhile, it is often necessary to respecify the models based on data analysis, and respecification should respect the same principles as specification</li>
+</ul></li>
+</ul>
+<div id="general-representation" class="section level3">
+<h3>General Representation</h3>
+<ul>
+<li>Remember that the common factor model underlies both exploratory and confirmatory factor analyses, and the equation for each indicator is:</li>
+</ul>
+<p><span class="math display" id="eq:fa-single">\[
+y_j =\sum_{k=1}^{K}a_{jk} f_k + e_j,
+\tag{1}
+\]</span>
+where <span class="math inline">\(K\)</span> is the number of factor, <span class="math inline">\(J\)</span> is the number of indicators and subscript <span class="math inline">\(j=1...J\)</span>.</p>
+<ul>
+<li>The more concise matrix form is:</li>
+</ul>
+<p><span class="math display" id="eq:fa-matrix">\[
+\mathbf{Y} =\mathbf{AF+E}.
+\tag{2}
+\]</span></p>
+<ul>
+<li><p>Implicit in the above equation is the factor covariance matrix <span class="math inline">\(COV(\mathbf{F})=\mathbf{C}\)</span> and error covariance matrix <span class="math inline">\(COV(\mathbf{E}) =\mathbf{D}\)</span>.</p></li>
+<li><p>All model parameters are contained in three matrices:</p>
+<ul>
+<li><span class="math inline">\(\mathbf{A}\)</span> (<span class="math inline">\(J \times K\)</span>)</li>
+<li><span class="math inline">\(\mathbf{C}\)</span> (<span class="math inline">\(K \times K\)</span>)</li>
+<li><span class="math inline">\(\mathbf{D}\)</span> (<span class="math inline">\(J \times J\)</span>)</li>
+</ul></li>
+<li><p>The crucial difference in CFA comes from:</p>
+<ol style="list-style-type: decimal">
+<li>Specified number of factors <span class="math inline">\(K\)</span>;</li>
+<li>Restrictions imposed on the model parameters to specify how the parameters are addressed during modeling.</li>
+</ol>
+<ul>
+<li>It helps to reduce the actual number of parameters that need to be estimated to acceptable level</li>
+</ul></li>
+<li><p>The status of each model parameter can be free or restricted as fixed or constrained depending on the researcher’s specifications.</p></li>
+<li><p>Constraints are usually imposed on the loading matrix <span class="math inline">\(\mathbf{A}\)</span>: some elements are fixed to be zeros or ones. Here’s a typically specified loading matrix with 9 items and 3 factors:</p>
+<ul>
+<li>Note the fixed and free loadings</li>
+</ul></li>
+</ul>
+<p><span class="math display" id="eq:mlambda">\[
+\underset{9 \times 3}{\mathbf{A}} = \begin{bmatrix}
+   1 &amp; 0 &amp;  0 \\
+   a_{21} &amp; 0 &amp;  0 \\
+   a_{31} &amp; 0 &amp;  0 \\
+   0 &amp; 1 &amp;  0 \\
+   0 &amp; a_{52} &amp;  0 \\
+   0 &amp; a_{62} &amp;  0 \\
+   0 &amp; 0 &amp;  1 \\
+   0 &amp; 0 &amp;  a_{83} \\
+   0 &amp; 0 &amp;  a_{93} \\
+ \end{bmatrix}.
+ \tag{3}
+\]</span></p>
+<ul>
+<li>A <strong>free parameter</strong> (also referred as unknown parameter) is to be freely estimated by the algorithm based on the sample data (i.e., no constraint).
+<ul>
+<li>it includes the loading, factorial correlation, and error variance</li>
+<li>In the above loading matrix, there are six free loadings</li>
+</ul></li>
+<li>In contrast, a <strong>fixed parameter</strong> is constrained or specified to equal a constant (e.g., 0 or 1). That is, the algorithm <em>accepts</em> this constant as the estimate of the parameter regardless of the data.
+<ul>
+<li>In the above loading matrix, there are three loadings fixed at one, 18 loadings fixed at zero</li>
+</ul></li>
+<li>Model specification should be based on substantive knowledge, hypotheses or assumptions.
+<ul>
+<li>Thus, CFA provides not only estimates of model parameter, but also a hypothesis testing of the model structure, which can be further used for model comparisons and modification.</li>
+</ul></li>
+</ul>
+</div>
+<div id="standardized-vs.-unstandardized-factor-in-standard-cfa" class="section level3">
+<h3>Standardized vs. Unstandardized Factor in Standard CFA</h3>
+<ul>
+<li><p>In a standard CFA model, indicators are unidimensional, factors are allowed to correlate (different from EFA) and the error terms are uncorrelated (similar to EFA).</p></li>
+<li><p>The latent scale of the factor is required to be determined in advance, with two possible options: standardized vs. unstandardized factor</p>
+<ul>
+<li>Under EFA, factors are usually standardized</li>
+</ul></li>
+<li><p>When the factors are standardized, and all loading parameters can be estimated (see Figure <a href="#fig:std-fac-fig">1</a>).</p>
+<ul>
+<li>Usually, the scales of the data (i.e., observed variables) are also standardized as one, and it is referred to as the standardized solution (similar to the EFA setting)</li>
+</ul></li>
+<li><p>In Figure <a href="#fig:std-fac-fig">1</a>, free or unknown parameters <span class="math inline">\(t\)</span> include six terms of loading, six terms of error variance, and one term of factor covariance, the number of which equals to 13</p></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:std-fac-fig"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>=1>,tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>=1>,tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = <a<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\nF1->y2 [label = <a<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nF1->y3 [label = <a<FONT POINT-SIZE=\"8\"><SUB>31<\/SUB><\/FONT>>]\nF2->y4 [label = <a<FONT POINT-SIZE=\"8\"><SUB>42<\/SUB><\/FONT>>]\nF2->y5 [label = <a<FONT POINT-SIZE=\"8\"><SUB>52<\/SUB><\/FONT>>]\nF2->y6 [label = <a<FONT POINT-SIZE=\"8\"><SUB>62<\/SUB><\/FONT>>]\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none]\ny2e [pos = \"-2,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none]\ny3e[pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none]\ny4e[pos = \"0,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none]\ny5e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>,shape=none]\ny6e[pos = \"2,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>,shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: Standardized factors.
+</p>
+</div>
+<ul>
+<li><p>Alternatively, we can specify one of the indicator loadings as one so that factor variance can be estimated, which is referred to as unstandardized factors (see Figure <a href="#fig:unstd-fac-fig">2</a>).</p></li>
+<li><p>It assigns to a factor a scale same as the explained (common) variance of the indicator, and the indicator fixed at one is known as <strong>reference indicator</strong>.</p></li>
+<li><p>In Figure <a href="#fig:unstd-fac-fig">2</a>, the reference indicator for <span class="math inline">\(f_1\)</span> and <span class="math inline">\(f_2\)</span> is <span class="math inline">\(a_{11}\)</span> and <span class="math inline">\(a_{42}\)</span>, respectively</p>
+<ul>
+<li>Free or unknown parameters <span class="math inline">\(t\)</span> include four terms of loading, six terms of error variance, and three terms of factor covariance, the number of which is also 13</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unstd-fac-fig"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>,tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = <a<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>=1>]\nF1->y2 [label = <a<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nF1->y3 [label = <a<FONT POINT-SIZE=\"8\"><SUB>31<\/SUB><\/FONT>>]\nF2->y4 [label = <a<FONT POINT-SIZE=\"8\"><SUB>42<\/SUB><\/FONT>=1>]\nF2->y5 [label = <a<FONT POINT-SIZE=\"8\"><SUB>52<\/SUB><\/FONT>>]\nF2->y6 [label = <a<FONT POINT-SIZE=\"8\"><SUB>62<\/SUB><\/FONT>>]\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none]\ny2e [pos = \"-2,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none]\ny3e[pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none]\ny4e[pos = \"0,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none]\ny5e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>,shape=none]\ny6e[pos = \"2,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>,shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 2: Unstandardized factors.
+</p>
+</div>
+<ul>
+<li><p>The two methods of scaling the factors are mathematically equivalent, and generally result in the same overall fit of the model to the same data.</p></li>
+<li><p>In some special situations (e.g., multiple groups, interaction constraint), the standardized method might not work well.</p></li>
+<li><p>Thus, the unstandardized method (i.e., reference indicator) is usually the default CFA setting.</p>
+<ul>
+<li>Nevertheless, you are suggested to report both solutions whenever possible.</li>
+</ul></li>
+<li><p>For the reference indicator, indicator with positive and high loading preferred.</p>
+<ul>
+<li>Since weak strength or negative relation between the factor and most indicators could cause problems of identification, stability, or estimation.</li>
+</ul></li>
+</ul>
+</div>
+<div id="more-complex-structure" class="section level3">
+<h3>More Complex Structure</h3>
+<ul>
+<li>More complex loading patterns with cross-loadings or multidimensional indicators can be specified (see Figure <a href="#fig:cross-ld-fig">3</a>).
+<ul>
+<li>Note that this is a reduced diagram without the parameter and error symbols, and the number of free parameters equals to the number of arrows (directional or bidirectional) excluding those with fixed values</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:cross-ld-fig"></span>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = \"\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF2->y4 [label = \"1\"]\nF2->y5 [label = \"\"]\nF2->y6 [label = \"\"]\n\nF2->y3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = \"\",shape=none]\ny2e [pos = \"-2,4!\", label = \"\",shape=none]\ny3e[pos = \"-1,4!\", label = \"\",shape=none]\ny4e[pos = \"0,4!\", label = \"\",shape=none]\ny5e[pos = \"1,4!\", label = \"\",shape=none]\ny6e[pos = \"2,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3: Cross Loading CFA.
+</p>
+</div>
+<ul>
+<li>Testing of individual parameter is also possible by re-specifying a previously fixed or constrained parameter as free parameter or vice versa.</li>
+</ul>
+</div>
+<div id="assumptions" class="section level3">
+<h3>Assumptions</h3>
+<ul>
+<li><p>Similar to hypothesis testing, CFA relies on the important assumption of random sampling. Namely, the observed variables are assumed to come from a random sample drawn from some defined population. Accordingly, estimates based on the sample are representative of the population parameters.</p></li>
+<li><p>Moreover, the population is assumed to have a multivariate normal distribution, implying each item has a normal distribution and all item-pair associations are linear. More precisely, it’s equivalent to assume <span class="math inline">\(\bf{Y} \sim N(0,\mathbf{\Sigma})\)</span>, where <span class="math inline">\(\mathbf{\Sigma}\)</span> is the <span class="math inline">\(J \times J\)</span> population covariance matrix.</p></li>
+<li><p>Note that the data or factors can be unstandardized, and thus <span class="math inline">\(\mathbf{\Sigma}\)</span> is not necessarily a correlation matrix.</p></li>
+<li><p>Combining with Equation <a href="#eq:fa-matrix">(2)</a>, we can further assume <span class="math inline">\(\mathbf{F} \sim N(0,\mathbf{C})\)</span>, where <span class="math inline">\(\mathbf{C}\)</span> is the <span class="math inline">\(K \times K\)</span> factor covariance matrix.</p>
+<ul>
+<li>Namely, the factorial means are fixed as zero, but the scales are not necessarily fixed as EFA does.</li>
+</ul></li>
+<li><p>The error terms <span class="math inline">\(\mathbf{E} \sim N(0,\mathbf{D})\)</span>, where <span class="math inline">\(\mathbf{D}\)</span> is the <span class="math inline">\(J \times J\)</span> error covariance matrix. Although <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix (i.e., local independence) by default, it can be non-diagonal under the CFA setting (but not EFA).</p></li>
+<li><p>Similar to EFA, the factors and errors are independent of each other, namely <span class="math inline">\(COV(\mathbf{F,E})=0\)</span>.</p></li>
+<li><p>With the above assumptions and similar to what we did in EFA, the population covariance matrix <span class="math inline">\(\bf{\Sigma}\)</span> can be expressed as a function of the model parameters (also referred to as <em>model-implied</em> covariance matrix):</p></li>
+</ul>
+<p><span class="math display" id="eq:dec-rot">\[
+\begin{aligned}
+\mathbf{\Sigma}=\mathbf{\Sigma(\omega)}= \mathbf{ACA^\text{T}+D}
+\end{aligned}
+\tag{4},
+\]</span>
+where <span class="math inline">\(\boldsymbol{\omega}\)</span> contains all free parameters in <span class="math inline">\(\mathbf{A, D,C}\)</span>.</p>
+<hr />
+</div>
+</div>
+<div id="model-identification" class="section level2">
+<h2><strong>Model Identification</strong></h2>
+<ul>
+<li><p>CFA models can be specified in many different ways as illustrated above. Unfortunately, it doesn’t mean any specified model can be legitimately estimated.</p></li>
+<li><p>A statistical model is said to be identified if it is analytically possible to derive a unique solution (i.e., unique estimate of each parameter).</p>
+<ul>
+<li>The word “analytically” emphasizes identification as a property of the model and not of the data. For example, if a model is not identified, then it remains so regardless of the sample size (100, 1,000, etc.).</li>
+<li>Model identification is concerned with three important concepts: the degree of freedom, number of observation, and number of free or unknown parameters.</li>
+</ul></li>
+</ul>
+<div id="degree-of-freedom" class="section level3">
+<h3>Degree of Freedom</h3>
+<ul>
+<li><p>If there’s no analytical solution or there are multiple solutions, the models are not identified and should be respecified; otherwise, attempts to analyze and estimate them may be fruitless.</p>
+<ul>
+<li>As an example, rotational indeterminacy results in infinite number of solutions, which is of concern in EFA.</li>
+</ul></li>
+<li><p>Under CFA, indentification issue usually comes from the fact that the number of unknown parameters exceeds the number of observation, or the lack of degree of freedom.</p></li>
+<li><p>In CFA, the number of <strong>observations</strong> <span class="math inline">\(u\)</span> is the number of <em>unique</em> elements in the data covariance matrix <span class="math inline">\(\bf{\Sigma}\)</span>, which equals <span class="math inline">\(J(J + 1)/2\)</span> (due to the symmetry of the matrix above or below the diagonal).</p>
+<ul>
+<li>For example, there are <span class="math inline">\(4(4 + 1)/2=10\)</span> observations for a model with <span class="math inline">\(4\)</span> items, regardless of the sample size or how the model will be specified (e.g., number of factors).</li>
+<li>Note: This is also the number of unique equations one can possibly obtain in the model.</li>
+</ul></li>
+<li><p>The degree of freedom <span class="math inline">\(df\)</span> in the model is defined as the difference between the number of observations <span class="math inline">\(u\)</span> and the number of free or unknown parameters <span class="math inline">\(t\)</span>, namely, <span class="math inline">\(df = u – t\)</span>.</p></li>
+</ul>
+</div>
+<div id="from-under-identification-to-over-identification" class="section level3">
+<h3>From Under-Identification to Over-Identification</h3>
+<ul>
+<li><p>If <span class="math inline">\(t &gt; u\)</span> or <span class="math inline">\(df &lt; 0\)</span>, there are infinite solutions since the number of unknown parameters is more than the number of observations or equations. The model is referred to as <strong>under-identified</strong>, which cannot be estimated and requires respecification within the CFA context.</p></li>
+<li><p>In Figure <a href="#fig:under-id-fig">4</a>, <span class="math inline">\(t = 8 a + 4 d + 1 c = 13 &gt; u=10\)</span> and the model is under-identified. Actually, this is an EFA model without any constraint on the loading pattern.</p>
+<ul>
+<li>This is actually an EFA model</li>
+<li>By fixing some loadings as zero, the model can be simplified.</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:under-id-fig"></span>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \".5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"1\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"1\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = \"\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"\"]\nF1->y2 [label = \"\"]\nF2->y3 [label = \"\"]\nF2->y4 [label = \"\"]\n\nF2->y1 [label = \"\"]\nF2->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF1->y4 [label = \"\"]\n\n#Errors\ny1e[pos = \"-2,4!\", label = \"\",shape=none]\ny2e [pos = \"-1,4!\", label = \"\",shape=none]\ny3e[pos = \"0,4!\", label = \"\",shape=none]\ny4e[pos = \"1,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: Under-identification.
+</p>
+</div>
+<ul>
+<li><p><span class="math inline">\(t &lt; u\)</span> or <span class="math inline">\(df &gt;0\)</span>,the model is referred to as <strong>over-identified</strong>. There is very likely no <strong>EXACT</strong> solution since the number of unknown is less than the number of observations or equations.</p></li>
+<li><p>But we can get an approximate solution that will minimize the discrepancy between the observed covariance matrix <span class="math inline">\(\bf{S}\)</span> and model-implied covariance matrices <span class="math inline">\(\bf{\Sigma}\)</span> with certain estimation method and a set of parameters. Thus, the model is estimable.</p></li>
+<li><p>After respecifying the above diagram by constraining the items as unidimensional, we have <span class="math inline">\(t = 4 a + 4 d + 1 C = 9 &lt; u=10\)</span> and the model becomes over-identified (Figure <a href="#fig:under-id-fig">4</a>).</p></li>
+<li><p>Note that cross-loading is often the source of under-identification, especially for complex models. This is one reason researchers try to avoid cross-loading in model specification.</p></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:over-id-fig"></span>
+<div id="htmlwidget-5" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \".5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"1\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"1\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = \"\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"\"]\nF1->y2 [label = \"\"]\nF2->y3 [label = \"\"]\nF2->y4 [label = \"\"]\n\n\n#Errors\ny1e[pos = \"-2,4!\", label = \"\",shape=none]\ny2e [pos = \"-1,4!\", label = \"\",shape=none]\ny3e[pos = \"0,4!\", label = \"\",shape=none]\ny4e[pos = \"1,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: Over-identification.
+</p>
+</div>
+<ul>
+<li>If <span class="math inline">\(t = u\)</span> or <span class="math inline">\(df =0\)</span>, the model is referred to as <strong>just-identified</strong>, or saturated (i.e., no degree of freedom). With the same number of unknown and equations, one will get exact solution.
+<ul>
+<li>In Figure <a href="#fig:just-id-fig">6</a>, <span class="math inline">\(t = 3 a + 3 d = 6 = u = 3(3+1)/2\)</span></li>
+</ul></li>
+<li>Necessary rule for identification: <em>If a standard CFA model with a single factor has at least three indicators, the model is identified. If a standard model with two or more factors has at least two indicators per factor, the model is identified.</em></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:just-id-fig"></span>
+<div id="htmlwidget-6" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"0,1!\", label = \"f\",shape=circle]\n\nF1->F1[dir=both,label = \"1\",tailport = \"s\", headport = \"s\"] \n\n#Loadings\nF1->y1 [label = \"\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\n\n#Errors\ny1e[pos = \"-1,4!\", label = \"\",shape=none]\ny2e [pos = \"0,4!\", label = \"\",shape=none]\ny3e[pos = \"1,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 6: Just-identification.
+</p>
+</div>
+<ul>
+<li>Statistically however, this is usually not of much concern or interest, because it is just a linear transformation of the observations and you are NOT testing or (dis)confirming the model per se.
+<ul>
+<li>So to speak, you’ve given up the most powerful nature of CFA. Nevertheless, it can serve as a baseline model for model comparisons.</li>
+</ul></li>
+</ul>
+</div>
+<div id="necessary-but-not-sufficient" class="section level3">
+<h3>Necessary But Not Sufficient</h3>
+<ul>
+<li>So it is important to distinguish among under-, just-, or over-identified models. But over-identified model can become unidentified due to many reasons
+<ul>
+<li><span class="math inline">\(t\)</span>-Rule: <span class="math inline">\(t \le u\)</span> or <span class="math inline">\(df \ge 0\)</span>, it is a necessary, but not sufficient, condition for model identification</li>
+</ul></li>
+<li>Ex1: Two uncorrelated factors: <span class="math inline">\(u = 4(4+1)/2 = 10\)</span>; <span class="math inline">\(t = 8\)</span>; the model is over-identified globally with <span class="math inline">\(df = 2\)</span>
+<ul>
+<li>But it is locally under-identified (i.e., one factor with two indicators)</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:local-uid-fig"></span>
+<div id="htmlwidget-7" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \".5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"1\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"1\",tailport = \"e\", headport = \"e\"]\n# F1->F2[dir=both,label = \"0\"]\n# dummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"\"]\nF1->y2 [label = \"\"]\nF2->y3 [label = \"\"]\nF2->y4 [label = \"\"]\n\n\n#Errors\ny1e[pos = \"-2,4!\", label = \"\",shape=none]\ny2e [pos = \"-1,4!\", label = \"\",shape=none]\ny3e[pos = \"0,4!\", label = \"\",shape=none]\ny4e[pos = \"1,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 7: Locally Underidentified.
+</p>
+</div>
+<ul>
+<li>Ex2: Two weakly correlated factors: <span class="math inline">\(u = 10\)</span>; <span class="math inline">\(t = 9\)</span>; the model is over-identified with <span class="math inline">\(df = 1\)</span>
+<ul>
+<li>But it might be empirically under-identified during estimation (i.e., treated as one factor with two indicators by the computer program)</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:emp-uid-fig"></span>
+<div id="htmlwidget-8" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \".5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"1\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"1\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label = \"~0\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"\"]\nF1->y2 [label = \"\"]\nF2->y3 [label = \"\"]\nF2->y4 [label = \"\"]\n\n\n#Errors\ny1e[pos = \"-2,4!\", label = \"\",shape=none]\ny2e [pos = \"-1,4!\", label = \"\",shape=none]\ny3e[pos = \"0,4!\", label = \"\",shape=none]\ny4e[pos = \"1,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 8: Empirically Underidentified.
+</p>
+</div>
+<hr />
+</div>
+</div>
+<div id="model-estimation-and-interpretation" class="section level2">
+<h2><strong>Model Estimation and Interpretation</strong></h2>
+<ul>
+<li>For just- or over-identified model, the population covariance matrix <span class="math inline">\(\bf{\Sigma}\)</span> can be expressed as a function of the model-implied covariance matrix <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span>, where <span class="math inline">\(\boldsymbol{\omega}\)</span> contains all free parameters in <span class="math inline">\(\mathbf{A, D,C}\)</span>, namely we have a basic hypothesis <span class="math inline">\(\boldsymbol{\Sigma=\Sigma(\omega)}\)</span>
+<ul>
+<li>For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)</li>
+<li>For over-identified model, there is no EXACT solution and we rely on estimation, which only produces approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error)</li>
+<li>Although this might appear to be disadvantageous, it actually offers one of the greatest strengths for CFA: fit statistics for model-data fit evaluation.</li>
+<li>During model estimation, it’s the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> that is being approximated with <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> using specific estimation method, under the assumption of random sampling.</li>
+</ul></li>
+<li>The most popular method is the maximum likelihood estimation, which is the default setting in most CFA or SEM programs.</li>
+</ul>
+<div id="maximum-likelihood-estimation" class="section level3">
+<h3>Maximum Likelihood Estimation</h3>
+<ul>
+<li><p>In statistics, maximum likelihood (ML) estimation is a method of estimating the parameters of a probability distribution by maximizing a likelihood function, so that the chance to observe the data is most likely under the assumed statistical model.</p></li>
+<li><p>The values of the parameters that maximize the likelihood function are called the maximum likelihood estimates.</p></li>
+<li><p>Under the FA context, ML estimation relies on two key assumptions about the data: random sampling and normality.</p></li>
+<li><p>First, a given set of observations is a random sample from an unknown population. The goal of ML estimation is to make inferences about the population parameters that are most likely to have generated the sample data.</p></li>
+<li><p>Then, ML estimation maximizes the likelihood of observing the sample data from a multivariate normal distribution based on model parameters, <span class="math inline">\(\bf{Y} \sim N[0,\boldsymbol{\Sigma(\omega)}]\)</span>, with <span class="math inline">\(\boldsymbol{\Sigma(\omega)}= \mathbf{ACA^\text{T}+D}\)</span>.</p></li>
+<li><p>Statistically, it is equivalent to minimize the discrepancy between <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> and the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> through the fitting or discrepancy function:</p></li>
+</ul>
+<p><span class="math display" id="eq:obj-fun">\[
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(J+K)
+\tag{5},
+\]</span>
+where <span class="math inline">\(tr(\cdot)\)</span> denotes the trace of a square matrix trace, <span class="math inline">\(\bf{S}\)</span> is the sample covariance matrix, and <span class="math inline">\(J\)</span> and <span class="math inline">\(K\)</span> are the number of indicators and factors, respectively.</p>
+<ul>
+<li><p>The estimation algorithm starts the fitting function with a set of initial parameter values <span class="math inline">\(\omega_0\)</span>, and iterates with different parameter estimates <span class="math inline">\(\hat{\omega}\)</span> until the discrepancy is small enough (below a predefined minimum value). The estimates are then retained and considered as the maximum likelihood estimates.</p></li>
+<li><p>One important feature of ML estimation is that it provides the uncertainty (i.e. standard error) of the estimate, or the interval estimate.</p></li>
+</ul>
+</div>
+<div id="advantages-and-issues" class="section level3">
+<h3>Advantages and Issues</h3>
+<ul>
+<li><p>The ML method is generally both scale free and scale invariant.</p>
+<ul>
+<li>The former means that if a variable’s scale is linearly transformed, a parameter estimated for the transformed variable can be mathematically converted back to the original metric.</li>
+<li>The latter means the value of the fitting function in a particular sample remains the same regardless of the scale of the observed variables (Kaplan, 2000).</li>
+<li>However, ML estimation may lose these properties if a correlation matrix is analyzed instead of a covariance matrix.</li>
+</ul></li>
+<li><p>Other properties of the ML estimation:</p>
+<ul>
+<li>Consistency: as the number of indicators gets larger, factor estimates get closer to true values</li>
+<li>Asymptotic normality and efficiency: as sample size gets larger, parameter estimates are more reliable (i.e., smaller standard error)</li>
+<li>Different initial values converge to same estimates</li>
+</ul></li>
+<li><p>CFA with the ML method is large-sample technique, and requires moderate to large sample size. Parameter estimates will not be reliable when the sample size is small.</p></li>
+<li><p>When a raw data file is analyzed, standard ML estimation assumes that there is no missing value. A special form of ML estimation is needed for raw data files where some observations are missing at random</p></li>
+<li><p>Although usually not a problem when analyzing identified models, a converged solution may be inadmissible in ML estimation and other iterative methods.</p>
+<ul>
+<li>This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates)</li>
+</ul></li>
+<li><p>Heywood cases can be caused by many factors: specification errors, nonidentification of the model, the presence of outlier cases, a combination of small sample sizes (e.g., N &lt; 100) and only two indicators per factor, or extremely high or low population correlations that result in empirical underidentification (Chen, Bollen, Paxton, Curran, &amp; Kirby, 2001)</p>
+<ul>
+<li>When you have Heywood case, it’s not necessarily bad things since it can be used as diagnostic information about the model. Researchers should attempt to determine the source of the problem instead of constraining an error variance to be positive in a computer program.</li>
+</ul></li>
+</ul>
+</div>
+<div id="interpretation-of-parameter-estimates" class="section level3">
+<h3>Interpretation of Parameter Estimates</h3>
+<ul>
+<li><p>However complex the mathematics of MLE, the interpretation of parameter estimates for CFA models is relatively straightforward.</p></li>
+<li><p>Table <a href="#tab:est-std-tab">3</a> presents all parameter estimates based on the standard models in Figure <a href="#fig:unstd-fac-fig">2</a> (unstandardized factors solution) and Figure <a href="#fig:std-fac-fig">1</a> (standardized factors solution), with the covariance structure in Table <a href="#tab:cov-ex1-tab">1</a>.</p></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-std-tab">Table 3: </span>Parameter Estimates, Standard CFA
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.780
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+29.07
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.063
+</td>
+<td style="text-align:right;">
+0.071
+</td>
+<td style="text-align:right;">
+14.88
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.780
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+29.09
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{31}\)</span>
+</td>
+<td style="text-align:right;">
+0.916
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+14.40
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.726
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+25.34
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{42}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.784
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+29.45
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{52}\)</span>
+</td>
+<td style="text-align:right;">
+0.910
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+14.66
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.743
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+26.62
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{62}\)</span>
+</td>
+<td style="text-align:right;">
+0.953
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+14.85
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.765
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+28.12
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.298
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+9.72
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.391
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+9.35
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.336
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+9.71
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.391
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+9.33
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.349
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+11.53
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.473
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+11.37
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.305
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+9.64
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.386
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+9.26
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{55}\)</span>
+</td>
+<td style="text-align:right;">
+0.325
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+11.05
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.447
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+10.77
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{66}\)</span>
+</td>
+<td style="text-align:right;">
+0.312
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+10.33
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.415
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+9.98
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.464
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+9.18
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.485
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+9.24
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{12}\)</span>
+</td>
+<td style="text-align:right;">
+0.218
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+7.21
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.459
+</td>
+<td style="text-align:right;">
+0.046
+</td>
+<td style="text-align:right;">
+9.92
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Under the unstandardized solution, the loading values should be explained relative to the reference indicator and the factorial covariance matrix is obtained.</p></li>
+<li><p>Under the standardized solution, the loading values are standardized within one, and the factorial correlation matrix is obtained.</p>
+<ul>
+<li>We can obtain the proportion of explained variance (similar to the <span class="math inline">\(R^2\)</span> or coefficient of determination in regression analysis) for <span class="math inline">\(y_j\)</span>, which is <span class="math inline">\(1-d_{jj}\)</span>.</li>
+</ul></li>
+<li><p>We can also fit the more complex model in Figure <a href="#fig:cross-ld-fig">3</a> to the same covariance structure in Table <a href="#tab:est-comx-tab">4</a>.</p></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-comx-tab">Table 4: </span>Parameter Estimates, Cross-Loading CFA
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.783
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+28.71
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.066
+</td>
+<td style="text-align:right;">
+0.072
+</td>
+<td style="text-align:right;">
+14.71
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.786
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+28.86
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{31}\)</span>
+</td>
+<td style="text-align:right;">
+0.864
+</td>
+<td style="text-align:right;">
+0.071
+</td>
+<td style="text-align:right;">
+12.12
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.687
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+17.42
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{32}\)</span>
+</td>
+<td style="text-align:right;">
+0.084
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+1.44
+</td>
+<td style="text-align:right;">
+0.149
+</td>
+<td style="text-align:right;">
+0.068
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+1.45
+</td>
+<td style="text-align:right;">
+0.148
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{42}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.785
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+29.56
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{52}\)</span>
+</td>
+<td style="text-align:right;">
+0.907
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+14.67
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.743
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+26.59
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{62}\)</span>
+</td>
+<td style="text-align:right;">
+0.951
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+14.87
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.764
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+28.11
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.295
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+9.41
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.387
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+9.06
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.329
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+9.31
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.383
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+8.96
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.356
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+11.76
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.482
+</td>
+<td style="text-align:right;">
+0.041
+</td>
+<td style="text-align:right;">
+11.64
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.303
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+9.61
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.384
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+9.22
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{55}\)</span>
+</td>
+<td style="text-align:right;">
+0.326
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+11.08
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.449
+</td>
+<td style="text-align:right;">
+0.041
+</td>
+<td style="text-align:right;">
+10.81
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{66}\)</span>
+</td>
+<td style="text-align:right;">
+0.313
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+10.36
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.416
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+10.00
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.467
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+9.15
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.486
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+9.26
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{12}\)</span>
+</td>
+<td style="text-align:right;">
+0.209
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+6.84
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.439
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+8.96
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Comparing to Table <a href="#tab:cov-ex1-tab">1</a>, the estimates are generally close, with one clear difference: the added loading <span class="math inline">\(a_{32}\)</span> is close to zero, and its <span class="math inline">\(p\)</span>-value is insignificant, which suggest the loading is unnecessary.</p></li>
+<li><p>When raw data are analyzed, it is possible to calculate factor scores for each case.</p>
+<ul>
+<li>Because factors are not measured directly but instead through their indicators, such scores are only estimates of cases’ relative standings on the factor.</li>
+<li>There is more than one way to calculate factor scores, however, and although scores derived using different methods tend to be highly correlated, they generally do not all yield identical rank orderings of the cases.</li>
+<li>Given the above, Bollen’s (1989) perspective on this matter is pertinent: researchers should probably refrain from making too fine a comparison on estimated factor scores.</li>
+</ul></li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="model-evaluation" class="section level2">
+<h2><strong>Model Evaluation</strong></h2>
+<ul>
+<li><p>For over-identified model, model estimation is approximate (i.e., no exact solution). There is thus a need to evaluate how well the model fits the data, or how close the parameter estimates and population values are.</p></li>
+<li><p>Model estimation is also known as model fitting, which is equivalent to test or confirm the null hypothesis <span class="math inline">\(H_0: \boldsymbol{\Sigma=\Sigma(\omega)}\)</span> based on the chi-square statistics.</p></li>
+<li><p>A variety of fit indexes are available for model evaluation, some of which are more commonly used than others and will be introduced below.</p></li>
+</ul>
+<div id="model-chi-square" class="section level3">
+<h3>Model Chi-Square</h3>
+<ul>
+<li>When the population is multivariate distributed and the model is correctly specified, the ML-based discrepancy function <span class="math inline">\(F_{ML}\)</span> is related to chi-square distribution. More precisely, <span class="math inline">\((N – 1)F_{ML}\)</span> is distributed as a Pearson chi-square statistic with the model’s degrees of freedom, <span class="math inline">\(df_M\)</span>.
+<ul>
+<li>Note: <span class="math inline">\(N\)</span> is the sample size, and Sometimes, <span class="math inline">\(N \times F_{ML}\)</span> is used</li>
+</ul></li>
+<li>This statistic is referred to as the model chi-square <span class="math inline">\(\chi_M^2\)</span>, or model test statistics <span class="math inline">\(T_M\)</span>, which is assumed to follow the <span class="math inline">\(\chi^2\)</span> distribution with <span class="math inline">\(df_M\)</span> degree of freedom
+<ul>
+<li>Thus, one can obtain <span class="math inline">\(p\)</span> value to reject or accept the null hypothesis based on χ2</li>
+<li>It is also known as the likelihood ratio chi-square or generalized likelihood ratio.</li>
+</ul></li>
+<li>As a fit index, it is actually a <em>badness-of-fit</em> index because the higher its value, the worse the model’s fitness to the data.
+<ul>
+<li>For a just-identified model, it generally equals zero and has no degrees of freedom because the model perfectly fits the data.</li>
+</ul></li>
+<li>The model chi-square is affected by sample size: if the sample size is large, which is required in order to interpret the index as a test statistic, the value of <span class="math inline">\(\chi_M^2\)</span> may lead to rejection of the model even with slight discrepancy.
+<ul>
+<li>Indeed, rejection of basically any over-identified model based on <span class="math inline">\(\chi_M^2\)</span> requires only a sufficiently large number of cases.</li>
+<li>In practice, the index is often revised to develop more sophisticated fit indexes less affected by sample size and have interpretive norms.</li>
+</ul></li>
+</ul>
+</div>
+<div id="root-mean-square-error-of-approximation" class="section level3">
+<h3>Root Mean Square Error of Approximation</h3>
+<ul>
+<li>Root mean square error of approximation (RMSEA) is a parsimony-adjusted index defined as:</li>
+</ul>
+<p><span class="math display">\[\text{RMSEA}=\sqrt{\frac{\delta_M}{df_M(N-1)}}\]</span></p>
+<p>where <span class="math inline">\(\delta_M=max(\chi_M^2-df_M,0)\)</span> is the noncentrality parameter for a noncentral chi-square distribution adjusting for the model degree of freedom.</p>
+<ul>
+<li><p>This equation shows that the RMSEA estimates the amount of error of approximation per model degree of freedom and takes sample size into account. Note that the result RMSEA = 0 says only that <span class="math inline">\(\chi_M^2 \leq df_M\)</span>, not that <span class="math inline">\(\chi_M^2 = 0\)</span> (i.e., not perfect fit).</p></li>
+<li><p>A rule of thumb is that RMSEA <span class="math inline">\(\leq .05\)</span> indicates close approximate fit, values between .05
+and .08 suggest reasonable error of approximation, and <span class="math inline">\(RMSEA \geq .10\)</span> suggests poor fit</p></li>
+<li><p>The 90% confidence interval (CI) of the RMSEA is also useful</p>
+<ul>
+<li>lower bound <span class="math inline">\(\leq.05\)</span>: the null hypothesis of <strong>close fit</strong> is not rejected</li>
+<li>upper bound <span class="math inline">\(\geq.10\)</span>: the null hypothesis of <strong>poor fit</strong> is not rejected</li>
+</ul></li>
+<li><p>Ex: Suppose that RMSEA <span class="math inline">\(= .045\)</span> with the 90% CI of (0, .15):</p>
+<ul>
+<li>Based on the lower bound, the null hypothesis of close fit is not rejected.</li>
+<li>Based on the upper bound, the null hypothesis of poor fit is not rejected.</li>
+<li>Thus, the result RMSEA = .045 for this example is subject to a fair amount of sampling error because it is just as possible a good fit as a poor fit.</li>
+<li>This type of “mixed” outcome is more likely to happen in smaller samples. A larger sample may be required in order to obtain more precise results</li>
+</ul></li>
+</ul>
+</div>
+<div id="comparative-fit-index" class="section level3">
+<h3>Comparative Fit Index</h3>
+<ul>
+<li>Comparative fit index (CFI) is an incremental index which assesses the relative improvement in fit of the researcher’s model compared with a <em>baseline model</em>.
+<ul>
+<li>The baseline model is typically the independence or null model, which assumes zero population covariance among the indicators (i.e., indicators are assumed uncorrelated).</li>
+<li>When means are not analyzed, the only parameters are the population variances of the indicators.</li>
+<li>Thus, the baseline model should fit the data poorly, with large model chi-square <span class="math inline">\(\chi_B^2\)</span> and related noncentrality parameter <span class="math inline">\(\delta_B=max(\chi_B^2-df_B,0)\)</span></li>
+</ul></li>
+<li>The CFI is define as:</li>
+</ul>
+<p><span class="math display">\[
+\text{CFI}=1-\delta_M / \delta_B
+\]</span></p>
+<ul>
+<li>A rule of thumb for the CFI (and other incremental indexes) is that values greater than roughly .90 may indicate reasonably good fit of the researcher’s model (Hu &amp; Bentler, 1999).
+<ul>
+<li>However, CFI = 1.0 means only that <span class="math inline">\(\chi_M^2 &lt; df_M\)</span>, not that the model has perfect fit.</li>
+</ul></li>
+<li>All incremental fit indexes have been criticized for using the independence (null) model as the baseline model, because the assumption of uncorrelated indicators is scientifically implausible in many (probably most) applications.
+<ul>
+<li>Therefore, a high CFI value may not be very impressive - necessary but not sufficient</li>
+</ul></li>
+</ul>
+</div>
+<div id="standardized-root-mean-square-residual" class="section level3">
+<h3>Standardized Root Mean Square Residual</h3>
+<ul>
+<li>The standardized root mean square residual (SRMR) is based on transforming both the sample covariance matrix and the predicted covariance matrix into correlation matrices:</li>
+</ul>
+<p><span class="math display">\[
+\text{SRMR}=\sqrt{2\sum_{i=1}^{J}\sum_{j=1}^{i}[(s_{ij}-\hat{\sigma})/(s_{ii}s_{jj})]^2/J(J+1 )}
+\]</span></p>
+<ul>
+<li>It is thus a measure of the mean absolute correlation residual, the average difference between the observed and predicted correlations. Values of the SRMR less than .10 are generally considered favorable.</li>
+</ul>
+</div>
+<div id="joint-criteria-and-example" class="section level3">
+<h3>Joint Criteria and Example</h3>
+<ul>
+<li>It turns out that no single index can work well. In practice, several indexes are often used together for model evaluation.
+<ul>
+<li>The above indexes are strongly suggested to report in any official research</li>
+<li>Don’t cherry pick, and point out the (in)consistency among the indexes, with possible explanation</li>
+</ul></li>
+<li>Figure <a href="#fig:mul-mod-fig1">9</a> presents four different model specifications on the same covariance structure in last Chapter, and related fitting indexes can be found in Table <a href="#tab:fit-dms-tab">5</a>. Based on the RMSEA, its 90% interval, CFI, and SRMR, it is quite clear Model (a) and (c) are acceptable, whereas Model (b) and (d) are problematic.</li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mul-mod-fig1"></span>
+<div id="htmlwidget-9" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\naname [pos = \"0,0!\", width=2, label=\"(a) Standard\",shape = plaintext]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label=\"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label=\"\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label=\"\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF2->y4 [label = \"1\"]\nF2->y5 [label = \"\"]\nF2->y6 [label = \"\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = \"\",shape=none]\ny2e [pos = \"-2,4!\", label = \"\",shape=none]\ny3e[pos = \"-1,4!\", label = \"\",shape=none]\ny4e[pos = \"0,4!\", label = \"\",shape=none]\ny5e[pos = \"1,4!\", label = \"\",shape=none]\ny6e[pos = \"2,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n\nbname [pos = \"6,0!\", width=1, label=\"(b) Uneven Loading\",shape = plaintext]\n# Items\nby1 [pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"4,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"4,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"7,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF1->bF1[dir=both,label=\"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nbF2->bF2[dir=both,label=\"\",tailport = \"e\", headport = \"e\"]\nbF1->bF2[dir=both,label=\"\"]\nbdummy [pos = \"5.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF2->by3 [label = \"\"]\nbF2->by4 [label = \"1\"]\nbF2->by5 [label = \"\"]\nbF2->by6 [label = \"\"]\n\n# bF2->by3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\nby1e[pos = \"3,4!\", label = \"\",shape=none]\nby2e [pos = \"4,4!\", label = \"\",shape=none]\nby3e[pos = \"5,4!\", label = \"\",shape=none]\nby4e[pos = \"6,4!\", label = \"\",shape=none]\nby5e[pos = \"7,4!\", label = \"\",shape=none]\nby6e[pos = \"8,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 9: Different Model Specifications
+</p>
+</div>
+<div id="htmlwidget-10" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-10">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\ncname [pos = \"0,0!\", width=2, label=\"(c) Cross-loading\",shape = plaintext]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label=\"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label=\"\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label=\"\"]\ndummy [pos = \"-.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF2->y4 [label = \"1\"]\nF2->y5 [label = \"\"]\nF2->y6 [label = \"\"]\n\nF2->y3 [label = \"\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = \"\",shape=none]\ny2e [pos = \"-2,4!\", label = \"\",shape=none]\ny3e[pos = \"-1,4!\", label = \"\",shape=none]\ny4e[pos = \"0,4!\", label = \"\",shape=none]\ny5e[pos = \"1,4!\", label = \"\",shape=none]\ny6e[pos = \"2,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n\ndname [pos = \"6,0!\", width=1, label=\"(d) Orthogonal Factors & cross-loading\",shape = plaintext]\n# Items\nby1 [pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"4,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"4,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"7,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF1->bF1[dir=both,label=\"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nbF2->bF2[dir=both,label=\"\",tailport = \"e\", headport = \"e\"]\n# bF1->bF2[dir=both,label=\"\"]\n# bdummy [pos = \"5.5,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF2->by4 [label = \"1\"]\nbF2->by5 [label = \"\"]\nbF2->by6 [label = \"\"]\n\nbF2->by3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\nby1e[pos = \"3,4!\", label = \"\",shape=none]\nby2e [pos = \"4,4!\", label = \"\",shape=none]\nby3e[pos = \"5,4!\", label = \"\",shape=none]\nby4e[pos = \"6,4!\", label = \"\",shape=none]\nby5e[pos = \"7,4!\", label = \"\",shape=none]\nby6e[pos = \"8,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:fit-dms-tab">Table 5: </span>Fit Indexes for Different Model Specifications
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+a
+</th>
+<th style="text-align:right;">
+b
+</th>
+<th style="text-align:right;">
+c
+</th>
+<th style="text-align:right;">
+d
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CHISQ
+</td>
+<td style="text-align:right;">
+9.286
+</td>
+<td style="text-align:right;">
+188.276
+</td>
+<td style="text-align:right;">
+7.252
+</td>
+<td style="text-align:right;">
+69.858
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DF
+</td>
+<td style="text-align:right;">
+8.000
+</td>
+<td style="text-align:right;">
+8.000
+</td>
+<td style="text-align:right;">
+7.000
+</td>
+<td style="text-align:right;">
+8.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PVALUE
+</td>
+<td style="text-align:right;">
+0.319
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.403
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+<td style="text-align:right;">
+0.212
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.124
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.LOWER
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.187
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.098
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.UPPER
+</td>
+<td style="text-align:right;">
+0.057
+</td>
+<td style="text-align:right;">
+0.239
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+0.152
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CFI
+</td>
+<td style="text-align:right;">
+0.999
+</td>
+<td style="text-align:right;">
+0.827
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.941
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SRMR
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.124
+</td>
+<td style="text-align:right;">
+0.017
+</td>
+<td style="text-align:right;">
+0.157
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIC
+</td>
+<td style="text-align:right;">
+6705.394
+</td>
+<td style="text-align:right;">
+6884.385
+</td>
+<td style="text-align:right;">
+6705.360
+</td>
+<td style="text-align:right;">
+6765.967
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIC
+</td>
+<td style="text-align:right;">
+6760.184
+</td>
+<td style="text-align:right;">
+6939.175
+</td>
+<td style="text-align:right;">
+6764.365
+</td>
+<td style="text-align:right;">
+6820.757
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+</div>
+<div id="model-comparisons" class="section level2">
+<h2><strong>Model Comparisons</strong></h2>
+<ul>
+<li>As illustrated, one can encounter different model specifications. In fact, it’s Strongly suggested to investigate multiple models in any empirical research
+<ul>
+<li>Similar to specify multiple hypotheses in hypothesis testing</li>
+<li>The fit indexes described above can help to reject inappropriate models (e.g., b and d in Table <a href="#tab:fit-dms-tab">5</a>)</li>
+<li>But it’s likely that multiple models fit the data well (e.g., a and b in the table)</li>
+</ul></li>
+<li>Model evaluation described above is considered as absolute fit
+<ul>
+<li>Evaluate if the model fits the data on absolute standards</li>
+</ul></li>
+<li>In contrast, model comparison is to select the best model among competing candidates
+<ul>
+<li>Relative fit: by their nature, such judgments are relative, not absolute</li>
+<li>It should follow the absolute fit evaluation; otherwise, the models might not fit the data well, rendering the comparison as practically meaningless</li>
+</ul></li>
+<li>Comparative judgments about model-data fit depend on the “nested” or “non-nested” nature of the models in question</li>
+</ul>
+<div id="nested-or-hierarchical-models" class="section level3">
+<h3>Nested or Hierarchical Models</h3>
+<ul>
+<li><p>Two models are <strong>hierarchical</strong> or <strong>nested</strong> if one is a subset of the other</p>
+<ul>
+<li>Unrestricted: the one with more parameters to estimate</li>
+<li>Restricted model: the one with less parameters to estimate</li>
+<li>The unrestricted model can be transformed into the restricted model by imposing constraints on the parameters</li>
+<li>The restricted model can be transformed into the unrestricted model by relaxing constraints on the parameters</li>
+</ul></li>
+<li><p>Example in Figure <a href="#fig:mul-mod-fig1">9</a>: the unrestricted model is c, with different restricted models</p>
+<ul>
+<li>a: the associated par is the (cross-)loading from <span class="math inline">\(y_3\)</span> on <span class="math inline">\(f_2\)</span></li>
+<li>b: the associated par is the loading from <span class="math inline">\(y_3\)</span> on <span class="math inline">\(f_1\)</span></li>
+<li>d: the associated par is the correlation between <span class="math inline">\(f_1\)</span> on <span class="math inline">\(f_2\)</span></li>
+</ul></li>
+<li><p>When two models are nested and both fit the data well in absolute sense:</p>
+<ul>
+<li>The restricted model is simpler with more degrees of freedom (i.e., less parameters to be estimated) than the unrestricted model</li>
+<li>But it also has worse absolute fit (i.e., larger <span class="math inline">\(F_{ML}\)</span> or <span class="math inline">\(\chi_M^2\)</span>) than the unrestricted model (e.g., Model a vs. c in Figure <a href="#fig:mul-mod-fig1">9</a> and Table <a href="#tab:fit-dms-tab">5</a>)</li>
+<li>It makes sense: the simpler the model, the worse the model-data fit (same logic that the saturated model has perfect fit)</li>
+</ul></li>
+<li><p>So the question we should ask: Is the decrease in absolute fit worthy the increase of simplicity (more degree of freedom or less free parameters)?</p></li>
+<li><p>To answer the question, We will rely on the likelihood ratio test (LRT) of significance and the assumption <span class="math inline">\(\chi_M^2\)</span> is a chi-square distribution with <span class="math inline">\(df_M\)</span> degree of freedom:</p>
+<ul>
+<li>The chi-square difference statistic, <span class="math inline">\(\chi_D^2=\chi_{M,res}^2-\chi_{M,unr}^2\)</span></li>
+<li>Its degrees of freedom, <span class="math inline">\(df_D=df_{M,res}-df_{M,unr}\)</span></li>
+<li>The <span class="math inline">\(\chi_D^2\)</span> statistic tests the null hypothesis that the difference is insignificant, namely identical fit of the two nested models in the population, at specific significance level (e.g., .05)</li>
+<li>When one fails to reject the null hypothesis, the restricted model is preferred due to its simplicity (the Principle of parsimony)</li>
+<li>When the (one-tailed) null hypothesis is rejected, the unrestricted model is preferred due to significantly better fit</li>
+</ul></li>
+<li><p>Ex: in Table <a href="#tab:fit-dms-tab">5</a>, the chi-square difference statistic between Model a and c, with <span class="math inline">\(df_D=1\)</span> is:</p>
+<ul>
+<li><span class="math inline">\(\chi_D^2(1)=9.286 - 7.252 = 2.034\)</span>, <span class="math inline">\(p=.154\)</span></li>
+<li>The null hypothesis of identical fit retains (at <span class="math inline">\(\alpha=.1\)</span> significant level), and Model a is preferred due to simplicity (see Figure <a href="#fig:mul-mod-fig1">9</a>)</li>
+</ul></li>
+<li><p>The significance testing for nested models also has important implications for model modification</p></li>
+</ul>
+</div>
+<div id="model-modification-and-the-modification-index" class="section level3">
+<h3>Model Modification and the Modification Index</h3>
+<ul>
+<li><p>When the model is slightly modified, the original and modified models are usually nested with each other</p>
+<ul>
+<li>Ex: Models c vs. a, b, or d in Figure <a href="#fig:mul-mod-fig1">9</a></li>
+<li>We can apply the same chi-square difference statistic <span class="math inline">\(\chi_D^2\)</span> to compare the models</li>
+<li>Similarly, the simpler model is preferred in case of insignificance, and the more complex model is preferred in case of significance</li>
+</ul></li>
+<li><p>A modification index (MI) is the <span class="math inline">\(\chi_D^2\)</span> statistic with a single degree of freedom. That is, it estimates <span class="math inline">\(\chi_D^2(1)\)</span> for <strong>adding</strong> a parameter (e.g, cross-loading, factorial correlation, or correlated error).</p>
+<ul>
+<li>It reflects, approximately, the amount by which the model chi-square statistic, <span class="math inline">\(\chi_M^2\)</span>, would <em>decrease</em> if a fixed (usually fixed-to-zero) parameter was freely estimated.</li>
+<li>Thus, large values indicate potentially useful parameters: the greater the value of a modification index, the better the predicted improvement in overall fit if that parameter was added to the model</li>
+<li>Usually, MI values larger than significant at <span class="math inline">\(.05\)</span> level, or <span class="math inline">\(\chi_D^2(1)&gt;3.84\)</span>, should be of concern, and the largest value should be prioritized.</li>
+</ul></li>
+<li><p>Associated with the MI is the expected parameter change statistic (EPC), which reflects the approximate value of the new parameter if added to the model.</p></li>
+<li><p>Table <a href="#tab:mi-ex-tab">6</a> presents the MI values of significant parameter changes for Model (b) in Figure <a href="#fig:mul-mod-fig1">9</a>:</p></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:mi-ex-tab">Table 6: </span>Modification Indexes above 3.84
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+MI
+</th>
+<th style="text-align:right;">
+EPC
+</th>
+<th style="text-align:right;">
+Std EPC
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{31}\)</span>
+</td>
+<td style="text-align:right;">
+160.29
+</td>
+<td style="text-align:right;">
+0.906
+</td>
+<td style="text-align:right;">
+0.645
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{41}\)</span>
+</td>
+<td style="text-align:right;">
+15.71
+</td>
+<td style="text-align:right;">
+-0.261
+</td>
+<td style="text-align:right;">
+-0.186
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{13}\)</span>
+</td>
+<td style="text-align:right;">
+30.32
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+<td style="text-align:right;">
+0.132
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{14}\)</span>
+</td>
+<td style="text-align:right;">
+6.92
+</td>
+<td style="text-align:right;">
+-0.056
+</td>
+<td style="text-align:right;">
+-0.056
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{23}\)</span>
+</td>
+<td style="text-align:right;">
+40.75
+</td>
+<td style="text-align:right;">
+0.164
+</td>
+<td style="text-align:right;">
+0.164
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{26}\)</span>
+</td>
+<td style="text-align:right;">
+5.29
+</td>
+<td style="text-align:right;">
+-0.051
+</td>
+<td style="text-align:right;">
+-0.051
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{34}\)</span>
+</td>
+<td style="text-align:right;">
+7.31
+</td>
+<td style="text-align:right;">
+-0.070
+</td>
+<td style="text-align:right;">
+-0.070
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{36}\)</span>
+</td>
+<td style="text-align:right;">
+5.43
+</td>
+<td style="text-align:right;">
+-0.059
+</td>
+<td style="text-align:right;">
+-0.059
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{46}\)</span>
+</td>
+<td style="text-align:right;">
+11.51
+</td>
+<td style="text-align:right;">
+0.121
+</td>
+<td style="text-align:right;">
+0.121
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Indicators with poor loading estimates can be removed from the model given the removal is not negatively influential to:
+<ul>
+<li>Model identification</li>
+<li>Substantive representation</li>
+<li>Model fit statistics</li>
+</ul></li>
+<li>Caveats:
+<ul>
+<li>Parameter should be added or dropped one by one (but note the MI is only for adding parameter)</li>
+<li>Explanation is always needed to justify the modifications</li>
+<li>Usually it is fine for a small number of modifications, i.e., no more than a few parameters are changed</li>
+<li>When many parameters are changed this way, the theory-driven CFA is becoming the data-driven EFA per se</li>
+</ul></li>
+</ul>
+</div>
+<div id="non-nested-models" class="section level3">
+<h3>Non-Nested Models</h3>
+<ul>
+<li>If two models are not nested (i.e., neither model’s parameters form a subset of the other model’s parameters), the above chi-square difference statistic cannot be used for model comparison
+<ul>
+<li>Absolute fit can be still adopted for model evaluation, which is usually the first step</li>
+</ul></li>
+<li>To compare non-nested models, We can employ the information criteria indexes, which takes into consideration both the absolute fit and model parsimony:
+<ul>
+<li>Akaike Information Criterion (AIC) compensates the absolute fit with the number of free parameters <span class="math inline">\(t\)</span>, as</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+AIC=-2LL+2t
+\]</span>
+- Bayesian Information Criterion (BIC) compensates the absolute fit with both the number of free parameters <span class="math inline">\(t\)</span> and the sample size <span class="math inline">\(N\)</span></p>
+<p><span class="math display">\[
+BIC=-2LL+t \times ln(N)
+\]</span>
+where <span class="math inline">\(LL\)</span> is the log maximum likelihood
+- For both indexes, the smaller the values the better the model</p>
+<ul>
+<li>Ex: Model (a) and (b) in Figure <a href="#fig:mul-mod-fig1">9</a> are non-nested. According to Table <a href="#tab:fit-dms-tab">5</a>, Model a is better than b based on either the AIC or BIC</li>
+</ul>
+</div>
+</div>
+<div id="extensions" class="section level2">
+<h2><strong>Extensions</strong></h2>
+<ul>
+<li>CFA can be specified in many different ways, and specification of other complex structures (e.g, higher-order, correlated errors) are also possible.</li>
+</ul>
+<div id="local-dependence-or-orthogonal-factors" class="section level3">
+<h3>Local Dependence or Orthogonal Factors</h3>
+<ul>
+<li>In factor analysis, it’s common to assume that the measurement errors of different indicators are uncorrelated, which is also referred to as the <strong>local independence assumption</strong>
+<ul>
+<li>It means that the indicators are conditionally independent of each other or have nothing in common after controlling for the common factors</li>
+<li>Namely, the factors are the only cause of the common variance that the indicators share with each other</li>
+<li>The assumption is strictly followed under the EFA setting and its violation can cause serious problems (e.g., over-extraction of factors)</li>
+</ul></li>
+<li>Under CFA, the assumption can be relaxed by specifying the correlated errors as shown in Model (c) of Figure <a href="#fig:equ-mod-fig">10</a>
+<ul>
+<li>In practice, it’s uncommon to specify the correlated errors based on a priori hypothesis</li>
+<li>Instead, they are usually re-specified based on the modification indexes</li>
+</ul></li>
+<li>In a CFA model with multiple factors, it’s possible to hypothesize that the factors are uncorrelated (orthogonal)
+<ul>
+<li>This can result in a simpler structure and more freedom to estimate the loading matrix. It’s often related to the bifactor model in the literature</li>
+<li>Ex: In Model (d) of Figure <a href="#fig:equ-mod-fig">10</a>, the two factors are uncorrelated; instead, there are two cross-loadings</li>
+</ul></li>
+</ul>
+</div>
+<div id="equivalent-models" class="section level3">
+<h3>Equivalent Models</h3>
+<ul>
+<li>With many possible model specifications, <strong>equivalent models</strong> should be considered.
+<ul>
+<li>Equivalent models are mathematically identical models but with a different configuration of model structure</li>
+<li>They are usually transformations of constraints on the same variables</li>
+<li>They also have equal goodness-of-fit indexes, including <span class="math inline">\(\chi_M^2\)</span> (and degree of freedom) and all other fit statistics described earlier</li>
+<li>Thus, the researchers need to explain why their final model should be preferred over other equivalent models.</li>
+</ul></li>
+<li>Ex: Model (b), (c), and (d) are equivalent to Model (a) in Figure <a href="#fig:equ-mod-fig">10</a> by, respectively:
+<ul>
+<li>Introducing a higher-order factor</li>
+<li>Allowing local dependence</li>
+<li>Introducing a bifactor structure</li>
+</ul></li>
+<li>The four models are mathematically equivalent, and if any of the special models rather than the standard model (a) is adopted, be prepared to provide substantive rationale</li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:equ-mod-fig"></span>
+<div id="htmlwidget-11" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-11">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\naname [pos = \"0,-1!\", width=2, label=\"(a) Standard\",shape = plaintext]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"1.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label=\"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label=\"\",tailport = \"e\", headport = \"e\"]\nF1->F2[dir=both,label=\"\"]\ndummy [pos = \"0,1!\", height=1, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF1->y4 [label = \"\"]\nF2->y5 [label = \"1\"]\nF2->y6 [label = \"\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = \"\",shape=none]\ny2e [pos = \"-2,4!\", label = \"\",shape=none]\ny3e[pos = \"-1,4!\", label = \"\",shape=none]\ny4e[pos = \"0,4!\", label = \"\",shape=none]\ny5e[pos = \"1,4!\", label = \"\",shape=none]\ny6e[pos = \"2,4!\", label = \"\",shape=none]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\n\nbname [pos = \"8,-1!\", width=1, label=\"(b) Higher-Order\",shape = plaintext]\n# Items\nby1 [pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"9,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"10,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"6.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"9.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF3[pos = \"8,0!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nbF3->bF1 [label = \"1\"]\nbF3->bF2 [label = \"1\"]\nbF3->bF3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\n\nbf1e[pos = \"5.5,0!\", label = \"\",shape=none]\nbf2e[pos = \"10.5,0!\", label = \"\",shape=none]\nbf1e->bF1 [label = \"\"]\nbf2e->bF2 [label = \"\"]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF1->by4 [label = \"\"]\nbF2->by5 [label = \"1\"]\nbF2->by6 [label = \"\"]\n\n# bF2->by3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\nby1e[pos = \"5,4!\", label = \"\",shape=none]\nby2e [pos = \"6,4!\", label = \"\",shape=none]\nby3e[pos = \"7,4!\", label = \"\",shape=none]\nby4e[pos = \"8,4!\", label = \"\",shape=none]\nby5e[pos = \"9,4!\", label = \"\",shape=none]\nby6e[pos = \"10,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 10: Equivalent Models
+</p>
+</div>
+<div id="htmlwidget-12" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-12">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\ncname [pos = \"0,0!\", width=2, label=\"(c) Correlated Errors\",shape = plaintext]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-2,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"0,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"0,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label=\"\",tailport = \"s\", headport = \"s\"] # &#x3D5\n\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF1->y3 [label = \"\"]\nF1->y4 [label = \"\"]\nF1->y5 [label = \"\"]\nF1->y6 [label = \"\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = \"\",shape=none]\ny2e [pos = \"-2,4!\", label = \"\",shape=none]\ny3e[pos = \"-1,4!\", label = \"\",shape=none]\ny4e[pos = \"0,4!\", label = \"\",shape=none]\ny5e[pos = \"1,4!\", label = \"\",shape=none,height=.1] #fixedsize = true\ny6e[pos = \"3,4!\", label = \"\",shape=none,height=.1]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\n\ny5e->y6e[dir=both,label=\"\", splines=curved, tailport = \"n\", headport = \"n\"]\ndummy [pos = \"2,4!\", height=1, label=\"\", color=white]\n\ndname [pos = \"8,0!\", width=1, label=\"(d) Bifactor\",shape = plaintext]\n# Items\nby1 [pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"9,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"10,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"7.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"9.5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF1->bF1[dir=both,label=\"\",tailport = \"s\", headport = \"s\"] # &#x3D5\nbF2->bF2[dir=both,label=\"\",tailport = \"s\", headport = \"s\"]\n\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF1->by4 [label = \"\"]\nbF1->by5 [label = \"\"]\nbF1->by6 [label = \"\"]\nbF2->by5 [label = \"1\"]\nbF2->by6 [label = \"1\"]\n\n#Errors\nby1e[pos = \"5,4!\", label = \"\",shape=none]\nby2e [pos = \"6,4!\", label = \"\",shape=none]\nby3e[pos = \"7,4!\", label = \"\",shape=none]\nby4e[pos = \"8,4!\", label = \"\",shape=none]\nby5e[pos = \"9,4!\", label = \"\",shape=none]\nby6e[pos = \"10,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="reporting-cfa" class="section level3">
+<h3>Reporting CFA</h3>
+<ul>
+<li>One important goal of reporting is to ensure others can replicate your results and agree with your findings, even without using the same software. The following information and procedures are suggested in official report:
+<ul>
+<li>Model specification: Path diagram and/or structural equations with the parameter matrices
+<ul>
+<li>when multiple models are compared, provide specification for each one</li>
+<li>Explanation of possible identification issue preferred</li>
+<li>Substantive definitions of indicators and factors, preferably using tables</li>
+</ul></li>
+<li>Summary statistics such as sample size, sample covariance structure, mean, and skewness and kurtosis</li>
+<li>For model evaluation, these fit statistics are suggested (likely with others): <span class="math inline">\(\chi_M^2\)</span> with <span class="math inline">\(df\)</span> and <span class="math inline">\(p\)</span>-value; <span class="math inline">\(RMSEA\)</span> with the 90% CI; <span class="math inline">\(CFI\)</span>; <span class="math inline">\(SRMR\)</span>; <span class="math inline">\(AIC\)</span>; <span class="math inline">\(BIC\)</span></li>
+<li>For model estimation: parameter estimates (both unstd. and std.) with SE, <span class="math inline">\(z\)</span>-scores and <span class="math inline">\(p\)</span>-values
+<ul>
+<li>Explanation of parameter estimates preferred, e.g., if the magnitude of important estimates (e.g., loadings, factor correlations) are substantively meaningful.</li>
+<li>In some cases, especially due to large sample size, parameter estimates can be statistically significant but substantively trivial (e.g., .1)</li>
+</ul></li>
+<li>For model comparisons, fit statistics for each model needed, plus LR testing for nested models or <span class="math inline">\(AIC\)</span> and <span class="math inline">\(BIC\)</span> comparisons for nonnested models</li>
+<li>For model modification, report any adjustments or changes to the original model, with substantive rationale</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="further-understanding" class="section level2">
+<h2><strong>Further Understanding</strong></h2>
+<div id="factor-analysis-vs.-latent-variable-modeling" class="section level3">
+<h3>Factor Analysis vs. Latent Variable Modeling</h3>
+<ul>
+<li>Factor analysis can be considered as one part of a big family latent variable model (LVM)
+<ul>
+<li>The modeling of latent variables through observed variables</li>
+<li>In LVM, both the latent and observed variables can be continuous or categorical</li>
+</ul></li>
+<li>Shared characteristics or assumptions of LVM:
+<ul>
+<li>The observed variable is considered as an imperfect measure of latent variables (i.e., with measurement errors)</li>
+<li>All models are based on linear or nonlinear structural equations: related to SEM</li>
+<li>The assumption of local independence is usually assumed: the observed variables are conditionally independent or have nothing in common after controlling for the latent variables</li>
+</ul></li>
+<li>Nature of the observed and latent variable determines the modeling framework in LVM
+<ul>
+<li>Generally, there are four modeling frameworks under LVM, which can be considered as four different ways to establish correspondence between the observed behavior and latent variable</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-5">Table 7: </span>Latent Variable Modeling Framework
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="2">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: left; font-weight: bold; " colspan="2">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Observed Variable
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+Continuous
+</th>
+<th style="text-align:left;">
+Categorical
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+Latent
+</td>
+<td style="text-align:left;">
+Continuous
+</td>
+<td style="text-align:left;">
+Factor Analysis
+</td>
+<td style="text-align:left;">
+Latent Trait Analysis, Item Response Theory
+</td>
+</tr>
+<tr>
+<td style="text-align:left;font-weight: bold;">
+Variable
+</td>
+<td style="text-align:left;">
+Categorical
+</td>
+<td style="text-align:left;">
+Latent Profile Analysis, Mixture Model
+</td>
+<td style="text-align:left;">
+Latent Class Analysis, Cognitive Diagnosis Model
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="partially-cfa" class="section level3">
+<h3>Partially CFA</h3>
+<ul>
+<li><p>One key difference between CFA and EFA is that a CFA model needs to be well specified based on substantive knowledge or hypothesis.</p></li>
+<li><p>In practice, we might have partial knowledge, especially on the loading matrix - Partially Confirmatory Factor Analysis (PCFA)</p>
+<ul>
+<li>Ex: Figure <a href="#fig:pcfa-fig">11</a></li>
+<li>Some loadings can be specified as free to estimate</li>
+<li>For other loadings, it’s unclear if they should be fixed as zero (and removed from the model) or free</li>
+</ul></li>
+<li><p>PCFA actually gives us more freedom during model specification and identification</p>
+<ul>
+<li>refer to Chen (2020; 2021) for more details</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:pcfa-fig"></span>
+<div id="htmlwidget-13" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-13">{"x":{"diagram":"digraph SEM {\n\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       outputorder = edgesfirst,\n       splines=true]\n\nnode [shape = rectangle]\n\ny1 [pos = \"-6,4!\", label = \"y1\"]\ny11[pos = \"-6,5!\", label = \" \",shape=none]\ny2 [pos = \"-4,4!\", label = \"y2\"]\ny22 [pos = \"-4,5!\", label = \" \",shape=none]\ny3[pos = \"-2,4!\", label = \"y3\"]\ny33[pos = \"-2,5!\", label = \" \",shape=none]\ny4[pos = \"0,4!\", label = \"y4\"]\ny44[pos = \"0,5!\", label = \" \",shape=none]\ny5[pos = \"2,4!\", label = \"y5\"]\ny55[pos = \"2,5!\", label = \" \",shape=none]\ny6[pos = \"4,4!\", label = \"y6\"]\ny66[pos = \"4,5!\", label = \" \",shape=none]\ny7[pos = \"6,4!\", label = \"y7\"]\ny77[pos = \"6,5!\", label = \" \",shape=none]\ny8[pos = \"8,4!\", label = \"y8\"]\ny88[pos = \"8,5!\", label = \" \",shape=none]\ny9[pos = \"10,4!\", label = \"y9\"]\ny99[pos = \"10,5!\", label = \" \",shape=none]\ny10[pos = \"12,4!\", label = \"y10\"]\ny1010[pos = \"12,5!\", label = \" \",shape=none]\nF1[pos = \"0,0!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"6,0!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\n\ny11->y1\ny22->y2\ny33->y3\ny44->y4\ny55->y5\ny66->y6\ny77->y7\ny88->y8\ny99->y9\ny1010->y10\nF1->y1\nF1->y2\nF1->y3\nF1->y4\nF1->y5\nF1->y6[style = \"dashed\"]\nF1->y7[style = \"dashed\"]\nF1->y8[style = \"dashed\"]\nF1->y9[style = \"dashed\"]\nF1->y10[style = \"dashed\"]\nF2->y1[style=\"dashed\"]\nF2->y2[style=\"dashed\"]\nF2->y3[style=\"dashed\"]\nF2->y4[style=\"dashed\"]\nF2->y5[style=\"dashed\"]\nF2->y6\nF2->y7\nF2->y8\nF2->y9\nF2->y10\n\n\nF1->F2[dir=both]\ndummy [pos = \"3,0!\", height=1, label=\"\", color=white]\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 11: Partially Confirmatory Factor Analysis
+</p>
+</div>
+</body>
+</div>
+</div>

@@ -1,0 +1,1714 @@
+---
+title: "Structural Model with Latent Variables"
+author: "Jinsong Chen"
+subtitle: "EDUR7103 SEM I Week 3-4"
+output:
+  bookdown::html_document2:
+    # code_folding: hide
+    df_print: kable
+    number_sections: false
+    # theme: spacelab
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+  bookdown::word_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+  bookdown::pdf_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+editor_options:
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+
+body {
+  font-size: 2em;
+}
+
+```
+
+```{r setup, include=F}
+# if (!require(bookdown)) { install.packages("bookdown"); library(bookdown) }
+library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+library(lavaan)
+knitr::opts_chunk$set(echo = T) #print code by default
+options(digits=3)
+```
+
+
+<body>
+
+***
+
+## **Introduction**
+
+* The most general kind of model in SEM is a structural model with latent variables, which is also known as a structural regression (SR) model or full structural equation model (full model)
+  - It can be regarded as a marriage of the path analysis and (confirmatory) factor analysis, and relies on many principles and assumptions under both the PA and CFA
+  - Thus, a full model can be decomposed into a structural and measurement component
+
+* Although the coupling of PA and CFA seems straightforward, a full model with both a structural and measurement component can be very complicated, with different combinations of the exogenous and endogenous variables and/or the observed and latent variables.
+  - From the structural perspective, the focus is to decompose the model-implied correlation or covariance into causal and noncausal effects
+  - From the measurement perspective, the focus is to analyze the latent construct and pattern underlying the observed variables.
+
+
+* As mentioned, the key to fully understand the complexity of the modeling process are model parameters. But notation system with both exogenous and endogenous variables in the full model is tedious.
+
+* Although the idea to distinguish exogenous and endogenous variables is didactically meaningful or heuristic, it often brings more complexity to understand models with latent variables.
+
+* Here we'll adopt a simpler **all $y$ notation** system, which extends the notation system used in CFA with a path matrix:
+  - All observed variables are represented as $y$s
+
+```{r echo=FALSE,warning=FALSE}
+library(kableExtra)
+
+df<-data.frame(
+  c1=c("$y$","$f$","$e$","$u$","$b$","$a$","$c$","$d$"),
+  c2=c("Y","F","E","U","B","A","C","D"),
+  c3=c("$J \\times 1$","$K \\times 1$","$J \\times 1$","$P \\times 1$","$P \\times K$","$J \\times K$","$K \\times K$","$J \\times J$"),
+  c4=c("Indicator or item, observed variable","Factor, latent variable","Measurement error, error variable","Disturbance, error variable","Path coefficient, parameter","Loading, parameter","Factor covariance, parameter", "Error covariance, parameter")
+  )
+header<-c("Symbol", "Matrix Form", "Dimension", "Meaning")
+
+df %>%
+  kbl(booktabs = T,caption = "All $y$ Notation", col.names=header)  %>% 
+  kable_classic(full_width = F, html_font = "Cambria") %>% #,font_size = 20
+  # column_spec(2,italic = T) %>%
+  column_spec(2, bold = T)
+
+```
+
+* We will first consider Standard full models, where all variables in the structural component are latent variables (i.e., factors)
+  - In the second part we'll extend the idea to a mix of latent and observed variables by introducing the concept of single-indicator factor
+
+
+## **Model Specification and Identification**
+
+### General Representation
+
+* In general, we can assume there are $J$ indicators $y$ and $K$ factors $f$. Out of the $K$ factors, $P$ are endogenous. A general representation for the structural and measurement components, respectively, is:
+
+$$
+f_p=\sum_{k=1}^{K}b_{pk}f_{k}+u_p,
+(\#eq:full-str)
+$$
+
+and
+$$
+y_j= \sum_{k=1}^{K} a_{jk} f_{k} + {e}_j.
+(\#eq:full-mea)
+$$
+
+where $b$s and $a$s are the path and loading coefficients, respectively; $u$s and $E$s are the disturbances for the endogenous latent variables and measurement errors of the indicators, respectively; subscripts $p=1...P$ and $j=1...J$.
+
+* Model parameters can be better understood through the matrix form, as:
+
+$$
+\mathbf{F=BF}+\mathbf{U},
+(\#eq:full-str-mat)
+$$
+
+
+$$
+\mathbf{Y} =\mathbf{AF+E}.
+(\#eq:full-mea-mat)
+$$
+
+where $\mathbf{B}$ is the $P \times K$ matrix of path coefficients or direct effects, and $\mathbf{A}$ the $J \times K$ loading matrix.
+
+* Variances and covariances among exogenous latent variables and those among disturbances $\mathbf{U}$ are now represented together in a $K \times K$ covariance matrix $\mathbf{C}$.
+
+* Variances and covariances among measurement errors $\mathbf{E}$ are represented in a $J \times J$
+covariance matrix $\mathbf{D}$.
+
+* All model parameters $\boldsymbol{\omega}$ are contained in four matrices: $\mathbf{B, A,C, D}$
+  - There are a variety of constraints on the matrices for model identification
+
+* Here is an example of standard full model diagram with four latent variables, each with two indicators:
+
+
+```{r srm-4f, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Structural Model with Four Latent Variables"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+y4[pos = '3,3!', label = 'y@_{4}']
+y5[pos = '3,-3!', label = 'y@_{5}']
+y6[pos = '1,-3!', label = 'y@_{6}']
+y7[pos = '-1,-3!', label = 'y@_{7}']
+y8[pos = '-3,-3!', label = 'y@_{7}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '2,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '2,-1!', label = 'f@_{3}',shape=circle]
+F4[pos = '-2,-1!', label = 'f@_{4}',shape=circle]
+D1 [pos = '-3,1!',label='u@_{1}',  shape = none,width = 0.3]
+D2 [pos = '3,1!',label='u@_{2}',  shape = none,width = 0.3]
+dummy [pos = '0,-1!', width=1, height=1, label='', color=white]
+
+F4->F4[dir=both,label = 'c@_{44}',tailport = 'w', headport = 'w'] 
+F3->F4[dir=both,label = 'c@_{34}']
+F3->F3[dir=both,label = 'c@_{33}',tailport = 'e', headport = 'e']
+F2->F1 [label = 'b@_{12}']
+F3->F1 [label = 'b@_{13}']
+F3->F2 [label = 'b@_{23}']
+F4->F1 [label = 'b@_{14}']
+F4->F2 [label = 'b@_{24}']
+D1->F1
+D2->F2
+# D3->F3
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '&lambda;@_{21}']
+F2->y3 [label = '1']
+F2->y4 [label = '&lambda;@_{42}']
+F3->y5 [label = '1']
+F3->y6 [label = '&lambda;@_{63}']
+F4->y7 [label = '1']
+F4->y8 [label = '&lambda;@_{84}']
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none,width = 0.3]
+y2e [pos = '-1,4!', label = 'E@_{2}',shape=none,width = 0.3]
+y3e[pos = '1,4!', label = 'E@_{3}',shape=none,width = 0.3]
+y4e[pos = '3,4!', label = 'E@_{4}',shape=none,width = 0.3]
+y5e[pos = '3,-4!', label = 'E@_{5}',shape=none,width = 0.3]
+y6e[pos = '1,-4!', label = 'E@_{6}',shape=none,width = 0.3]
+y7e[pos = '-1,-4!', label = 'E@_{7}',shape=none,width = 0.3]
+y8e[pos = '-3,-4!', label = 'E@_{8}',shape=none,width = 0.3]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+y7e->y7
+y8e->y8
+# name [pos = '-3,5!', width=1.5, label='(a) Structural Regression Model',shape = plaintext]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* The related equations for the structural part are:
+
+$$
+\begin{bmatrix}  f_{1} \\f_{2} \end{bmatrix} 
+= \begin{bmatrix}
+   0 & b_{12} & b_{13} & b_{14} \\
+   0 & 0 & b_{23} & b_{24}
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2}  \end{bmatrix}.
+  (\#eq:full-4v)
+$$
+
+Note that $\mathbf{B}$ can be decomposed into the endogenous part:
+$$
+\mathbf{B_n}=
+ \begin{bmatrix}
+   0 & b_{12} \\
+   0 & 0 
+ \end{bmatrix}
+$$
+and exogenous part:
+$$
+\mathbf{B_x}=
+ \begin{bmatrix}
+ b_{13} & b_{14} \\
+  b_{23} & b_{24}
+ \end{bmatrix}
+$$
+
+
+* The related equations for the measurement part are:
+
+$$
+\begin{bmatrix}  y_{1} \\ y_{2} \\ y_{3} \\ y_{4}\\ y_{5}\\ y_{6} \\ y_{7}\\ y_{8}\end{bmatrix} 
+= 
+\underbrace{\begin{bmatrix}
+   1 & 0 &  0& 0  \\
+   a_{21} & 0 &  0 & 0  \\
+   0 & 1 &  0 & 0 \\
+   0 & a_{42} &  0& 0 \\
+   0 & 0 &  1 & 0 \\
+   0 & 0 &  a_{63}& 0  \\
+   0 & 0 &  0 & 1 \\
+   0 & 0 & 0 &a_{84}  \\
+ \end{bmatrix}}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  E_{1} \\ E_{2} \\ E_{3} 
+  \\ E_{4}\\ E_{5}\\ E_{6} \\ E_{7} \\ E_{8}\end{bmatrix}. \\
+\mathbf{A}
+$$
+* The loading matrix is sparse (i.e., most elements are zero). Parameters in two other matrices are:
+
+$$
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} & 0 & 0 & 0\\
+   0 & c_{22} & 0& 0 \\
+   0 & 0 & c_{33}& c_{34} \\
+   0 & 0 & c_{34} & c_{44} \\
+ \end{bmatrix}.
+$$
+* Note that $c_{11}$ and $c_{22}$ are the covariances of $u_{1}$ and $u_{2}$, respectively. $\mathbf{D}$ is a diagonal matrix with diagonal terms $(d_{11},d_{22},...,d_{88})$
+
+* The above full model consists of the following measurement and structural models:
+
+```{r cfa-4f, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Measurement Model"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+y4[pos = '3,3!', label = 'y@_{4}']
+y5[pos = '3,-3!', label = 'y@_{5}']
+y6[pos = '1,-3!', label = 'y@_{6}']
+y7[pos = '-1,-3!', label = 'y@_{7}']
+y8[pos = '-3,-3!', label = 'y@_{7}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '2,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '2,-1!', label = 'f@_{3}',shape=circle]
+F4[pos = '-2,-1!', label = 'f@_{4}',shape=circle]
+d34 [pos = '0,-1!', width=1, height=1, label='', color=white]
+d12 [pos = '0,1!', width=1, height=1, label='', color=white]
+d23 [pos = '2,0!', width=1, height=1, label='', color=white]
+d24 [pos = '-2,0!', width=1, height=1, label='', color=white]
+
+F4->F4[dir=both,label = 'c@_{44}',tailport = 'w', headport = 'w'] 
+F3->F4[dir=both,label = 'c@_{34}']
+F3->F3[dir=both,label = 'c@_{33}',tailport = 'e', headport = 'e']
+F2->F2[dir=both,label = 'c@_{22}',tailport = 'e', headport = 'e']
+F1->F1[dir=both,label = 'c@_{11}',tailport = 'w', headport = 'w']
+F2->F1 [dir=both,label = 'c@_{12}',tailport = 'nw', headport = 'ne']
+F3->F1 [dir=both,label = 'c@_{13}']
+F3->F2 [dir=both,label = 'c@_{23}',tailport = 'ne', headport = 'se']
+F4->F1 [dir=both,label = 'c@_{14}']
+F4->F2 [dir=both,label = 'c@_{24}']
+# D1->F1
+# D2->F2
+# D3->F3
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '&lambda;@_{21}']
+F2->y3 [label = '1']
+F2->y4 [label = '&lambda;@_{42}']
+F3->y5 [label = '1']
+F3->y6 [label = '&lambda;@_{63}']
+F4->y7 [label = '1']
+F4->y8 [label = '&lambda;@_{84}']
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none,width = 0.3]
+y2e [pos = '-1,4!', label = 'E@_{2}',shape=none,width = 0.3]
+y3e[pos = '1,4!', label = 'E@_{3}',shape=none,width = 0.3]
+y4e[pos = '3,4!', label = 'E@_{4}',shape=none,width = 0.3]
+y5e[pos = '3,-4!', label = 'E@_{5}',shape=none,width = 0.3]
+y6e[pos = '1,-4!', label = 'E@_{6}',shape=none,width = 0.3]
+y7e[pos = '-1,-4!', label = 'E@_{7}',shape=none,width = 0.3]
+y8e[pos = '-3,-4!', label = 'E@_{8}',shape=none,width = 0.3]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+y5e->y5
+y6e->y6
+y7e->y7
+y8e->y8
+# name [pos = '-3,5!', width=1.5, label='(a) Structural Regression Model',shape = plaintext]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+  
+```{r pa-4f, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Structrual Model"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+ay_1 [pos = '-2,2!',label='f@_{1}']
+ay_4 [pos = '-2,0!',label='f@_{4}']
+ay_2 [pos = '0,2!',label='f@_{2}']
+ay_3 [pos = '0,0!',label='f@_{3}']
+aD_2 [pos = '1,2!',label='u@_{2}', shape = none,width = 0.3]
+aD_1 [pos = '-3,2!',label='u@_{1}',  shape = none,width = 0.3]
+
+ay_2->ay_1 [label = 'b@_{12}']
+ay_3->ay_1 [label = 'b@_{13}']
+ay_4->ay_1 [label = 'b@_{14}']
+ay_3->ay_2 [label = 'b@_{23}']
+ay_4->ay_2 [label = 'b@_{24}']
+aD_1->ay_1
+aD_2->ay_2
+ay_3->ay_4[dir = both,tailport = 's', headport = 's',label='c@_{34}']
+adummy [pos = '-1,-0.2!', width=1, height=1, label='', color=white]
+ay_3->ay_3[dir = both,tailport = 'e', headport = 'e',label='c@_{33}']
+ay_4->ay_4[dir = both,tailport = 'w', headport = 'w',label='c@_{44}']
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* If one understands the fundamentals of PA and CFA, there is relatively little new to learn about specification of standard full models because it can be decomposed into two parts, each requiring consideration of basically the same issues as in PA and CFA. For example:
+  - For the measurement component, one can choose standardized factor or reference indicator
+  - For the structural component, the basic type of effects are direct, indirect, spurious and analyzed (the latter two are noncausal)
+
+* It also means that the modeling process can be divided into two steps, with the first step for the measurement component only, and the second step for the full model.
+  - The two-step concept is implemented throughout the modeling process from identification, estimation, evaluation, comparison, and modification.
+
+
+### Model Identification
+
+* Any full model must satisfy the two necessary requirements for identification as any other kind of structural equation model:
+  1. $t$-Rule: the number of observations, which is $u = J (J + 1)/2$ must equal or exceed the number of free parameters $t$, that is, the model degrees of freedom must be at least zero ($df_M \geq 0$);
+  1. each factor must have a scale (i.e., standardized factor or reference indicator). 
+
+* The $t$-rule helps to make sure the model is just- or over-identified. As mentioned above, all model parameters $\boldsymbol{\omega}$, together with constraints for identification, are contained in four matrices: $\mathbf{B, A,C, D}$.
+
+* Based on  the two-step concept, the measurement model is respecified as a CFA model and evaluated for identification.
+ - In Figure \@ref(fig:cfa-4f), for example, $u=8(8 + 1)/2=36$, $t=22$ and $df=14$, which means it is a over-identified model with 14 degree of freedom
+ - Similarly, we need to pay attention to CFA issues such as local or empirical under-identification
+
+* The measurement model is subjected to the same CFA rule that, if a single factor has at least three indicators, the model is identified, and if a model with two or more factors has at least two indicators per factor, the model is identified.
+
+* For the structural part, in addition to the $t$-rule, we should also evaluate if it's a recursive model (e.g., without direct or indirect feedback loop)
+  - One important feature of recursive model is that it's possible to write the endogenous part of the path matrix $\mathbf{B_n}$ as a lower or upper triangle matrix (see Equation \@ref(eq:full-4v)).
+  - Null $\mathbf{B_n}$ rule: when $\mathbf{B_n}=0$ (i.e., no direct effect between any two endogenous factors), the structural is identified
+
+* When both the measurement and structural models are identified, the full model is identified
+  - This is a sufficient but not necessary condition (more discussion later)
+
+
+## **From Estimation to Modification**
+
+* When the full model is identified, the rest of the modeling process can be analyzed together in each step
+
+* For just- or over-identified model, the population covariance matrix can be expressed as a function of the model-implied covariance matrix, namely we have a basic hypothesis $\boldsymbol{\Sigma=\Sigma(\omega)}$
+  - For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)
+  - For over-identified model, we rely on estimation to obtain approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error) and fit statistics
+  - During model estimation, it's the sample covariance matrix $\bf{S}$ that is being approximated with $\boldsymbol{\Sigma(\omega)}$ using specific estimation method, under the assumption of random sampling.
+
+
+* The widely used maximum likelihood (ML) estimation maximizes the likelihood of observing the sample matrix based on an assumption that the observed variables are multivariate-normally distributed, as $\bf{Y} \sim N[0,\boldsymbol{\Sigma}]$.
+  - Statistically, it is equivalent to minimize the discrepancy between $\boldsymbol{\Sigma(\omega)}$ and the $\bf{S}$ through the fitting or discrepancy function:
+
+$$
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(J+K)
+(\#eq:obj-fun),
+$$
+* However complex the mathematics of MLE, the interpretation of parameter estimates is relatively straightforward with both point estimates and standard error to construct interval estimates
+
+* Although usually not a problem when analyzing recursive path models, a converged solution may be inadmissible in ML estimation and other iterative methods.
+  - This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates)
+
+* When the sample covariance matrix $\bf{S}$ is standardized as a correlation matrix $\bf{R}$ with standardized factors, all parameter estimates will be standardized, similar to the standardized coefficients in regression, and is known as the standardized solution
+  - Due to scale invariance, the fitting result remain the same
+  - It's a good practice to report both unstandardized and standardized estimates, since the two can give meaningful information from different perspectives.
+
+
+* The following example covariance matrix will be used for illustration of model estimation and evaluation:
+
+```{r typ-sr-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "")
+fn<-"SEM02.csv"
+# write.csv(dat,fn,row.names=F)
+y<-read.csv(fn)
+COV<-cov(y,use="pairwise.complete.obs")
+# SD<-apply(y,2,sd,na.rm=T)
+is.na(COV) <- upper.tri(COV)
+
+COV %>%
+  kbl(caption = "Sample Covariance Structure S, N = 500",digits = 3)%>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+### Analysis of the Measurement Model
+
+* For the measurement model, model evaluate is more important than estimation, since parameter estimates are usually of little interest at this stage:
+  - The fit statistics is acceptable: $\chi_M^2 (14) =8.367$, $p = .969$, $RMSEA = 0$ with the 90% confidence interval $(0, .023)$, $CFI = 1$, $SRMR = .012$
+
+* When the model fit is problematic, the measurement model can be adjusted based on the Modification Index (MI)
+
+* Similar to CFA, possible modifications of the measurement model include error covariance and adding or removing of cross-loadings.
+  - When there are many indicators, some indicators with poor loadings can be removed, given the removal is not negatively influential to model identification, substantive representation, and fit statistics
+  - Modification indexes in the below table are either cross-loadings or error covariance, and the values are well-below 3.84
+
+```{r mi-ex-tab, echo=FALSE}
+library(kableExtra)
+m<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8'
+
+res<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+mod<-modindices(res,minimum.value=1)
+
+par<- c("$a_{71}$","$a_{81}$","$a_{34}$","$a_{44}$","$d_{13}$","$d_{38}$","$d_{57}$","$d_{67}$")
+
+df<-cbind(par,mod[,4:6])
+colnames(df)<-c("Par","MI","EPC","Std EPC")
+rownames(df)<-NULL
+
+df %>%
+  kbl(caption = "Modification Indexes above 1",digits = 3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+### Analysis of the Full Model
+
+* To evaluate if the full model is appropriate before obtaining the parameter estimate
+  - In this case, the measurement and full models are equivalent models, and the fit statistics are the same: $\chi_M^2 (14) =8.367$, $p = .969$, $RMSEA = 0$ with the 90% confidence interval $(0, .023)$, $CFI = 1$, $SRMR = .012$
+
+* Parameter estimates:
+  - Note the difference of the fixed parameters under the two solutions
+
+```{r est-m0, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+m<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3+b14*f4
+    f2~b23*f3+b24*f4'
+
+res<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{32}$","$a_{42}$","$a_{53}$","$a_{63}$","$a_{74}$","$a_{84}$","$b_{12}$","$b_{13}$","$b_{14}$","$b_{23}$","$b_{24}$","$d_{11}$","$d_{22}$","$d_{33}$","$d_{44}$","$d_{55}$","$d_{66}$","$d_{77}$","$d_{88}$","$c_{11}$","$c_{22}$","$c_{33}$","$c_{44}$","$c_{34}$")
+
+df<-cbind(Par,est[,5:8],est0[,5:8])
+# df<-cbind(Par,df0[-c(1,3,5),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+### Parameter Testing
+
+* The causal effects and noncausal effects in the structural part can be decomposed and compared statistically
+
+* We can adopt Wald test to compare the direct effects (DEs), indirect effects (IEs), and total causal effects (TEs) of $f_3$ and $f_4$ on $f_1$ in Figure \@ref(fig:srm-4f). In the first step, we create constrained parameters for the IE and TE, as:
+  - $IE_1=b_{23}b_{12}$
+  - $IE_2=b_{24}b_{12}$
+  - $TE_1=b_{13}+IE_1$
+  - $TE_2=b_{14}+IE_2$ 
+
+* In the second step, we can setup the associate hypotheses, as:
+  - $H_{DE}: ~b_{13}=b_{14}$
+  - $H_{IE}: ~IE_1=IE_2$
+  - $H_{TE}: ~TE_1=TE_2$  
+
+* In the third step, we re-estimate the model with the same data and new constraints
+  - One can see that most effects are statistically significant
+  - The values of pair effects seem close, but it's difficult to tell if they are significantly different
+
+```{r est-m1, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+m<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3+b14*f4
+    f2~b23*f3+b24*f4
+
+    # constrained par
+    I1 := b23*b12
+    I2 := b24*b12
+    T1 := b13+I1
+    T2 := b14+I2
+'
+
+res<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+
+# fitMeasures(res,c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper","cfi","srmr","aic","bic"), output = "matrix")
+
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+label=c("b13","b14","I1","I2","T1","T2")
+ind<-which(est$label %in% label)
+
+Par<- c("$b_{13}$", "$b_{14}$","$IE_1$","$IE_2$","$TE_1$","$TE_2$")
+df<-cbind(Par,est[ind,5:8],est0[ind,5:8])
+# df<-cbind(Par,df0[-c(6,9,10),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Constrained Parameter Estimates",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Finally, hypotheses testing is conducted with the Wald test statistics:
+  - $H_{DE}: Wald(1)=0.95, ~p=.33$
+  - $H_{IE}: Wald(1)=1.53, ~p=.216$
+  - $H_{TE}: Wald(1)=.0634, ~p=.801$ 
+
+* The null hypotheses that there's no significant difference between the pair effects cannot be rejected 
+
+
+### Model Comparisons
+
+* For the same data or covariance structure, one can specify different models for comparisons, given there is substantive rationale
+  - In addition to Figure \@ref(fig:srm-4f), Figure \@ref(fig:mod-com) presents several model specifications on the structural component
+  - All models in Figure \@ref(fig:mod-com) are nested (i.e., more restricted) within Figure \@ref(fig:srm-4f)
+
+```{r mod-com, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Alternative Model Specifications (only the structural Component is presented)"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+ay_1 [pos = '-2,2!',label='f@_{1}',shape=circle]
+ay_2 [pos = '0,2!',label='f@_{2}',shape=circle]
+ay_3 [pos = '0,0!',label='f@_{3}',shape=circle]
+ay_4 [pos = '-2,0!',label='f@_{4}',shape=circle]
+aD_1 [pos = '-3,2!',label='',  shape = none,width = 0.3]
+aD_2 [pos = '1,2!',label='', shape = none,width = 0.3]
+
+ay_2->ay_1 [label = '']
+ay_3->ay_1 [label = '']
+# ay_4->ay_1 [label = '']
+ay_3->ay_2 [label = '']
+ay_4->ay_2 [label = '']
+aD_1->ay_1
+aD_2->ay_2
+ay_3->ay_4[dir = both,tailport = 's', headport = 's',label='']
+adummy [pos = '-1,-0.2!', width=1, height=0.6, label='', color=white]
+ay_3->ay_3[dir = both,tailport = 'e', headport = 'e',label='']
+ay_4->ay_4[dir = both,tailport = 'w', headport = 'w',label='']
+a [pos = '-2,3!', width=1.5, label='(a)',shape = plaintext]
+
+by_1 [pos = '3,2!',label='f@_{1}',shape=circle]
+by_2 [pos = '5,2!',label='f@_{2}',shape=circle]
+by_3 [pos = '5,0!',label='f@_{3}',shape=circle]
+by_4 [pos = '3,0!',label='f@_{4}',shape=circle]
+bD_1 [pos = '2,2!',label='',   shape = none,width = 0.3]
+bD_2 [pos = '6,2!',label='',  shape = none,width = 0.3]
+
+by_2->by_1 [label = '']
+by_3->by_1 [label = '']
+by_4->by_1 [label = '']
+# by_3->by_2 [label = '']
+by_4->by_2 [label = '']
+bD_1->by_1
+bD_2->by_2
+by_3->by_4[dir = both,tailport = 's', headport = 's',label='']
+bdummy [pos = '4,-0.2!', width=1, height=0.6, label='', color=white]
+by_3->by_3[dir = both,tailport = 'e', headport = 'e',label='']
+by_4->by_4[dir = both,tailport = 'w', headport = 'w',label='']
+b [pos = '3,3!', width=1.5, label='(b)',shape = plaintext]
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+```{r, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+ay_1 [pos = '-2,2!',label='f@_{1}',shape=circle]
+ay_2 [pos = '0,2!',label='f@_{2}',shape=circle]
+ay_3 [pos = '0,0!',label='f@_{3}',shape=circle]
+ay_4 [pos = '-2,0!',label='f@_{4}',shape=circle]
+aD_1 [pos = '-3,2!',label='',  shape = none,width = 0.3]
+aD_2 [pos = '1,2!',label='', shape = none,width = 0.3]
+
+ay_2->ay_1 [label = '']
+ay_3->ay_1 [label = '']
+ay_4->ay_1 [label = '']
+ay_3->ay_2 [label = '']
+# ay_4->ay_2 [label = '']
+aD_1->ay_1
+aD_2->ay_2
+ay_3->ay_4[dir = both,tailport = 's', headport = 's',label='']
+adummy [pos = '-1,-0.2!', width=1, height=0.6, label='', color=white]
+ay_3->ay_3[dir = both,tailport = 'e', headport = 'e',label='']
+ay_4->ay_4[dir = both,tailport = 'w', headport = 'w',label='']
+a [pos = '-2,3!', width=1.5, label='(c)',shape = plaintext]
+
+by_1 [pos = '3,2!',label='f@_{1}',shape=circle]
+by_2 [pos = '5,2!',label='f@_{2}',shape=circle]
+by_3 [pos = '5,0!',label='f@_{3}',shape=circle]
+by_4 [pos = '3,0!',label='f@_{4}',shape=circle]
+bD_1 [pos = '2,2!',label='',   shape = none,width = 0.3]
+bD_2 [pos = '6,2!',label='',  shape = none,width = 0.3]
+
+by_2->by_1 [label = '']
+# by_3->by_1 [label = '']
+by_4->by_1 [label = '']
+by_3->by_2 [label = '']
+by_4->by_2 [label = '']
+bD_1->by_1
+bD_2->by_2
+by_3->by_4[dir = both,tailport = 's', headport = 's',label='']
+bdummy [pos = '4,-0.2!', width=1, height=0.6, label='', color=white]
+by_3->by_3[dir = both,tailport = 'e', headport = 'e',label='']
+by_4->by_4[dir = both,tailport = 'w', headport = 'w',label='']
+b [pos = '3,3!', width=1.5, label='(d)',shape = plaintext]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* According  to Table \@ref(tab:fit-com-tab), all models are acceptable based on absolute fit statistics
+
+* For nested models, likelihood ratio or chi-square difference test can be adopted to compare models:
+  - Figure \@ref(fig:srm-4f) vs. Model (a): $\chi_D^2(1)=.4314, ~p=.511$
+  - Figure \@ref(fig:srm-4f) vs. Model (b): $\chi_D^2(1)=17.270, ~p<.001$
+  - Figure \@ref(fig:srm-4f) vs. Model (c): $\chi_D^2(1)=36.899, ~p.001$
+  - Figure \@ref(fig:srm-4f) vs. Model (d): $\chi_D^2(1)=6.177, ~p=0.013$
+
+* Except for Model (a), all other models are significantly different from (i.e. worse than) the original model
+
+
+* If two models are not nested, we can adopt the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC) for model comparisons
+  - Model (a), (b), (c), and (d) are not nested with each other
+  - Based on AIC and BIC (the smaller, the better), Model (a) is still the best model
+
+```{r fit-com-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+options(scipen = 999) # options (scipen = 0)
+# fn<-"SEM02.csv"
+# y<-read.csv(fn)
+
+m<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3+b14*f4
+    f2~b23*f3+b24*f4'
+
+m1<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3
+    f2~b23*f3+b24*f4'
+
+m2<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3+b14*f4
+    f2~b24*f4'
+
+m3<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b13*f3+b14*f4
+    f2~b23*f3'
+
+m4<-'f1=~y1 + y2 
+    f2=~y3 + y4
+    f3=~y5 + y6
+    f4=~y7 + y8
+    f1~b12*f2+b14*f4
+    f2~b23*f3+b24*f4'
+
+sm<-c("m", "m1", "m2","m3","m4")
+len<-length(sm)
+flist<-c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper",
+                  "cfi","srmr","aic","bic")
+df<-NULL
+
+for (i in 1:len){
+  res<-sem(get(sm[i]),sample.cov=cov(y),sample.nobs=nrow(y))
+  tmp<-fitMeasures(res,flist, output = "matrix")
+  df<-cbind(df,tmp)
+}
+colnames(df)<-c("Fig 1","a","b","c","d")
+rownames(df)<-toupper(rownames(df))
+
+
+# 1-pchisq(df[1,2:5]-df[1,1],df=1)
+# df<-format(as.data.frame(df),digits=3,scientific=F)
+
+df %>%
+  kbl(caption = "Fit Indexes for Different Model Specifications",digits=3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Similar to PA, the model can be slightly modified and the original and modified models are nested with each other
+  - Ex: adding a direct path to Models in Figure \@ref(fig:mod-com) becomes Figure \@ref(fig:srm-4f)  
+  - We can apply the same chi-square difference statistic $\chi_D^2$ with a single degree of freedom to compare the original and modified models
+
+***
+
+## **Models with Latent and Observed Structural Variables**
+
+### Model Specification
+
+* In general, the structural component can be mixed with both latent and observed variables. Figure \@ref(fig:srm1-4f) is an example with two factors and two exogenous observed variables.
+
+* One popular type as in the figure is referred as multiple-indicators and multiple-causes (MIMIC) models, in which multiple indicators reflect the underlying factors, and the multiple causes (observed predictors) affect latent variables/factors.
+
+* MIMIC models have the following characteristics:
+  - At the structural part, all endogenous variables are factors
+  - Direct effect between any two factors is not of concern (but their disturbances can be correlated); So to speak, it's a typical CFA model without any exogenous variables
+  - All possible paths (direct effects) of the exogenous variables to factors are considered (completely crossed)
+  - The exogenous variables are usually observed, although they can include factors in some cases
+
+```{r srm1-4f, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="MIMIC"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+y4[pos = '3,3!', label = 'y@_{4}']
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '2,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '2,-1!', label = 'x@_{2}']
+F4[pos = '-2,-1!', label = 'x@_{1}']
+D1 [pos = '-1,1!',label='u@_{1}',  shape = none,width = 0.3]
+D2 [pos = '1,1!',label='u@_{2}',  shape = none,width = 0.3]
+# D3 [pos = '3,-1!',label='u@_{3}',  shape = none,width = 0.3]
+# ay_3->ay_4[dir = both,tailport = 's', headport = 's',label='c@_{34}']
+
+ddummy [pos = '0,1!', width=1, height=1, label='', color=white]
+D1->D2[dir=both,label = '',tailport = 'n', headport = 'n']
+
+dummy [pos = '0,-1!', width=1, height=1, label='', color=white]
+F3->F4[dir=both,label = '']
+
+F4->F4[dir=both,label = '',tailport = 'w', headport = 'w'] 
+F3->F3[dir=both,label = '',tailport = 'e', headport = 'e']
+# F2->F1 [label = '']
+F3->F1 [label = '']
+F3->F2 [label = '']
+F4->F1 [label = '']
+F4->F2 [label = '']
+D1->F1
+D2->F2
+# D3->F3
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '']
+F2->y3 [label = '1']
+F2->y4 [label = '']
+
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none,width = 0.3]
+y2e [pos = '-1,4!', label = 'E@_{2}',shape=none,width = 0.3]
+y3e[pos = '1,4!', label = 'E@_{3}',shape=none,width = 0.3]
+y4e[pos = '3,4!', label = 'E@_{4}',shape=none,width = 0.3]
+# y5e[pos = '2,-4!', label = 'E@_{5}',shape=none,width = 0.3]
+# y6e[pos = '1,-4!', label = 'E@_{6}',shape=none,width = 0.3]
+# y7e[pos = '-1,-4!', label = 'E@_{7}',shape=none,width = 0.3]
+# y8e[pos = '-3,-4!', label = 'E@_{8}',shape=none,width = 0.3]
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* Although it appears different from the standard full model we introduced, the issue can be just addressed by considering the exogenous variables as single-indicator factors:
+  - Note that the loading and measurement error of the single-indicator factor are fixed at one and zero, respectively (i.e., no measurement error)
+  - It's equivalent to set constraints $f_3=y_5$ and $f_4=y_6$
+
+* With the single-indicator factors, we can utilize the same notation and representation of the standard full model, as in Figure \@ref(fig:mimic-4f):
+
+```{r mimic-4f, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="MIMIC"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+# edge [arrowhead = vee]
+# Items
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+y4[pos = '3,3!', label = 'y@_{4}']
+y5[pos = '2,-3!', label = 'y@_{5}']
+y6[pos = '-2,-3!', label = 'y@_{6}']
+
+
+#Factors
+F1[pos = '-2,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '2,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '2,-1!', label = 'f@_{3}',shape=circle]
+F4[pos = '-2,-1!', label = 'f@_{4}',shape=circle]
+D1 [pos = '-1,1!',label='u@_{1}',  shape = none,width = 0.3]
+D2 [pos = '1,1!',label='u@_{2}',  shape = none,width = 0.3]
+
+
+ddummy [pos = '0,1!', width=1, height=1, label='', color=white]
+D1->D2[dir=both,label = 'c@_{12}',tailport = 'n', headport = 'n']
+
+dummy [pos = '0,-1!', width=1, height=1, label='', color=white]
+F3->F4[dir=both,label = 'c@_{34}']
+
+F4->F4[dir=both,label = 'c@_{44}',tailport = 'w', headport = 'w'] 
+F3->F3[dir=both,label = 'c@_{33}',tailport = 'e', headport = 'e']
+# F2->F1 [label = 'b@_{12}']
+F3->F1 [label = 'b@_{13}']
+F3->F2 [label = 'b@_{23}']
+F4->F1 [label = 'b@_{14}']
+F4->F2 [label = 'b@_{24}']
+D1->F1
+D2->F2
+
+
+#Loadings
+F1->y1 [label = '1']
+F1->y2 [label = '&lambda;@_{21}']
+F2->y3 [label = '1']
+F2->y4 [label = '&lambda;@_{42}']
+F3->y5 [label = '1']
+F4->y6 [label = '1']
+
+#Errors
+y1e[pos = '-3,4!', label = 'E@_{1}',shape=none,width = 0.3]
+y2e [pos = '-1,4!', label = 'E@_{2}',shape=none,width = 0.3]
+y3e[pos = '1,4!', label = 'E@_{3}',shape=none,width = 0.3]
+y4e[pos = '3,4!', label = 'E@_{4}',shape=none,width = 0.3]
+# y5e[pos = '2,-4!', label = '0',shape=none,width = 0.3]
+# y6e[pos = '-2,-4!', label = '0',shape=none,width = 0.3]
+
+
+y1e->y1
+y2e->y2
+y3e->y3
+y4e->y4
+# y5e->y5
+# y6e->y6
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* In equation form, we have:
+
+$$
+\begin{bmatrix}  f_{1} \\f_{2} \end{bmatrix} 
+= \begin{bmatrix}
+   0 & 0 & b_{13} & b_{14} \\
+   0 & 0 & b_{23} & b_{24}
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2}  \end{bmatrix},
+$$
+
+and:
+
+$$
+\begin{bmatrix}  y_{1} \\ y_{2} \\ y_{3} \\ y_{4}\\ y_{5}\\ y_{6} \end{bmatrix} = 
+\begin{bmatrix}
+   1 & 0 &  0 & 0  \\
+   a_{21} & 0 &  0 & 0  \\
+   0 & 1 &  0 & 0 \\
+   0 & a_{42} &  0 & 0 \\
+   0 & 0 &  1 & 0\\
+   0 & 0 &  0 & 1 \\
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  E_{1} \\ E_{2} \\ E_{3} 
+  \\ E_{4}\\ E_{5}\\ E_{6} \end{bmatrix}.
+$$
+
+with:
+
+$$
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} & c_{12} & 0 & 0\\
+   c_{12} & c_{22} & 0& 0 \\
+   0 & 0 & c_{33}& c_{34} \\
+   0 & 0 & c_{34} & c_{44} \\
+ \end{bmatrix}.
+$$
+and $\mathbf{D}$ is a diagonal matrix with diagonal terms $(D_{11},d_{22},...,d_{44})$
+
+
+### Model Identification
+
+* For MIMIC models, the path coefficients of endogenous factors $\mathbf{B}=0$, which is equivalent to the Null $\mathbf{B}$ rule under PA. Thus, the structural component is identified
+
+* However, identification of the measurement component can be tricky due to the single-indicator factor, and the two-step rule might not work.
+
+* Ex: Figure \@ref(fig:sing-full) is a just-identified model with single-indicator factors. However, its measurement model in Figure \@ref(fig:sing-meas) is under-identified ($df=-1$)
+
+```{r sing-full, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Identified Full Model with Single-Indicator Factors"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+# y1e[pos = '-3,4!', label = '',shape=none,width = 0.5]
+y2e [pos = '-1,4!', label = '',shape=none,width = 0.5]
+# y3e[pos = '1,4!', label = '',shape=none,width = 0.5]
+
+F1[pos = '-3,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '-1,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '1,1!', label = 'f@_{3}',shape=circle]
+F1->F1[dir=both,label = '',tailport = 'w', headport = 'w'] # &#x3D5
+D1 [pos = '-1,0!',label='',  shape = none,width = 0.3]
+D2 [pos = '1,0!',label='',  shape = none,width = 0.3]
+
+F1->F2
+F2->F3
+F1->y1 [label = '1']
+F2->y2 [label = '1']
+F3->y3 [label = '1']
+D1->F2
+D2->F3
+
+y2e->y2
+
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+```{r sing-meas, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Under-identified Measurement Model with Single-Indicator Factors"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+y1 [pos = '-3,3!', label = 'y@_{1}']
+y2 [pos = '-1,3!', label = 'y@_{2}']
+y3[pos = '1,3!', label = 'y@_{3}']
+# y1e[pos = '-3,4!', label = '',shape=none,width = 0.5]
+y2e [pos = '-1,4!', label = '',shape=none,width = 0.5]
+# y3e[pos = '1,4!', label = '',shape=none,width = 0.5]
+
+#Factors
+F1[pos = '-3,1!', label = 'f@_{1}',shape=circle]
+F2[pos = '-1,1!', label = 'f@_{2}',shape=circle]
+F3[pos = '1,1!', label = 'f@_{3}',shape=circle]
+F1->F1[dir=both,label = '',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '',tailport = 'w', headport = 'w']
+F3->F3[dir=both,label = '',tailport = 'w', headport = 'w']
+F1->F2[dir=both,label = '',tailport = 's', headport = 's']
+F1->F3[dir=both,label = '',tailport = 's', headport = 's']
+F2->F3[dir=both,label = '',tailport = 's', headport = 's']
+dummy [pos = '-2,1!', height=1.5, label='', color=white]
+dummy1 [pos = '0,1!', height=1.5, label='', color=white]
+# dummy2 [pos = '-.9,1!', height=2.5, label='', color=white]
+
+#Loadings
+F1->y1 [label = '1']
+F2->y2 [label = '1']
+F3->y3 [label = '1']
+y2e->y2
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+### Model Evaluation and Estimation
+
+
+* Following is the observed covariance structure for the MIMIC model in Figure \@ref(fig:mimic-4f)
+
+```{r mimic-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "")
+fn<-"SEM03.csv"
+# write.csv(dat,fn,row.names=F)
+y<-read.csv(fn)
+COV<-cov(y,use="pairwise.complete.obs")
+# SD<-apply(y,2,sd,na.rm=T)
+is.na(COV) <- upper.tri(COV)
+
+COV %>%
+  kbl(caption = "Sample Covariance Structure S, N = 500",digits = 3)%>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Fit evaluation is acceptable: $\chi_M^2 (14) =5.496$, $p = .358$, $RMSEA = .014$ with the 90% confidence interval $(0, .065)$, $CFI = 1$, $SRMR = .013$
+
+* Parameter estimates:
+  - The disturbances of the two factors are not correlated (i.e., $c_{12}$ is insignificant)
+
+```{r est-mimic, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+m<-'th1=~y1 + y2 
+    th2=~y3 + y4
+    th3=~1*y5
+    th4=~1*y6
+    y5 ~~ 0*y5
+    y6 ~~ 0*y6
+
+    th1~b13*th3+b14*th4
+    th2~b23*th3+b24*th4'
+
+fit<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+est<-parameterEstimates(fit)
+est0<-standardizedSolution(fit, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{32}$","$a_{42}$","$b_{13}$","$b_{14}$","$b_{23}$","$b_{24}$","$d_{11}$","$d_{22}$","$d_{33}$","$d_{44}$","$c_{11}$","$c_{22}$","$c_{33}$","$c_{44}$","$c_{34}$","$c_{12}$")
+
+df0<-cbind(est[,5:8],est0[,5:8])
+df<-cbind(Par,df0[-c(5:8),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+### Cause Indicators
+
+* Observed variables of measurement models are usually represented as effect (reflective) indicators that are presumed to be caused by underlying factors and their measurement errors.
+
+* The specification of observed variables as cause (formative) indicators reflects a different assumption about directionality—that the factor is affected by its indicators, instead of the other way around.
+
+* It is theoretically possible to specify that all indicators of a factor are cause indicators rather than effect indicators.
+  - For instance, indicators such as education, income, and occupational prestige could all be causes of a socioeconomic (SES) factor instead of its effects.
+  
+* However, models with only cause indicators can be under-identified:
+  - In Figure \@ref(fig:cause-ind), $df=-4$
+  
+* One solution is to convert the factor to a composite (sum) of the indicators without any error term, and the indicators are known as composite indicators
+  - The weights for individual indicators can be equal (e.g., 1) or unknown and estimated from the data
+
+```{r cause-ind, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="A Factor with All Cause Indicators"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+# y1 [pos = '-3,3!', label = 'y@_{1}']
+y1 [pos = '-1,3!', label = 'f@_{1}',shape=circle]
+# y3[pos = '1,3!', label = 'y@_{3}']
+# y1e[pos = '-3,4!', label = '',shape=none,width = 0.5]
+y1e [pos = '-1,4!', label = '',shape=none,width = 0.5]
+# y3e[pos = '1,4!', label = '',shape=none,width = 0.5]
+
+#Factors
+F1[pos = '-3,1!', label = 'x@_{1}']
+F2[pos = '-1,1!', label = 'x@_{2}']
+F3[pos = '1,1!', label = 'x@_{3}']
+F1->F1[dir=both,label = '',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '',tailport = 'w', headport = 'w']
+F3->F3[dir=both,label = '',tailport = 'w', headport = 'w']
+F1->F2[dir=both,label = '',tailport = 's', headport = 's']
+F1->F3[dir=both,label = '',tailport = 's', headport = 's']
+F2->F3[dir=both,label = '',tailport = 's', headport = 's']
+dummy [pos = '-2,0.8!', height=1, label='', color=white]
+dummy1 [pos = '0,0.8!', height=1, label='', color=white]
+# dummy2 [pos = '-.9,1!', height=2.5, label='', color=white]
+
+#Loadings
+F1->y1 [label = '']
+F2->y1 [label = '']
+F3->y1 [label = '']
+y1e->y1
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* Another solution is to introduce effect indicators to the factor(s), turning it into a MIMIC model, per se, as shown in Figure \@ref(fig:cause-eff-ind) ($df=2$):
+  - However, substantive rationale is needed for the effect indicators
+
+```{r cause-eff-ind, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="A Factor with All Cause Indicators"}
+
+# par(mar = c(.1, .1, .1, .1))
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+y1 [pos = '-2,4!', label = 'y@_{1}']
+y2[pos = '0,4!', label = 'y@_{2}']
+t1 [pos = '-1,3!', label = 'f@_{1}',shape=circle]
+d1 [pos = '-2,3!', label = '',shape=none,width = 0.5]
+y1e[pos = '-3,4!', label = '',shape=none,width = 0.5]
+y2e[pos = '1,4!', label = '',shape=none,width = 0.5]
+
+#Factors
+F1[pos = '-3,1!', label = 'x@_{1}']
+F2[pos = '-1,1!', label = 'x@_{2}']
+F3[pos = '1,1!', label = 'x@_{3}']
+F1->F1[dir=both,label = '',tailport = 'w', headport = 'w'] # &#x3D5
+F2->F2[dir=both,label = '',tailport = 'w', headport = 'w']
+F3->F3[dir=both,label = '',tailport = 'w', headport = 'w']
+F1->F2[dir=both,label = '',tailport = 's', headport = 's']
+F1->F3[dir=both,label = '',tailport = 's', headport = 's']
+F2->F3[dir=both,label = '',tailport = 's', headport = 's']
+dummy [pos = '-2,.9!', height=1, label='', color=white]
+dummy1 [pos = '0,.9!', height=1, label='', color=white]
+# dummy2 [pos = '-.9,1!', height=2.5, label='', color=white]
+
+#Loadings
+F1->t1 [label = '']
+F2->t1 [label = '']
+F3->t1 [label = '']
+d1->t1
+t1 -> y1[label = '1']
+t1 -> y2
+y1e->y1
+y2e->y2
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+### Higher-order and Bifactor Models
+
+* In a CFA model with multiple factors, it's possible to hypothesize that the covariance structure of the factors is explained by higher-order factors.
+  - The second-order factors are cause with the first-order factors as their effect and sole (direct) indicators (i.e., no observed variable as a direct indicator)
+  - The first-order factors are cause of the observed variables and indicators of the second-order factors at the same time; as indicators, they are also subject to measurement errors
+  - The higher-order part is also subject to similar identification rules (e.g., three indicators for a single factor) and standardized options
+  
+* Ex: In Figure \@ref(fig:ho-cfa-fig), the variation among the three first-order factors is caused by a common second-order factor and each factor's measurement error (uniqueness)
+  - Note that, when there are only two first-order factors, both higher-order loadings should be fixed at one; otherwise, the model is locally under-identified
+  - Alternatively, one loading can be freely estimated while fixing the variance of the second-order factor as one - similar to the standardized factor option
+    + But variance of first-order factors cannot be fixed since they are dependent variables now
+
+
+```{r ho-cfa-fig, echo=FALSE, fig.align='center', fig.cap="Standard Higher-Order Model", message=FALSE, warning=FALSE, cache=FALSE}
+
+par(mar = c(0, 0, 0, 0))
+plot1<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+by1 [pos = '4,3!', label = 'y@_{1}']
+by2 [pos = '5,3!', label = 'y@_{2}']
+by3[pos = '6,3!', label = 'y@_{3}']
+by4[pos = '7,3!', label = 'y@_{4}']
+by5[pos = '8,3!', label = 'y@_{5}']
+by6[pos = '9,3!', label = 'y@_{6}']
+by7[pos = '10,3!', label = 'y@_{7}']
+by8[pos = '11,3!', label = 'y@_{8}']
+by9[pos = '12,3!', label = 'y@_{9}']
+
+#Factors
+bF1[pos = '5,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '8,1!', label = 'f@_{2}',shape=circle]
+bF3[pos = '11,1!', label = 'f@_{3}',shape=circle]
+bF4[pos = '8,-1!', label = 'f@_{4}',shape=circle]
+bF4->bF1 [label = '1']
+bF4->bF2 [label = '']
+bF4->bF3 [label = '']
+bF4->bF4[dir=both,label = '',tailport = 's', headport = 's']
+
+bf1e[pos = '6,1!', label = '',shape=none,width = 0.]
+bf2e[pos = '9,1!', label = '',shape=none,width = 0.2]
+bf3e[pos = '12,1!', label = '',shape=none,width = 0.2]
+bf1e->bF1 [label = '']
+bf2e->bF2 [label = '']
+bf3e->bF3 [label = '']
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF2->by4 [label = '1']
+bF2->by5 [label = '']
+bF2->by6 [label = '']
+bF3->by7 [label = '1']
+bF3->by8 [label = '']
+bF3->by9 [label = '']
+
+# bF2->by3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+by1e[pos = '4,4!', label = '',shape=none]
+by2e[pos = '5,4!', label = '',shape=none]
+by3e[pos = '6,4!', label = '',shape=none]
+by4e[pos = '7,4!', label = '',shape=none]
+by5e[pos = '8,4!', label = '',shape=none]
+by6e[pos = '9,4!', label = '',shape=none]
+by7e[pos = '10,4!', label = '',shape=none]
+by8e[pos = '11,4!', label = '',shape=none]
+by9e[pos = '12,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+by7e->by7
+by8e->by8
+by9e->by9
+}")
+
+plot1
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* The higher-order CFA is actually a special case of the bifactor model in Figure \@ref(fig:bifactor-fig). Bifactor models are potentially applicable when
+  (a) there is a general factor that is hypothesized to account for the commonality of the items;
+  (b) there are multiple domain specific factors, each of which is hypothesized to account for the unique influence of the specific domain over and above the general factor;
+  (c) researchers may be interested in the domain specific factors as well as the common factor that is of focal interest.
+  
+* In canonical bifactor model, the relations among the general and domain specific factors are assumed to be orthogonal, as the domain specific factors are related to the contribution that is over and above the general factor.
+
+```{r bifactor-fig, echo=FALSE, fig.align='center', message=FALSE, warning=FALSE, cache=FALSE, fig.cap="Bifactor Model"}
+
+# par(mar = c(0, 0, 0, 0))
+plot2<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+by1 [pos = '4,3!', label = 'y@_{1}']
+by2 [pos = '5,3!', label = 'y@_{2}']
+by3[pos = '6,3!', label = 'y@_{3}']
+by4[pos = '7,3!', label = 'y@_{4}']
+by5[pos = '8,3!', label = 'y@_{5}']
+by6[pos = '9,3!', label = 'y@_{6}']
+by7[pos = '10,3!', label = 'y@_{7}']
+by8[pos = '11,3!', label = 'y@_{8}']
+by9[pos = '12,3!', label = 'y@_{9}']
+
+#Factors
+bF3[pos = '5,1!', label = 'f@_{1}',shape=circle]
+bF1[pos = '8,1!', label = 'f@_{2}',shape=circle]
+bF2[pos = '11,1!', label = 'f@_{3}',shape=circle]
+bF1->bF1[dir=both,label='',tailport = 's', headport = 's'] # &#x3D5
+bF2->bF2[dir=both,label='',tailport = 's', headport = 's']
+bF3->bF3[dir=both,label='',tailport = 's', headport = 's']
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF1->by4 [label = '']
+bF1->by5 [label = '']
+bF1->by6 [label = '']
+bF1->by7 [label = '']
+bF1->by8 [label = '']
+bF1->by9 [label = '']
+bF2->by7 [label = '1']
+bF2->by8 [label = '']
+bF2->by9 [label = '']
+bF3->by1 [label = '1']
+bF3->by2 [label = '']
+bF3->by3 [label = '']
+
+#Errors
+by1e[pos = '4,4!', label = '',shape=none]
+by2e [pos = '5,4!', label = '',shape=none]
+by3e[pos = '6,4!', label = '',shape=none]
+by4e[pos = '7,4!', label = '',shape=none]
+by5e[pos = '8,4!', label = '',shape=none]
+by6e[pos = '9,4!', label = '',shape=none]
+by7e[pos = '10,4!', label = '',shape=none]
+by8e[pos = '11,4!', label = '',shape=none]
+by9e[pos = '12,4!', label = '',shape=none]
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+by7e->by7
+by8e->by8
+by9e->by9
+
+}")
+
+plot2
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* For every bifactor model, there is an equivalent full higher-order model with direct effects (factor loadings) from the second-order factor to every indicators, over and above the second-order effect on the lower order factors (see Figure \@ref(fig:ho-full-fig)).
+  - A standard second-order model is a special case (constrained version) of the full higher-order model with the direct effects from the second-order factor to the observed variables eliminated. In other words, the standard higher-order model is more restricted than the full higher-order model, which is equivalent to the bifactor model.
+  - Consequently, the standard higher-order model is nested within the bifactor model (A is nested in B, B is equal to C, so that A is nested in C).
+  - Thus, likelihood ratio test can be given to compare bifactor and higher-order models
+
+
+```{r ho-full-fig, echo=FALSE, fig.align='center', fig.cap="Full Higher-Order Model", message=FALSE, warning=FALSE, cache=FALSE}
+
+par(mar = c(0, 0, 0, 0))
+plot1<-grViz("digraph model {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       fontsize = 12,
+       splines=true]
+node [shape = rectangle]
+
+by1 [pos = '4,3!', label = 'y@_{1}']
+by2 [pos = '5,3!', label = 'y@_{2}']
+by3[pos = '6,3!', label = 'y@_{3}']
+by4[pos = '7,3!', label = 'y@_{4}']
+by5[pos = '8,3!', label = 'y@_{5}']
+by6[pos = '9,3!', label = 'y@_{6}']
+by7[pos = '10,3!', label = 'y@_{7}']
+by8[pos = '11,3!', label = 'y@_{8}']
+by9[pos = '12,3!', label = 'y@_{9}']
+
+#Factors
+bF1[pos = '5,1!', label = 'f@_{1}',shape=circle]
+bF2[pos = '8,1!', label = 'f@_{2}',shape=circle]
+bF3[pos = '11,1!', label = 'f@_{3}',shape=circle]
+bF4[pos = '8,-1!', label = 'f@_{4}',shape=circle]
+bF4->bF1 [label = '1']
+bF4->bF2 [label = '']
+bF4->bF3 [label = '']
+bF4->bF4[dir=both,label = '',tailport = 's', headport = 's']
+
+bf1e[pos = '6,1!', label = '',shape=none,width = 0.]
+bf2e[pos = '9,1!', label = '',shape=none,width = 0.2]
+bf3e[pos = '12,1!', label = '',shape=none,width = 0.2]
+bf1e->bF1 [label = '']
+bf2e->bF2 [label = '']
+bf3e->bF3 [label = '']
+
+#Loadings
+bF1->by1 [label = '1']
+bF1->by2 [label = '']
+bF1->by3 [label = '']
+bF2->by4 [label = '1']
+bF2->by5 [label = '']
+bF2->by6 [label = '']
+bF3->by7 [label = '1']
+bF3->by8 [label = '']
+bF3->by9 [label = '']
+
+# bF2->by3 [label = '']
+# F1->y4 [label = '']
+
+#Errors
+by1e[pos = '4,4!', label = '',shape=none]
+by2e[pos = '5,4!', label = '',shape=none]
+by3e[pos = '6,4!', label = '',shape=none]
+by4e[pos = '7,4!', label = '',shape=none]
+by5e[pos = '8,4!', label = '',shape=none]
+by6e[pos = '9,4!', label = '',shape=none]
+by7e[pos = '10,4!', label = '',shape=none]
+by8e[pos = '11,4!', label = '',shape=none]
+by9e[pos = '12,4!', label = '',shape=none]
+
+by1e->by1
+by2e->by2
+by3e->by3
+by4e->by4
+by5e->by5
+by6e->by6
+by7e->by7
+by8e->by8
+by9e->by9
+
+
+
+bF4->by1 [label = '1']
+bF4->by2 [label = '']
+bF4->by3 [label = '']
+bF4->by4 [label = '']
+bF4->by5 [label = '']
+bF4->by6 [label = '']
+bF4->by7 [label = '']
+bF4->by8 [label = '']
+bF4->by9 [label = '']
+
+}")
+
+plot1
+# grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* An example to compare the above higher-order CFA and bifactor model:
+
+```{r bifactor-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "")
+fn<-"SEM04.csv"
+# write.csv(dat,fn,row.names=F)
+y<-read.csv(fn)
+COV<-cov(y,use="pairwise.complete.obs")
+# SD<-apply(y,2,sd,na.rm=T)
+is.na(COV) <- upper.tri(COV)
+
+COV %>%
+  kbl(caption = "Sample Covariance Structure S, N = 500",digits = 3)%>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Fit statistics for both models are acceptable, the more complex bifactor model is significantly better:
+  - Bifactor: $\chi_M^2 (21) =22.770$, $p = .356$, $RMSEA = .013$ with the 90% confidence interval $(0, .041)$, $CFI = .999$, $SRMR = .017$, $AIC=8223$, $AIC=8324$
+  - HO CFA: $\chi_M^2 (24) =48.218$, $p = .002$, $RMSEA = .045$ with the 90% confidence interval $(.026, .063)$, $CFI = .985$, $SRMR = .027$, $AIC=8243$, $AIC=8331$
+  - $\chi_D^2(7)=25.448, ~p<.001$
+
+* Parameter estimates for the bifactor model:
+  - The standardized solution makes more sense to inform how the indicators load on the general and domain-specific factors
+
+```{r est-bifactor, echo=FALSE,message=FALSE, warning=FALSE, cache=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+m<-'t1=~y1 + y2 + y3 + y4 + y5 + y6 + y7 + y8 + y9
+    t2 =~ y1 +y2 + y3 
+    t3 =~ y7 + y8 + y9'
+    # 
+    # t1 ~~ 0*t3
+    # t2 ~~ 0*t3
+
+fit<-cfa(m,sample.cov=cov(y),sample.nobs=nrow(y),orthogonal=TRUE)
+# fitMeasures(fit,c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper","cfi","srmr","aic","bic"), output = "matrix")
+
+est<-parameterEstimates(fit)
+est0<-standardizedSolution(fit, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{31}$","$a_{41}$","$a_{51}$","$a_{61}$","$a_{71}$","$a_{81}$","$a_{91}$","$a_{12}$","$a_{22}$","$a_{32}$","$a_{73}$","$a_{83}$","$a_{93}$")
+
+df0<-cbind(est[,4:7],est0[,4:7])
+df<-cbind(Par,df0[-c(16:30),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates for the Bifactor Model",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Parameter estimates for the higher-order CFA model:
+  - There is a negative variance estimate (i.e., $c_{22}$, which is a Heywood case and suggests the model is likely misspecified.
+
+```{r est-HO-CFA, echo=FALSE,message=FALSE, warning=FALSE, cache=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+m1<-'t1 =~ y1 + y2 + y3
+    t2 =~ y4 + y5 + y6
+    t3 =~ y7 + y8 + y9
+    t4 =~ b41*t1 + b42*t2 + b43*t3'
+
+fit1<-cfa(m1,sample.cov=cov(y),sample.nobs=nrow(y))
+
+est<-parameterEstimates(fit1)
+est0<-standardizedSolution(fit1, type = "std.all")
+Par<- c("$a_{11}$","$a_{21}$","$a_{31}$","$a_{42}$","$a_{52}$","$a_{62}$","$a_{73}$","$a_{83}$","$a_{93}$","$b_{41}$","$b_{42}$","$b_{43}$","$c_{11}$","$c_{22}$","$c_{33}$","$c_{44}$")
+
+df0<-cbind(est[,5:8],est0[,5:8])
+df<-cbind(Par,df0[-c(13:21),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates for the Bifactor Model",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+## **Other Issues**
+
+### Sample size
+
+* As the same as for other kinds of statistical methods, SEM results derived within larger samples have less sampling error than within smaller samples. Although determination of appropriate sample size is a critical issue in SEM, unfortunately, there is no consensus in the literature regarding what would be the appropriate sample size for SEM.
+
+* SEM is basically a large-sample technique. Many researchers consider $N=200$ as the minimum sample size, although it's usually agreed that the number can be smaller (e.g., 150) for simple CFA or path models.
+
+* Another consideration is model complexity. That is, more complex models with more parameters require larger samples than more parsimonious models in order for the estimates to be comparably stable.
+
+* Although there are no absolute standards in the literature about the relation between sample size and model complexity, a desirable goal is to have the ratio of the number of cases to the number of free parameters be a 10:1 ratio at least.
+  - Thus, a model with 20 parameters should have a minimum sample size of 200 cases.
+  
+* In practice, it would be sensible to meet both criteria when designing a research project. Sample size is also highly related to the statistical power of rejection of the null hypothesis when it is false.
+  - For a type II error of $b$, the corresponding statistical power is $1 − b$
+  - For a model with smaller degree of freedom, larger sample size is needed to achieve the same level of power
+  
+* On the other hand, we need to be careful to interpret parameter estimates and testing when the sample size is large. Most of the test statistics described are sensitive to sample size; thus, even a trivial change in overall model fit due to adding or dropping a parameter could be statistically significant within a large sample.
+
+* In addition to noting the statistical significance of a parameter estimate or modification index, the researcher should also consider the substantive meaning of the value.
+  - For instance, a factor loading or direct effect of .1 can be statistically significant based on either estimation or the modification index. However, it might just reflect the large sample size, and is substantively trivial.
+
+
+### Reporting Full Model Analysis
+
+* One important goal of reporting is to ensure others can replicate your results and agree with your findings, even without using the same software. The following information and procedures are suggested in official report:
+  - Model specification: Path diagram and/or structural equations with the parameter matrices
+    + when multiple models are compared, provide specification for each one
+    + Explanation of possible identification issue preferred
+    + Substantive definitions of indicators and factors, preferably using tables
+  - Summary statistics such as sample size, sample covariance structure, mean, and skewness and kurtosis
+  - For model evaluation, these fit statistics are suggested (likely with others): $\chi_M^2$ with $df$ and $p$-value; $RMSEA$ with the 90% CI; $CFI$; $SRMR$; $AIC$; $BIC$
+  - For model estimation: parameter estimates (both unstd. and std.) with SE, $z$-scores and $p$-values
+    + Explanation of parameter estimates preferred, e.g., if the magnitude of important estimates (e.g., loadings, direct effects) are substantively meaningful.
+    + In some cases, especially due to large sample size, parameter estimates can be statistically significant but substantively trivial (e.g., .1)
+  - For model comparisons, fit statistics for each model needed, plus LR testing for nested models or $AIC$ and $BIC$ comparisons for nonnested models
+  - For model modification, report any adjustments or changes to the original model, with substantive rationale
+  - For parameter testing, report any constrained parameters (e.g., indirect effect or parameter equality) and/or hypotheses testing with the Wald test statistics
+
+
+
+### Topics in SEM II
+
+* Measurement equivalence or invariance
+* multiple-sample CFA and SEM
+* CFA and SEM with categorical data or nonnormal data
+* Robust Estimators for Data with nonignorable Missingness
+* Interaction Effect and Latent Growth Model
+
+</body>

@@ -1,0 +1,1116 @@
+---
+title: "Path Analysis"
+author: "Jinsong Chen"
+subtitle: "EDUR7103 SEM I Week 1-2"
+output:
+  bookdown::html_document2:
+    # code_folding: hide
+    df_print: kable
+    number_sections: false
+    # theme: spacelab
+    toc: true
+    toc_depth: 3
+    toc_float:
+      collapsed: false
+  bookdown::word_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+  bookdown::pdf_document2:
+    df_print: kable
+    number_sections: false
+    toc: true
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+editor_options:
+  chunk_output_type: console
+---
+
+```{css, echo=FALSE}
+
+body {
+  font-size: 2em;
+}
+
+```
+
+```{r setup, include=F}
+# if (!require(bookdown)) { install.packages("bookdown"); library(bookdown) }
+library(DiagrammeR)
+library(DiagrammeRsvg)
+library(rsvg)
+library(lavaan)
+knitr::opts_chunk$set(echo = T) #print code by default
+options(digits=3)
+```
+
+
+<body>
+
+***
+
+## **Introduction**
+
+* Path analysis (PA) is the SEM technique for analyzing structural models with only observed variables (i.e., indicator). Although there are no latent variables (other than the error term), many principles and concepts in PA hold true for more complicated SEM types.
+
+* PA can be viewed as an extension of regression analysis
+  - In regression analysis, the variables are either causes or outcomes, with only direct effects in between; moreover, there can be multiple causes for each outcome, but only one outcome for each cause
+  - In PA, the variables can be causes and outcomes at the same time, with both direct and indirect effects available; moreover, multiple causes and multiple outcomes can coexist
+
+* PA and FA are two building blocks of the SEM family
+  - PA also involves the analysis of the covariance structure among observed variables
+  - In FA, the latent variables or factors are fixed as causes, observed variables are fixed as effects, and the relations among factors are unanalyzed
+  - In PA, the covariance structure is decomposed into causal and noncausal effects based on model specification
+  - The focus is the pre-specified causal effect (unidirectional), rather than the correlation or covariance (bidirectional)
+  - Key terms: Exogenous vs. endogenous variables 
+
+* Exogenous variables are independent variables that *cause* variation of other variables in the model.
+  - The word “exogenous” means “from without (the outside),” and whatever causes exogenous variables are not represented in the model; that is, their causes are unknown or unexplained as far as the model is concerned.
+  - The mathematical symbol is $x$
+
+* Endogenous variables are outcomes or dependent variables that are *effects* produced by the exogenous variables in the model, either directly or indirectly.
+  - The word “endogenous” means “from within,” and every endogenous variable has at least one cause, which are usually placed on the left side of the diagram or right side of the equation.
+  - The variation of the endogenous variables is divided into an explained component and an unexplained component (error terms)
+  - The mathematical symbol is $y$
+  - No matter how many endogenous variables a variable can explain, it becomes an endogenous variable (i.e., with error term) itself once it's explained by any other variable
+
+* Similar to CFA, PA can be understood as a modeling process ranging from model specification, identification, parameter estimation, fit evaluation, model comparisons to potential model modification. 
+  - In an empirical research, specification and identification is part of the research design, while the rest belong to research implementation and analysis.
+  - Model parameters are the key to fully understand the entire modeling process; they are widely used in the equations, diagrams, and tables
+
+* Notation system: **$x$-$y$ notation**
+  - The exogenous and endogenous observed variables are represented as $x$s and $y$s, respectively
+
+```{r echo=FALSE,warning=FALSE}
+library(kableExtra)
+
+df<-data.frame(
+  c1=c("$y$","$x$","$u$","$b$","$g$","$c$","$d$"),
+  c2=c("Y","X","U","B","G","C","D"),
+  c3=c("$P \\times 1$","$Q \\times 1$","$P \\times 1$","$P \\times P$","$P \\times Q$","$Q \\times Q$","$P \\times P$"),
+  c4=c("Endogenous variable","Exogenous variable","Disturbance, error variable","Path coefficient for endogenous variable","Path coefficient for exogenous variable","Exogenous variable covariance", "Disturbance covariance")
+  )
+header<-c("Symbol", "Matrix Form", "Dimension", "Meaning")
+
+df %>%
+  kbl(booktabs = T,caption = "All $y$ Notation", col.names=header)  %>% 
+  kable_classic(full_width = F, html_font = "Cambria") %>% #,font_size = 20
+  # column_spec(2,italic = T) %>%
+  column_spec(2, bold = T)
+
+```
+
+
+## **Model Specification**
+
+* Specification is hypothesis-based and the most important step, because results from later steps assume that the model$—$the researcher's hypotheses$—$are correctly specified.
+  - Misspecification can render all subsequent analyses useless
+  - Meanwhile, it is often necessary to respecify models, and respecification should respect the same principles as specification
+  - Try to make a list of possible (prioritized) changes to the initial model that would be justified according to theory or empirical results and/or prepare to specify multiple models for comparisons
+
+### General Representation
+
+* Following is a general representation of structural equations with observed variables, $Q$ of which are exogenous and $P$ of which are endogenous: 
+
+$$
+y_i=\sum_{p=1}^{P}b_{ip}y_{p}+\sum_{q=1}^{Q}g_{iq}x_q+u_i
+(\#eq:pa-gen)
+$$
+where $b$ and $g$ are the path coefficients of the endogenous and exogenous variables, respectively; $u$ is the error term, which is also referred to as **disturbance**, with the error covariance matrix $\mathbf{D}$, and subscripts $i=1...P$.
+
+* More concisely, the matrix is:
+
+$$
+\mathbf{Y=BY+G X}+\mathbf{U}
+(\#eq:pa-matrix)
+$$
+where $\mathbf{B}$ and $\mathbf{G}$ are the matrices of the path coefficients. 
+
+* The covariance structure of the exogenous variables $\mathbf{C}$ is usually of little interest or unanalyzed. Disturbance $\mathbf{U} \sim N(0,\mathbf{D})$, where $\mathbf{D}$ is the $P \times P$ error covariance matrix.
+  - Although $\mathbf{D}$ is usually diagonal, it can be non-diagonal with correlated disturbances.
+
+* It's assumed that the exogenous variables and disturbances are uncorrelated, $\text{COV}(\mathbf{X,U})=0$
+
+* In model specification the observed variables are assumed to randomly sampled from some defined population. Accordingly, the observed or sample covariance matrix $\mathbf{S}$ asymptotically approaches the population covariance matrix $\mathbf{\Sigma}$.
+  - It means that the two matrices are getting closer to each other with larger sample size
+
+
+* Here is an example of path model diagram with four observed variables (two exogenous vs. two endogenous):
+  
+```{r typ-pa, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Path Model with Four Variables"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!',label='u@_{1}', shape = none,width = 0.3]
+aD_2 [pos = '1,0!',label='u@_{2}',  shape = none,width = 0.3]
+# a [pos = '-2,3!', width=1.5, label='(a) Recursive',shape = plaintext]
+
+aX_1->aY_1 [label = 'g@_{11}']
+aX_1->aY_2 [label = 'g@_{21}']
+aX_2->aY_1 [label = 'g@_{12}']
+aX_2->aY_2 [label = 'g@_{22}']
+aY_1->aY_2 [label = 'b@_{21}']
+aD_1->aY_1
+aD_2->aY_2
+aX_1->aX_2[dir = both,tailport = 'w', headport = 'w',label='c@_{21}']
+adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n',label='c@_{11}']
+aX_2->aX_2[dir = both,tailport = 'n', headport = 'n',label='c@_{22}']
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* $c$s are elements in $\mathbf{C}$, and usually obtained directly from $\mathbf{S}$
+  - They don't need to be estimated per se, but still count as unknown parameters when computing the degree of freedom.
+
+
+* The related structural equations are:
+
+$$
+\begin{bmatrix}  y_{1} \\ y_{2} \\ \end{bmatrix} 
+= \begin{bmatrix}
+   0 & 0 \\
+   b_{21} & 0 \\
+ \end{bmatrix}
+ \begin{bmatrix}  y_{1} \\ y_{2} \\ \end{bmatrix} +
+ \begin{bmatrix}
+   g_{11} & g_{12} \\
+   g_{21} & g_{22} \\
+ \end{bmatrix}
+  \begin{bmatrix}  x_{1} \\ x_{2} \\ \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2} \\ \end{bmatrix}.
+  (\#eq:pa-4v)
+$$
+where
+$$
+ \mathbf{D} = \begin{bmatrix}
+   d_{11} & 0 \\
+   0 & d_{22} \\
+ \end{bmatrix},
+$$
+
+and
+$$
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} & c_{21} \\
+   c_{21} & c_{22} \\
+ \end{bmatrix}.
+$$
+
+* All model parameters are included in four matrices: $\mathbf{B, G, D,C}$
+  - Model parameters link the equation, diagram, and table together; they are the key to fully understand the entire modeling process
+
+### Recursive vs. Nonrecursive
+
+* It's important to distinguish between recursive and nonrecursive models in PA. **Recursive models** are the most straightforward and have two basic features: their disturbances are uncorrelated, and all causal effects are unidirectional.
+  - The model in Figure \@ref(fig:typ-pa) is recursive
+  - One important feature of recursive model is that it's possible to write $\mathbf{B}$ as a lower or upper triangle matrix (e.g., Equation \@ref(eq:pa-4v)).
+
+* **Nonrecursive models** have feedback loops or may have correlated disturbances. Figure \@ref(fig:non-recursive) are two nonrecursive models. The model on the left is nonrecursive because it has a direct feedback loop in which $y_1$ and $y_2$ are specified as both causes and effects of each other ($y_1\leftrightarrows y_2$).
+  - Note that models with indirect feedback loops, such as $y_1\rightarrow y_2 \rightarrow y_3\rightarrow y_1$, are also nonrecursive.
+
+* The model on the right is also considered as nonrecursive because it has a direct effect between the endogenous variables with correlated disturbances between them
+  - Correlated disturbances with direct effect is fine
+  - Although it might seem unusual to specify correlated disturbances, they can be suggested during model respecification or modification (e.g., by the modification index)
+
+
+```{r non-recursive, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Nonrecursive Path Model"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!', label='u@_{1}',  shape = none,width = 0.3]
+aD_2 [pos = '1,0!', label='u@_{2}',  shape = none,width = 0.3]
+# a [pos = '-2,3!', width=1.5, label='(a) Recursive',shape = plaintext]
+adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aY_1 
+aX_1->aY_2 
+aX_2->aY_1 
+aX_2->aY_2 
+aY_1->aY_2
+aY_2:ne->aY_1:se
+aD_1->aY_1
+aD_2->aY_2
+aX_1->aX_2[dir = both,tailport = 'w', headport = 'w']
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n']
+aX_2->aX_2[dir = both,tailport = 'n', headport = 'n']
+
+bX_1 [pos = '3,2!',label='x@_{1}']
+bX_2 [pos = '3,0!',label='x@_{2}']
+bY_1 [pos = '5,2!',label='y@_{1}']
+bY_2 [pos = '5,0!',label='y@_{1}']
+bD_1 [pos = '6,2!',label='u@_{1}',  shape = none,width = 0.3]
+bD_2 [pos = '6,0!',label='u@_{2}',   shape = none,width = 0.3]
+# b [pos = '3,3!', width=1.5, label='(b) Nonrecursive',shape = plaintext]
+bdummy [pos = '3,1!', width=1.5, label='', color=white]
+bX_1->bY_1
+bX_1->bY_2
+bX_2->bY_1
+bX_2->bY_2
+bY_1->bY_2
+# bY_2->bY_1[tailport = 'n', headport = 's']
+bD_1->bY_1
+bD_2->bY_2
+bX_1->bX_2[dir = both,tailport = 'w', headport = 'w']
+bX_1->bX_1[dir = both,tailport = 'n', headport = 'n']
+bX_2->bX_2[dir = both,tailport = 'n', headport = 'n']
+
+bD_1->bD_2[dir=both,label='', splines=curved, tailport = 'e', headport = 'e']
+bdummy1 [pos = '6,1!',  width=1.5,label='', color=white]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* **Nonrecursive models** are more complicated in terms of model identification and estimation, and are rarely used in education and psychology; they will not be covered in this course
+
+### Basic Types of Model and Effects
+
+* There are several basic types of models with associated effects. Direct effect refers to the direct influence of the cause variable (exogenous or endogenous) on the outcome (endogenous). it's the most common type of effect with all free parameters in the $\mathbf{B}$ and $\mathbf{G}$ matrices (see Equation \@ref(eq:pa-gen) or Figure \@ref(fig:typ-pa)).
+
+* Other types can be found in Figure \@ref(fig:indirect):
+  - (a) is the indirect effect, which refers to the indirect influence of the cause variable on the outcome through the intervening variable. It's the product of associated direct effects: $g_{11}b_{21}$
+  - (b) is the spurious effect of the two endogenous variables due to common cause. It's also the product of associated direct effects: $g_{11}g_{21}$
+  - (c) is the unanalyzed effect of correlated causes: $c_{21}$
+  - (d) is the Unanalyzed effect of correlated disturbances: $d_{21}$
+
+* Except for the direct and indirect effects, all other are noncausal. More complicated models are usually combinations of the basic types: In Figure \@ref(fig:typ-pa), we can easily find different types of effects.
+  - There will be multiple effects between two variables if multiple paths exist (more discussion later)
+  - Spurious effect only occurs between endogenous variables
+  - When a path contains both unanalyzed and direct or indirect effects, it is regarded as unanalyzed (e.g., the path containing $x_1$, $x_2$, and $y_2$)
+
+
+```{r indirect, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Basic Path Models"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!', label='',  shape = none,width = 0.3]
+aD_2 [pos = '1,0!', label='',  shape = none,width = 0.3]
+aX_1->aY_1 [label = 'g@_{11}']
+aX_1->aY_2 [label = 'g@_{21}']
+aY_1->aY_2 [label = 'b@_{21}']
+aD_1->aY_1
+aD_2->aY_2
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n',label='']
+a [pos = '-2,3!', width=1.5, label='(a) Indirect',shape = plaintext]
+
+bX_1 [pos = '3,1!',label='x@_{1}']
+bY_1 [pos = '5,2!',label='y@_{1}']
+bY_2 [pos = '5,0!',label='y@_{1}']
+bD_1 [pos = '6,2!',label='',  shape = none,width = 0.3]
+bD_2 [pos = '6,0!',label='',   shape = none,width = 0.3]
+bX_1->bY_1 [label = 'g@_{11}']
+bX_1->bY_2 [label = 'g@_{21}']
+# bY_1->bY_2
+# bY_2->bY_1[tailport = 'n', headport = 's']
+bD_1->bY_1
+bD_2->bY_2
+bX_1->bX_1[dir = both,tailport = 'n', headport = 'n',label='']
+b [pos = '3,3!', width=1.5, label='(b) Spurious',shape = plaintext]
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+```{r correlated, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE}
+
+a<-("digraph PA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,1!',label='y']
+aD_1 [pos = '1,1!', label='',  shape = none,width = 0.3]
+aX_1->aX_2[dir = both,label = 'c@_{21}',tailport = 'w', headport = 'w']
+adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aY_1 [label = 'g@_{11}']
+aX_2->aY_1 [label = 'g@_{12}']
+aD_1->aY_1
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n',label='']
+aX_2->aX_2[dir = both,tailport = 'n', headport = 'n',label='']
+a [pos = '-2,3!', width=1.5, label='(c) Correlated Causes',shape = plaintext]
+
+
+bX_1 [pos = '3,1!',label='x@_{1}']
+bY_1 [pos = '5,2!',label='y@_{1}']
+bY_2 [pos = '5,0!',label='y@_{1}']
+bD_1 [pos = '6,2!',label='',  shape = none,width = 0.3]
+bD_2 [pos = '6,0!',label='',   shape = none,width = 0.3]
+# bdummy [pos = '3,1!', width=1.5, label='', color=white]
+bX_1->bY_1 [label = 'g@_{11}']
+bX_1->bY_2 [label = 'g@_{21}']
+# bY_1->bY_2
+# bY_2->bY_1[tailport = 'n', headport = 's']
+bD_1->bY_1
+bD_2->bY_2
+b [pos = '3,3!', width=1.5, label='(d) Correlated Disturbances',shape = plaintext]
+
+bX_1->bX_1[dir = both,tailport = 'n', headport = 'n',label='']
+bD_1->bD_2[dir=both,label='c@_{21}', splines=curved, tailport = 'e', headport = 'e']
+bdummy1 [pos = '6,1!',  width=1.5,label='', color=white]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+### Model Identification
+
+* A **free parameter** (also referred as unknown parameter) is to be freely estimated by the algorithm based on the sample data (i.e., no constraint).
+  - it includes the path coefficients in $\mathbf{B}$ and $\mathbf{G}$, covariance in $\mathbf{C}$ and disturbances in $\mathbf{C}$
+  - In Equation \@ref(eq:pa-gen), the number of free parameters are 1, 4, 3, and 2 in $\mathbf{B}$, $\mathbf{G}$, $\mathbf{C}$, $\mathbf{C}$, respectively.
+  
+* In contrast, a **fixed parameter** is constrained or specified to equal a constant (e.g., 0 or 1). That is, the algorithm *accepts* this constant as the estimate of the parameter regardless of the data.
+  - Three path coefficients in $\mathbf{B}$ at Equation \@ref(eq:pa-gen) are fixed as zero
+
+* A **constrained parameter** is estimated by the algorithm within some restriction (e.g., equality, inequality, or nonlinear relationship with some other parameters).
+  - In Figure \@ref(fig:typ-pa), we can constrained $g_{11}=g_{22}$ (and the number of free parameter will be one less), and test the equality constraint as a hypothesis.
+
+* As mentioned previously, a statistical model is said to be identified if it is analytically possible to derive a unique solution (i.e., unique estimate of each parameter)
+
+* The similar concepts of under-, just-, or over-identified models apply, with the same $t$-rule ($t \le u$) or degree of freedom $df = u – t \ge 0$
+  - $t$ is the number of free or unknown parameters
+  - $u$ is the number of *unique* elements in the population covariance matrix $\bf{\Sigma}$, which equals $(P+Q)(P+Q + 1)/2$.
+  - In Figure \@ref(fig:typ-pa), for example, $u=4(4 + 1)/2=10$, $t=10$ and $df=0$, which means it is a just-identified model with no degree of freedom
+  - If one set $g_{11}=g_{22}$ or $b_{21}=0$ (i.e., no direct effect between $y_1$ and $y_2$), it becomes an over-identified model with $df=1$  
+  
+* The $t$-rule is still a necessary, but not sufficient, condition for model identification under PA
+  - For nonrecursive models (e.g., with direct feedback loop), they are unidentified even when $df \ge 0$; the rank and order conditions are suggested to figure out the identification status of a nonrecursive model (see Bollen, 1989, pp. 98-103)
+
+* Identification for PA is clear with the following two sufficient (but not necessary) rules:
+  - Recursive rule: Because of their particular characteristics, recursive path models are identified (Bollen, 1989, pp. 95–98)
+  - Null $\mathbf{B}$ rule: when $\mathbf{B}=0$ (i.e., no direct effect between any two endogenous variables), the path model is identified
+
+
+## **Model Estimation and Evaluation**
+
+* For just- or over-identified model, the population covariance matrix $\bf{\Sigma}$ can be expressed as a function of the model-implied covariance matrix $\boldsymbol{\Sigma(\omega)}$, where $\boldsymbol{\omega}$ contains all free parameters in $\mathbf{B, G, D,C}$, namely we have a basic hypothesis $\boldsymbol{\Sigma=\Sigma(\omega)}$
+  - For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)
+  - For over-identified model, we rely on estimation to obtain approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error) and fit statistics
+  - During model estimation, it's the sample covariance matrix $\bf{S}$ that is being approximated with $\boldsymbol{\Sigma(\omega)}$ using specific estimation method, under the assumption of random sampling.
+
+* In PA, $\boldsymbol{\Sigma(\omega)}$ can be divided into three pieces, each with its own set of parameters (see Bollen, 1989, pp. 85-86 for derivation):
+  - the covariance matrix of $\bf{Y}$, 
+
+$$
+\boldsymbol{\Sigma_{y}(\omega)}=\mathbf{(I-B)^{-1}(GCG^T+D)(I-B)^{-1T}}
+$$
+where $\mathbf{A^{-1}}$ is the inverse of matrix $\mathbf{A}$, and $\mathbf{A^{T}}$ is the transpose of $\mathbf{A}$.
+
+  - the covariance matrix of $\bf{x}$ with $\bf{Y}$, 
+
+$$
+\boldsymbol{\Sigma_{xy}(\omega)}=\mathbf{CG^T(I-B)^{-1T}}
+$$
+ - the covariance matrix of $\bf{x}$, 
+
+$$
+\boldsymbol{\Sigma_{x}(\omega)}=\mathbf{C}
+$$
+
+* The widely used maximum likelihood (ML) estimation maximizes the likelihood of observing the sample matrix based on an assumption that the endogenous variables are multivariate-normally distributed, as $\bf{Y} \sim N[0,\boldsymbol{\Sigma_y}]$, where $\boldsymbol{\Sigma_y}$ is the population covariance matrix of $\bf{Y}$.
+  - Statistically, it is equivalent to minimize the discrepancy between $\boldsymbol{\Sigma(\omega)}$ and the $\bf{S}$ through the fitting or discrepancy function:
+  
+
+$$
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(P+Q)
+(\#eq:obj-fun),
+$$
+
+* However complex the mathematics of the ML estimation, the interpretation of parameter estimates is relatively straightforward with both point estimates and standard error to construct interval estimates
+
+* When a raw data file is analyzed, standard ML estimation assumes that there is no missing value. A special form of ML estimation is needed for raw data files where some observations are missing at random
+
+* Although usually not a problem when analyzing recursive path models, a converged solution may be inadmissible in ML estimation and other iterative methods.
+  - This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates or correlation larger than one)
+
+* Heywood cases can be caused by factors such as specification errors, nonrecursive model, and small sample sizes (e.g., N < 100).
+  - When you have Heywood case, it's not necessarily bad things since it can be used as diagnostic information about the model. Researchers should attempt to determine the source of the problem instead of constraining an error variance to be positive in a computer program.
+
+* For over-identified model, model estimation is approximate, and there is thus a need to evaluate how well the model fits the data, or how close the parameter estimates and population values are.
+  - Model estimation is also known as model fitting, which is equivalent to test or confirm the null hypothesis $\text{H}_0: \boldsymbol{\Sigma=\Sigma(\omega)}$ based on the chi-square statistics and model degree of freedom
+  - A variety of fit indexes are available for model evaluation, many of which are derived from the model chi-square statistics
+  - Indexes strongly suggested to report: $\chi_M^2$ and its $p$-value, the RMSEA, its 90% interval, CFI, and SRMR
+
+* When the sample covariance matrix $\bf{S}$ is standardized as a correlation matrix $\bf{R}$, all parameter estimates will be standardized, similar to the standardized coefficients in regression, and is known as the standardized solution
+  - Due to scale invariance, the fitting result remain the same
+  - It's a good practice to report both unstandardized and standardized estimates, since the two can give meaningful information from different perspectives.
+
+
+* Example covariance structure with four variables:
+
+```{r typ-pa-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "")
+fn<-"SEM01.csv"
+# write.csv(dat,fn,row.names=F)
+y<-read.csv(fn)
+COV<-cov(y,use="pairwise.complete.obs")
+# SD<-apply(y,2,sd,na.rm=T)
+is.na(COV) <- upper.tri(COV)
+
+COV %>%
+  kbl(caption = "Example Covariance Structure S, N = 500",digits = 3)%>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+* Before obtaining parameter estimates, we need to evaluate if the model-data fit is appropriate
+  - In this special case it is a just-identified model and the fit will be perfect; one might just report that it's a saturated model without the detailed statistics 
+  - For over-identified model, the following fit statistics should be reported:
+  - $\chi_M^2 (0) =0$, $p = NA$, $RMSEA = 0$ with the 90% CI $(0, 0)$, $CFI = 1$, $SRMR = 0$
+
+* Parameter estimates contain rich information. Ex: see Table \@ref(tab:est-m0) for Figure \@ref(fig:typ-pa)
+  - In the standardized solution, the variance of all variables are fixed as one
+  - Parameters in $\mathbf{C}$ should be directly obtained from the observed covariance structure; thus related SEs and $z$-scores are not available
+  - Based on the $z$-score or $p$-value, all other parameter estimates are significant
+  - Based on the standardized estimates, the direct effects range from small to moderate
+  - Under the standardized solution, the proportion of explained variance (similar to the $R^2$ or coefficient of determination in regression analysis) for $y_1$ and $y_2$ is $1-d_{11}$ and $1-d_{22}$, respectively.
+
+```{r est-m0, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+# y<-read.csv(fn)
+m<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2 + y1'
+
+res<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+
+# fitMeasures(res,c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper","cfi","srmr","aic","bic"), output = "matrix")
+
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+Par<- c("$g_{11}$","$g_{12}$","$g_{21}$","$g_{22}$","$b_{21}$", "$d_{11}$","$d_{22}$","$c_{11}$","$c_{21}$","$c_{22}$")
+df<-cbind(Par,est[,4:7],est0[,4:7])
+# df<-cbind(Par,df0[-c(6,9,10),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+***
+
+## **Causal Inference and Modeling**
+
+* Cause and effect or causal inference is the focus of PA; path model is also known as causal model
+
+### Causal Inference and Specification
+
+* Causal inference in research depends on design, assumptions, and, to a lesser extent, statistical analysis.
+  - This is because analysis by itself is rarely sufficient to establish causation.
+  - Some causal assumptions can be checked against the data, but others are not empirically testable.
+  - Whether unverifiable assumptions are tenable is thus a matter of argument, not statistics.
+  - Accordingly, the researcher should explicitly articulate such assumptions while reassuring his or her audience that untestable assumptions are reasonable.
+  
+* Experimental designs in which cases are randomly assigned to conditions are a gold standard for causal inference in the behavioral sciences. Such studies have design elements that bolster internal validity
+  - Random assignment satisfies temporal precedence, or the requirement that presumed causes must occur before presumed effects
+  - The control group serves as a counterfactual for the experimental (treatment) group
+  - Randomization over replications also ensures that the independent variable is uncorrelated with all other potential causes of the outcome. This property concerns isolation, or the absence of other plausible explanations (confounders) that explain the observed covariation between the independent and dependent variables.
+  
+* In nonexperimental (passive observational) designs, few, if any, design elements may support causal inference. This is especially true if all variables are concurrently measured, such as when a set of questionnaires is completed during a single test session.
+  - Therefore, the sole basis for causal inference in such designs is assumption, one supported by a convincing, substantive rationale for specifying that $x$ causes $y$ instead of the reverse
+  - This process relies heavily on the researcher to rule out alternative explanations of the association between $x$ and $y$ and also to measure other presumed causes of $y$; Both require strong substantive knowledge about the phenomenon under study
+  - If the researcher cannot give a cogent account of directionality specifications, then causal inference in studies with concurrent measurement may be unwarranted.
+
+* A basic specification issue revolves around what variables cause a target outcome.
+  - Because the literature for newer research areas can be limited, decisions about what to include in the model must sometimes be guided more by the researcher's expertise than by published reports.
+
+* In path models, the researcher specifies a model that attempts to explain why $x$s and $y$s are correlated.
+  - Part of this explanation may include direct effects (e.g., $x \rightarrow y$) and indirect effect $x\rightarrow y_1 \rightarrow y_2$.
+  - Other parts of the explanation may reflect presumed noncausal effects, such as a spurious effect between $y_1$ and $y_2$ due to common causes $x$, or unanalyzed effect (i.e., cause or disturbance correlations).
+
+* Just as correlation does not imply causation, statistical causal modeling does not prove causation either. To reasonably infer that $x$ is a cause of $y$, all of the following conditions must be met:
+  (1) there is time precedence, that is, $x$ precedes $y$ in time;
+  (2) substantive rationale that the direction of the causal relation is correctly specified and there's a lack of alternative explanation, that is, $X$ causes $Y$ instead of the reverse, and it is not spurious
+  (3) the magnitude of association between $x$ and $y$ is moderate or above. 
+
+* Thus all analyses of causal models proceed on the basis of the above assumptions
+
+### Decomposition of Causal and Noncausal Effects
+
+* For a causal model, it's important to distinguish between different types of effects
+  - There exist multiple effects between two variables due to more than one (see Figure \@ref(fig:typ-pa1))
+
+```{r typ-pa1, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Path Model with Four Variables"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!',label='u@_{1}', shape = none,width = 0.3]
+aD_2 [pos = '1,0!',label='u@_{2}',  shape = none,width = 0.3]
+# a [pos = '-2,3!', width=1.5, label='(a) Recursive',shape = plaintext]
+
+aX_1->aY_1 [label = 'g@_{11}']
+aX_1->aY_2 [label = 'g@_{21}']
+aX_2->aY_1 [label = 'g@_{12}']
+aX_2->aY_2 [label = 'g@_{22}']
+aY_1->aY_2 [label = 'b@_{21}']
+aD_1->aY_1
+aD_2->aY_2
+aX_1->aX_2[dir = both,tailport = 'w', headport = 'w',label='c@_{21}']
+adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n',label='c@_{11}']
+aX_2->aX_2[dir = both,tailport = 'n', headport = 'n',label='c@_{22}']
+
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+* In a recursive path model, the **model-implied correlation** is the sum of all the causal effects and noncausal effects between two variables
+  - For better interpretation, all variables and path coefficients are standardized  (i.e.,standardized solution)
+  - To figure out all the causal and noncausal effects between any two variables, there are two ways: tracing rule and matrix algebra
+
+* **Tracing rule** is straightforward and easier to understand with the following principles:
+  1. One can go forward or backward causally; but once gone forward, one cannot go backward.
+  2. One can go through only one unanalyzed relation (two-headed arrow).
+  3. One can enter or leave a variable only once.
+
+* An alternative definition comes from Chen and Pearl (2015): A valid tracing does not involve colliding arrowheads, such as:
+
+$$
+\boldsymbol{\rightarrow \leftarrow, ~\leftrightarrow \leftarrow, ~\rightarrow \leftrightarrow, ~\leftrightarrow \leftrightarrow}
+$$
+* Ex: Figure \@ref(fig:typ-pa1)
+
+  - $r(x_1,x_2)=c_{21}$, but **not** $g_{11}g_{21}$ or $g_{11}g_{21}$ due to Rule 1
+  - $r(x_1,y_1)=g_{11}+c_{21}g_{12}$
+  - $r(x_2,y_1)=g_{12}+c_{21}g_{22}$
+  - $r(x_1,y_2)=g_{21}+g_{11}b_{21}+c_{21}g_{22}+c_{21}g_{12}b_{21}$
+  - $r(x_2,y_2)=g_{22}+g_{12}b_{21}+c_{21}g_{21}+c_{21}g_{11}b_{21}$
+  - $r(y_2,y_2)=b_{21}+g_{12}g_{22}+g_{11}g_{21}+g_{11}c_{21}g_{22}+g_{12}c_{21}g_{21}$
+
+* Use of the tracing rules is error-prone because it can be difficult to spot all of the valid tracings in larger models, and these rules do not apply to models with causal loops (i.e., nonrecursive)
+
+* In contrast, matrix algebra provide a better solution, especially for complicated model.
+
+For instance,
+
+$$
+\begin{align*}
+COV(x_1,y_1) & = COV(x_1,g_{11}x_1+g_{12}x_2+u_1) \\
+ & =g_{11}COV(x_1,x_1)+g_{12}COV(x_1,x_2)+COV(x_1,u_1)
+\end{align*}.
+(\#eq:eff-dec)
+$$
+Since all variables are standardized and $COV(x_1,u_1)=0$ based on model assumption, we have $r(x_1,y_1)=g_{11}+c_{21}g_{12}$
+
+
+Similarly,
+$$
+\begin{align*}
+COV(x_1,y_2) & = COV(x_1,b_{21}y_1+g_{21}x_1+g_{22}x_2+u_2) \\
+ & =b_{21}COV(x_1,y_1)+g_{21}COV(x_1,x_1)+g_{22}COV(x_1,x_2)+COV(x_1,u_2) \\
+ & = b_{21}(g_{11}+c_{21}g_{12})+g_{21}+g_{22}c_{21}
+\end{align*},
+(\#eq:eff-dec1)
+$$
+which is the same as the tracing-rule result above: $r(x_1,y_2)=g_{21}+g_{11}b_{21}+c_{21}g_{22}+c_{21}g_{12}b_{21}$.
+
+* Either way, we can decompose the total effects between any two variables as follows:
+
+
+```{r echo=FALSE}
+library(kableExtra)
+
+df<-data.frame(
+  c1=c("$x_1,x_2$","$x_1,y_1$","$x_2,y_1$","$x_1,y_2$","$x_2,y_2$","$y_1,y_2$"),
+  c2=c("--","$g_{11}$","$g_{12}$","$g_{21}$","$g_{22}$","$b_{21}$"),
+  c3=c("--","--","--","$g_{11}b_{21}$","$g_{12}b_{21}$","--"),
+  c4=c("$c_{21}$","$c_{21}g_{12}$","$c_{21}g_{22}$","$c_{21}g_{22}+c_{21}g_{12}b_{21}$","$c_{21}g_{21}+c_{21}g_{11}b_{21}$","$g_{12}g_{22}+g_{11}g_{21}+g_{11}c_{21}g_{22}+g_{12}c_{21}g_{21}$"))
+header<-c("Variables", "DE", "IE","Noncausal")
+
+df %>%
+  kbl(booktabs = T,caption = "Decomposition of Effects", col.names=header)  %>% 
+  kable_classic(full_width = F, html_font = "Cambria") #%>% ,font_size = 20
+  # column_spec(2,italic = T) %>%
+  # column_spec(3, bold = T)
+
+```
+
+
+* The above equations also imply how one can obtain analytical solution (i.e., without estimation) from a saturated model where the number of unknown parameters and equations are exactly the same
+
+### Indirect Effects versus Mediation
+
+* Indirect effects are always part of mediation, but they are not synonymous. This is because mediation refers to the causal hypothesis that one variable causes changes in another variable, which in turn leads to changes in the outcome variable (Little, 2013). 
+
+* The emphasis on changes in the above definition of mediation is because without evidence for change, the only effects that could be supported are indirect effects, not mediation. In other words, mediation always involves indirect effects, but not all indirect effects automatically signal mediation.
+
+* This is especially true in nonexperimental designs with no time precedence. Such designs are also called cross-sectional designs.
+
+* In general, use of the term mediation should be reserved for designs that feature time precedence; 
+otherwise, use of the term indirect effect is more realistic.
+
+## **Model Comparisons**
+
+* For the same data or covariance structure, one can specify different models for comparisons, given there is substantive rationale
+  - In addition to Figure \@ref(fig:typ-pa1), Figure \@ref(fig:mod-com) presents several model specifications to the same covariance structure in previous chapter
+
+* Model evaluation described in previous chapter is considered as absolute fit
+  - Evaluate if the model fits the data on absolute standards
+  - Based on Table \@ref(tab:typ-pa-tab), Model (b) and (d) don't fit the data well; Figure \@ref(fig:typ-pa1) and Model (c) are just-identified or saturated models
+
+```{r mod-com, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Alternative Model Specifications"}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!', label='',  shape = none,width = 0.3]
+aD_2 [pos = '1,0!', label='',  shape = none,width = 0.3]
+adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aY_1 
+aX_1->aY_2 
+aX_2->aY_1 
+aX_2->aY_2 
+aY_1->aY_2
+# aY_2->aY_1 
+aD_1->aY_1
+aD_2->aY_2
+# aX_1->aX_2[dir = both,tailport = 'w', headport = 'w']
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n']
+aX_2->aX_2[dir = both,tailport = 'n', headport = 'n']
+a [pos = '-2,3!', width=1.5, label='(a)',shape = plaintext]
+
+bX_1 [pos = '3,2!',label='x@_{1}']
+bX_2 [pos = '3,0!',label='x@_{2}']
+bY_1 [pos = '5,2!',label='y@_{1}']
+bY_2 [pos = '5,0!',label='y@_{1}']
+bD_1 [pos = '6,2!',label='',  shape = none,width = 0.3]
+bD_2 [pos = '6,0!',label='',   shape = none,width = 0.3]
+bdummy [pos = '3,1!', width=1.5, label='', color=white]
+bX_1->bY_1
+bX_1->bY_2
+bX_2->bY_1
+bX_2->bY_2
+# bY_1->bY_2
+# bY_2->bY_1[tailport = 'n', headport = 's']
+bD_1->bY_1
+bD_2->bY_2
+bX_1->bX_2[dir = both,tailport = 'w', headport = 'w']
+bX_1->bX_1[dir = both,tailport = 'n', headport = 'n']
+bX_2->bX_2[dir = both,tailport = 'n', headport = 'n']
+b [pos = '3,3!', width=1.5, label='(b)',shape = plaintext]
+# bD_1->bD_2[dir=both,label='', splines=curved, tailport = 'e', headport = 'e']
+# bdummy1 [pos = '6,1!',  width=1.5,label='', color=white]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+```{r, fig.align='center',echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE}
+
+a<-("digraph CFA {
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,
+       splines=true]
+node [shape = rectangle]
+
+aX_1 [pos = '-2,2!',label='x@_{1}']
+aX_2 [pos = '-2,0!',label='x@_{2}']
+aY_1 [pos = '0,2!',label='y@_{1}']
+aY_2 [pos = '0,0!',label='y@_{2}']
+aD_1 [pos = '1,2!', label='',  shape = none,width = 0.3]
+aD_2 [pos = '1,0!', label='',  shape = none,width = 0.3]
+# adummy [pos = '-2,1!', width=1.5, label='', color=white]
+aX_1->aY_1 
+aX_1->aY_2 
+aX_2->aY_1 
+aX_2->aY_2 
+aY_1->aY_2
+# aY_2->aY_1 
+aD_1->aY_1
+aD_2->aY_2
+aX_1->aX_2
+aX_1->aX_1[dir = both,tailport = 'n', headport = 'n']
+aX_2->aX_2[dir = both,tailport = 's', headport = 's']
+a [pos = '-2,3!', width=1.5, label='(c)',shape = plaintext]
+
+bX_1 [pos = '3,2!',label='x@_{1}']
+bX_2 [pos = '3,0!',label='x@_{2}']
+bY_1 [pos = '5,2!',label='y@_{1}']
+bY_2 [pos = '5,0!',label='y@_{1}']
+bD_1 [pos = '6,2!',label='',  shape = none,width = 0.3]
+bD_2 [pos = '6,0!',label='',   shape = none,width = 0.3]
+# bdummy [pos = '3,1!', width=1.5, label='', color=white]
+bX_1->bY_1
+bX_1->bY_2
+bX_2->bY_1
+bX_2->bY_2
+# bY_1->bY_2
+# bY_2->bY_1[tailport = 'n', headport = 's']
+bD_1->bY_1
+bD_2->bY_2
+bX_1->bX_2
+bX_1->bX_1[dir = both,tailport = 'n', headport = 'n']
+bX_2->bX_2[dir = both,tailport = 's', headport = 's']
+b [pos = '3,3!', width=1.5, label='(d)',shape = plaintext]
+# bD_1->bD_2[dir=both,label='', splines=curved, tailport = 'e', headport = 'e']
+# bdummy1 [pos = '6,1!',  width=1.5,label='', color=white]
+}
+
+")
+grViz(a)
+# b<-grViz(a)
+# tmp<-capture.output(rsvg_png(charToRaw(export_svg(b)),'fig1_2.png'))
+```
+
+
+* In contrast, model comparison is a relative fit: to select the best model among competing candidates
+  - Two types of comparisons: nested vs. non-nested
+
+* Two models are **hierarchical** or **nested** if one is a subset of the other
+  - Unrestricted: the one with more parameters to estimate 
+  - Restricted model: the one with less parameters to estimate 
+  - The unrestricted model can be transformed into the restricted model by imposing constraints on the parameters
+  - The restricted model can be transformed into the unrestricted model by relaxing constraints on the parameters
+
+* Ex: in Figure \@ref(fig:mod-com) and Figure \@ref(fig:typ-pa1), there are different pairs of nested models (unrestricted vs. restricted):
+  - Figure \@ref(fig:typ-pa1) vs. Model (a)
+  - Figure \@ref(fig:typ-pa1) vs. Model (b)
+  - Model (c) and (d)
+
+* The likelihood ratio test (LRT) is adopted with the assumption $\chi_M^2$ is a chi-square distribution with $df_M$ degree of freedom:
+  - The chi-square difference statistic, $\chi_D^2=\chi_{M,res}^2-\chi_{M,unr}^2$
+  - Its degrees of freedom, $df_D=df_{M,res}-df_{M,unr}$
+
+* Ex: in Table \@ref(tab:typ-pa-tab):
+  - The chi-square difference statistic between Figure \@ref(fig:typ-pa1) and Model (b), or between Model (c) and (d) is significant, with $\chi_D^2(1)=45.776$, $p<.0001$ 
+  - But the difference between Model (a) and Figure \@ref(fig:typ-pa) is insignificant, with $\chi_D^2(1)=0.154$, $p=0.695$ 
+
+* If two models are not nested (i.e., neither model's parameters form a subset of the other model's parameters), the above chi-square difference statistic cannot be used for model comparison
+  - Instead, we can adopt the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC)
+
+```{r fit-pa-tab, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+fn<-"SEM01.csv"
+y<-read.csv(fn)
+m<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2 + y1'
+m1<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2 + y1
+    x1~~0*x2'
+
+m2<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2
+    y1 ~~ 0*y2'
+m3<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2 + y1
+    x2 ~ x1'
+m4<-'y1 ~ x1 + x2 
+    y2 ~ x1 + x2
+    y1 ~~ 0*y2
+    x2 ~ x1'
+
+sm<-c("m", "m1", "m2","m3","m4")
+len<-length(sm)
+flist<-c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper",
+                  "cfi","srmr")
+df<-NULL
+
+for (i in 1:len){
+  res<-sem(get(sm[i]),sample.cov=cov(y),sample.nobs=nrow(y))
+  tmp<-fitMeasures(res,flist, output = "matrix")
+  df<-cbind(df,tmp)
+}
+colnames(df)<-c("Fig 1","a","b","c","d")
+rownames(df)<-toupper(rownames(df))
+
+df %>%
+  kbl(caption = "Fit Indexes for Different Model Specifications",digits = 3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+### Equivalent Models
+
+* Equivalent models are models mathematically identical but with a different configuration of model structure
+  - They are usually transformation of constraints on the same variables
+  - They also have equal goodness-of-fit indexes, including $\chi_M^2$ (and degree of freedom) and all other fit statistics described earlier
+  - Thus, the researchers need to explain why their final model should be preferred over other equivalent models.
+
+* Ex: In Figure \@ref(fig:mod-com), Models (b) and (d) are equivalent, by transforming the correlations as direct effects
+  - Thus, explanation is needed why one is preferred to the other
+
+
+### Model Modification and the Modification Index
+
+* When the model is slightly modified, the original and modified models are usually nested with each other
+  - Ex: adding a direct path to Model (b) in Figure \@ref(fig:mod-com) becomes Figure \@ref(fig:typ-pa1)  
+  - We can apply the same chi-square difference statistic $\chi_D^2$ with a single degree of freedom to compare the models
+  - That is, it estimates $\chi_D^2(1)$ for **adding** a parameter (e.g, direct effect).
+  - Usually, MI values larger than significant at $.05$ level, or $\chi_D^2(1)>3.84$, should be of concern, and the largest value should be prioritized.
+
+* Associated with the MI is the expected parameter change statistic (EPC), which reflects the approximate value of the new parameter if added to the model.
+
+* Table \@ref(tab:mi-ex-tab) presents the MI values of significant parameter changes for Model (b) in Figure \@ref(fig:mod-com):
+
+```{r mi-ex-tab, echo=FALSE}
+library(kableExtra)
+
+res<-sem(m2,sample.cov=cov(y),sample.nobs=nrow(y))
+mod<-modindices(res,minimum.value=3.84)
+
+par<- c("$d_{12}$","$b_{12}$","$b_{21}$")
+
+df<-cbind(par,mod[,4:6])
+colnames(df)<-c("Par","MI","EPC","Std EPC")
+rownames(df)<-NULL
+
+df %>%
+  kbl(caption = "Modification Indexes above 3.84",digits = 3)%>%
+  # add_header_above(c(" ", "a" = 1, "b" = 1)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+
+### Parameter Testing
+
+* We can evaluate individual parameters (free or constrained) in the model with one of the following methods:
+  1. Evaluate the significance of parameter estimates with $z$-score and $p$-value
+  2. Use LRT to compare models with different specifications, Ex: Model (c) vs. (d) in Figure \@ref(fig:mod-com)
+  3. Wald test with constrained parameters
+
+* The Wald test is powerful and flexible; it can test a set of parameter constraints without affecting the estimation of the original model. We will illustrate the steps of Wald test with Figure \@ref(fig:typ-pa1)
+
+* Ex: assume we want to compare the direct effects (DEs), indirect effects (IEs), and total causal effects (TEs) of $x_1$ and $x_2$ on $y_2$. In the first step, we create constrained parameters for the IE and TE, as:
+  - $IE_1=g_{11}b_{21}; ~IE_2=g_{12}b_{21}$
+  - $TE_1=g_{21}+g_{11}b_{21}; ~TE_2=g_{22}+g_{12}b_{21}$ 
+
+* In the second step, we can setup the associate hypotheses, as:
+  - $H_{DE}: ~g_{21}=g_{22}$
+  - $H_{IE}: ~IE_1=IE_2$
+  - $H_{TE}: ~TE_1=TE_2$  
+
+* In the third step, we re-estimate the model with the same data and new constraints
+  - One can see that all the effects are statistically significant
+  - However, it's difficult to tell if the effects are significantly different
+
+```{r est-m1, echo=FALSE}
+library(kableExtra)
+opts <- options(knitr.kable.NA = "NA")
+
+# y<-read.csv(fn)
+m<-'y1 ~ g11*x1 + g12*x2 
+    y2 ~ g21*x1 + g22*x2 + b21*y1
+    # x1 ~~ 0*x2
+
+    # constrained par
+    I1 := g11*b21
+    I2 := g12*b21
+    T1 := g21+I1
+    T2 := g22+I2
+'
+
+res<-sem(m,sample.cov=cov(y),sample.nobs=nrow(y))
+
+# fitMeasures(res,c("chisq", "df", "pvalue",  "rmsea","rmsea.ci.lower","rmsea.ci.upper","cfi","srmr","aic","bic"), output = "matrix")
+
+est<-parameterEstimates(res)
+est0<-standardizedSolution(res, type = "std.all")
+Par<- c("$g_{11}$","$g_{12}$","$g_{21}$","$g_{22}$","$b_{21}$", "$d_{11}$","$d_{22}$","$c_{11}$","$c_{21}$","$c_{22}$","$IE_1$","$IE_2$","$TE_1$","$TE_2$")
+df<-cbind(Par,est[,5:8],est0[,5:8])
+# df<-cbind(Par,df0[-c(6,9,10),])
+rownames(df) <- c()
+
+df %>%
+  kbl(caption = "Parameter Estimates",digits = 3)%>%
+  add_header_above(c(" ", "Unstandardized Solution" = 4, "Standardized Solution" = 4)) %>%
+  kable_classic(full_width= F, html_font = "Cambria")
+
+```
+
+* Finally, hypotheses testing is conducted with the Wald test statistics:
+  - $H_{DE}: Wald(1)=19.9, ~p<.0001$
+  - $H_{IE}: Wald(1)=30.7, ~p<.0001$
+  - $H_{TE}: Wald(1)=1.34, ~p=.248$ 
+
+* It's interesting to see that the difference of the TE is insignificant, although the difference of either the DE or IE is significant.
+
+* As shown, We often want to conduct null hypothesis significance test if the causal effects are significantly different from zero and/or each other. For the IE, special treatment is preferred for a more rigorous testing.
+  - Remember that the IE is a product of two DEs; although the ML estimate of each DE can be considered as normally distributed (i.e., with the $z$ statistic and symmetric interval estimates), the product of them tends to be positively skewed (i.e., nonnormal), invalidating the use of $z$-score and associated standard error to construct symmetric interval.
+  - Instead, a better strategy is to conduct nonparametric bootstrapping, which is a resampling method to estimate the empirical sampling distribution of the indirect effect (Mackinnon et al., 2002, Psych Methods); with the empirical distribution, we can construct a confidence interval for significance testing
+  
+* Unfortunately, the bootstrapping method needs raw data and won't work when only the covariance structure is available.
+
+### Model Trimming and Building
+
+* There are two contexts in which hierarchical path models are usually compared. In **model trimming**, the researcher typically begins the analysis with a just-identified model and simplifies it by eliminating paths.
+  - This is done by specifying that at least one path previously freely estimated is now constrained to equal zero.
+  - As a model is trimmed, its overall fit to the data typically becomes worse (e.g.,$\chi_M^2$increases).
+  
+* The starting point for **model building** is usually a bare-bones, over-identified model to which paths are added.
+  - Typically, at least one previously fixed-to-zero path is specified as a free parameter. 
+  - Model fit generally improves as paths are added (e.g.,$\chi_M^2$decreases).
+  
+* However, the goal of both trimming and building is to find a parsimonious model that still fits the data reasonably well. Models can be trimmed or built according to one of two different standards: theoretical or empirical.
+  - Theoretical respecification represents tests of specific, a priori hypotheses. Thus, respecification of a model to test hierarchical versions of it is guided by the researcher's hypotheses, and the main challenge comes from the theoretical or substantive rationale for the hypotheses.
+  - For empirically based respecification, paths are deleted or added according to statistical criteria, which is entirely data-driven. In this case the researcher should worry about capitalization on chance: a path may be statistically significant due only to chance of variation, and its inclusion in the model would be akin to a Type I error; likewise, a path that corresponds to a true causal effect may not be statistically significant in a particular sample, and its exclusion from the model would be essentially a Type II error.
+  - In practice, it might be more realistic to allow some empirical modifications on the basis of a theoretical respecification (i.e., to give a greater role for theory in model respecification).
+
+* The **chi-square difference** statistic, $\chi_D^2$, can be used to test the statistical significance of the decrement in overall fit as paths are eliminated (trimming) or the improvement in fit as paths are added (building).
+
+* Following is an example of Model Trimming vs. Building
+  - For model trimming, we begin with a just-identified model and adopt the univariate or multivariate Wald W test statistics to test if individual direct effects in dash lines are significant and thus can be dropped, one-by-one or collectively, respectively
+  - For model building, we begin with a bare-bone model and adopt the modification index with expected parameter change to add significant direct effect one by one until insignificant change
+  
+
+```{r fig.align='center',fig.height= 10,echo=FALSE,cache=FALSE,message=FALSE,warning=FALSE,fig.cap="Example of Model Trimming vs. Building"}
+library(DiagrammeR)
+par(mar = c(.1, .1, .1, .1))
+grViz("
+digraph SEM {
+
+graph [layout = neato,
+       overlap = flase,
+       outputorder = edgesfirst,outputorder = edgesfirst,splines=true]
+
+node [shape = rectangle]
+
+Exe [pos = '-4,2!', label = 'x@_{1}']
+Har [pos = '-4,0!', label = 'x@_{2}']
+Fit [pos = '-1,3!', label = 'y@_{1}']
+Str [pos = '-1,-1!', label = 'y@_{2}']
+Ill [pos = '2,1!', label = 'y@_{3}']
+D_Fi [pos = '1,4!', label = 'u@_{1}', shape = none]
+D_St [pos = '1,-2!', label = 'u@_{2}', shape = none]
+D_ll [pos = '3,2!', label = 'u@_{3}', shape = none]
+dummy [pos = '-4.2,1!', width=2, label='', color=white]
+a [pos = '-4,4!', width=1.5, label='(a) Model Trimming (based on A Jusst-Identified Model)',shape = plaintext]
+
+Exe:w->Har:w [label = '',dir = both,shape=curve]
+Exe->Fit[label = '']
+Exe->Str[label = '',style='dashed']
+Exe->Ill[label = '.',style='dashed']
+Har->Fit[label = '.',style='dashed']
+Har->Str[label = '']
+Har->Ill[label = '',style='dashed']
+Fit->Ill[label = '']
+Fit->Str[label = '',style='dashed']
+Str->Ill[label = '']
+
+D_Fi->Fit 
+D_ll->Ill 
+D_St->Str 
+
+Exe->Exe [label = '',dir = both,tailport = 'n', headport = 'n']
+Har->Har [label = '',dir = both,tailport = 'n', headport = 'n']
+
+
+
+bExe [pos = '-4,-6!', label = 'x@_{1}']
+bHar [pos = '-4,-8!', label = 'x@_{2}']
+bFit [pos = '-1,-5!', label = 'y@_{1}']
+bStr [pos = '-1,-9!', label = 'y@_{2}']
+bIll [pos = '2,-7!', label = 'y@_{3}']
+bD_Fi [pos = '1,-4!', label = 'u@_{1}', shape = none]
+bD_St [pos = '1,-10!', label = 'u@_{2}', shape = none]
+bD_ll [pos = '3,-6!', label = 'u@_{3}', shape = none]
+bdummy [pos = '-4.2,-7!', width=2, label='', color=white]
+b [pos = '-4,-4!', width=1.5, label='(b) Model Building (based on A Bare-bone Model',shape = plaintext]
+
+bExe:w->bHar:w [label = '',dir = both,shape=curve]
+bExe->bFit[label = '']
+# Exe->Str[label = '',style='dashed']
+# Exe->Ill[label = '.',style='dashed']
+# Har->Fit[label = '.',style='dashed']
+bHar->bStr[label = '']
+# Har->Ill[label = '',style='dashed']
+bFit->bIll[label = '']
+# Fit->Str[label = '',style='dashed']
+bStr->bIll[label = '']
+
+bD_Fi->bFit 
+bD_ll->bIll 
+bD_St->bStr 
+
+bExe->bExe [label = '',dir = both,tailport = 'n', headport = 'n']
+bHar->bHar [label = '',dir = both,tailport = 'n', headport = 'n']
+}
+")
+
+```
+
+
+</body>
