@@ -1,51 +1,0 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on A minimal Hugo website</title>
-    <link>/post/</link>
-    <description>Recent content in Posts on A minimal Hugo website</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language><atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>Confirmatory Factor Analysis</title>
-      <link>/post/1/01/01/confirmatory-factor-analysis/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/post/1/01/01/confirmatory-factor-analysis/</guid>
-      <description>body {font-size: 2em;}IntroductionSimilar to exploratory factor analysis (EFA), confirmatory factor analysis (CFA) is also considered as a common factor model where parameters such as loadings and factorial correlations can be estimated.
-The estimation also proceeds by analyzing the constructs and patterns underlying the variance structure of the data (see Table 1)
-Also known as covariance structure analysisTable 1: Example Covariance Structure, N = 500y1y2y3y4y5y6y10.</description>
-    </item>
-    
-    <item>
-      <title>Factor Analysis and the Exploratory Approach</title>
-      <link>/post/1/01/01/factor-analysis-and-the-exploratory-approach/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/post/1/01/01/factor-analysis-and-the-exploratory-approach/</guid>
-      <description>body {font-size: 2em;}IntroductionIn the social and behavioral sciences, as well as many other disciplines, researchers often encounter a large set of observations or scores for a group of people or objects.The data can come from any sources of measurement instruments including scale, questionnaire, survey, assessment, and so on.One important question that researchers often want to ask is if the large set of data can be parsimoniously represented with some underlying constructs or patterns.</description>
-    </item>
-    
-    <item>
-      <title>Path Analysis</title>
-      <link>/post/1/01/01/path-analysis/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/post/1/01/01/path-analysis/</guid>
-      <description>body {font-size: 2em;}IntroductionPath analysis (PA) is the SEM technique for analyzing structural models with only observed variables (i.e., indicator). Although there are no latent variables (other than the error term), many principles and concepts in PA hold true for more complicated SEM types.
-PA can be viewed as an extension of regression analysis
-In regression analysis, the variables are either causes or outcomes, with only direct effects in between; moreover, there can be multiple causes for each outcome, but only one outcome for each causeIn PA, the variables can be causes and outcomes at the same time, with both direct and indirect effects available; moreover, multiple causes and multiple outcomes can coexistPA and FA are two building blocks of the SEM family</description>
-    </item>
-    
-    <item>
-      <title>Structural Model with Latent Variables</title>
-      <link>/post/1/01/01/structural-model-with-latent-variables/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/post/1/01/01/structural-model-with-latent-variables/</guid>
-      <description>body {font-size: 2em;}IntroductionThe most general kind of model in SEM is a structural model with latent variables, which is also known as a structural regression (SR) model or full structural equation model (full model)
-It can be regarded as a marriage of the path analysis and (confirmatory) factor analysis, and relies on many principles and assumptions under both the PA and CFAThus, a full model can be decomposed into a structural and measurement componentAlthough the coupling of PA and CFA seems straightforward, a full model with both a structural and measurement component can be very complicated, with different combinations of the exogenous and endogenous variables and/or the observed and latent variables.</description>
-    </item>
-    
-  </channel>
-</rss>
