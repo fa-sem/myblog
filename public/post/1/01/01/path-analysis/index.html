@@ -1,0 +1,2040 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Path Analysis | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Path Analysis</span></h1>
+<h2 class="author">Jinsong Chen</h2>
+
+</div>
+
+<main>
+
+<script src="/post/1/01/01/path-analysis/index_files/header-attrs/header-attrs.js"></script>
+<script src="/post/1/01/01/path-analysis/index_files/kePrint/kePrint.js"></script>
+<link href="/post/1/01/01/path-analysis/index_files/lightable/lightable.css" rel="stylesheet" />
+<script src="/post/1/01/01/path-analysis/index_files/htmlwidgets/htmlwidgets.js"></script>
+<script src="/post/1/01/01/path-analysis/index_files/viz/viz.js"></script>
+<link href="/post/1/01/01/path-analysis/index_files/DiagrammeR-styles/styles.css" rel="stylesheet" />
+<script src="/post/1/01/01/path-analysis/index_files/grViz-binding/grViz.js"></script>
+
+
+<style type="text/css">
+
+body {
+  font-size: 2em;
+}
+
+</style>
+<body>
+<hr />
+<div id="introduction" class="section level2">
+<h2><strong>Introduction</strong></h2>
+<ul>
+<li><p>Path analysis (PA) is the SEM technique for analyzing structural models with only observed variables (i.e., indicator). Although there are no latent variables (other than the error term), many principles and concepts in PA hold true for more complicated SEM types.</p></li>
+<li><p>PA can be viewed as an extension of regression analysis</p>
+<ul>
+<li>In regression analysis, the variables are either causes or outcomes, with only direct effects in between; moreover, there can be multiple causes for each outcome, but only one outcome for each cause</li>
+<li>In PA, the variables can be causes and outcomes at the same time, with both direct and indirect effects available; moreover, multiple causes and multiple outcomes can coexist</li>
+</ul></li>
+<li><p>PA and FA are two building blocks of the SEM family</p>
+<ul>
+<li>PA also involves the analysis of the covariance structure among observed variables</li>
+<li>In FA, the latent variables or factors are fixed as causes, observed variables are fixed as effects, and the relations among factors are unanalyzed</li>
+<li>In PA, the covariance structure is decomposed into causal and noncausal effects based on model specification</li>
+<li>The focus is the pre-specified causal effect (unidirectional), rather than the correlation or covariance (bidirectional)</li>
+<li>Key terms: Exogenous vs. endogenous variables</li>
+</ul></li>
+<li><p>Exogenous variables are independent variables that <em>cause</em> variation of other variables in the model.</p>
+<ul>
+<li>The word “exogenous” means “from without (the outside),” and whatever causes exogenous variables are not represented in the model; that is, their causes are unknown or unexplained as far as the model is concerned.</li>
+<li>The mathematical symbol is <span class="math inline">\(x\)</span></li>
+</ul></li>
+<li><p>Endogenous variables are outcomes or dependent variables that are <em>effects</em> produced by the exogenous variables in the model, either directly or indirectly.</p>
+<ul>
+<li>The word “endogenous” means “from within,” and every endogenous variable has at least one cause, which are usually placed on the left side of the diagram or right side of the equation.</li>
+<li>The variation of the endogenous variables is divided into an explained component and an unexplained component (error terms)</li>
+<li>The mathematical symbol is <span class="math inline">\(y\)</span></li>
+<li>No matter how many endogenous variables a variable can explain, it becomes an endogenous variable (i.e., with error term) itself once it’s explained by any other variable</li>
+</ul></li>
+<li><p>Similar to CFA, PA can be understood as a modeling process ranging from model specification, identification, parameter estimation, fit evaluation, model comparisons to potential model modification.</p>
+<ul>
+<li>In an empirical research, specification and identification is part of the research design, while the rest belong to research implementation and analysis.</li>
+<li>Model parameters are the key to fully understand the entire modeling process; they are widely used in the equations, diagrams, and tables</li>
+</ul></li>
+<li><p>Notation system: <strong><span class="math inline">\(x\)</span>-<span class="math inline">\(y\)</span> notation</strong></p>
+<ul>
+<li>The exogenous and endogenous observed variables are represented as <span class="math inline">\(x\)</span>s and <span class="math inline">\(y\)</span>s, respectively</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-2">Table 1: </span>All <span class="math inline">\(y\)</span> Notation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Symbol
+</th>
+<th style="text-align:left;">
+Matrix Form
+</th>
+<th style="text-align:left;">
+Dimension
+</th>
+<th style="text-align:left;">
+Meaning
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(y\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+Y
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Endogenous variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+X
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(Q \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Exogenous variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(u\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+U
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Disturbance, error variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+B
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times P\)</span>
+</td>
+<td style="text-align:left;">
+Path coefficient for endogenous variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+G
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times Q\)</span>
+</td>
+<td style="text-align:left;">
+Path coefficient for exogenous variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+C
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(Q \times Q\)</span>
+</td>
+<td style="text-align:left;">
+Exogenous variable covariance
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+D
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times P\)</span>
+</td>
+<td style="text-align:left;">
+Disturbance covariance
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="model-specification" class="section level2">
+<h2><strong>Model Specification</strong></h2>
+<ul>
+<li>Specification is hypothesis-based and the most important step, because results from later steps assume that the model<span class="math inline">\(—\)</span>the researcher’s hypotheses<span class="math inline">\(—\)</span>are correctly specified.
+<ul>
+<li>Misspecification can render all subsequent analyses useless</li>
+<li>Meanwhile, it is often necessary to respecify models, and respecification should respect the same principles as specification</li>
+<li>Try to make a list of possible (prioritized) changes to the initial model that would be justified according to theory or empirical results and/or prepare to specify multiple models for comparisons</li>
+</ul></li>
+</ul>
+<div id="general-representation" class="section level3">
+<h3>General Representation</h3>
+<ul>
+<li>Following is a general representation of structural equations with observed variables, <span class="math inline">\(Q\)</span> of which are exogenous and <span class="math inline">\(P\)</span> of which are endogenous:</li>
+</ul>
+<p><span class="math display" id="eq:pa-gen">\[
+y_i=\sum_{p=1}^{P}b_{ip}y_{p}+\sum_{q=1}^{Q}g_{iq}x_q+u_i
+\tag{1}
+\]</span>
+where <span class="math inline">\(b\)</span> and <span class="math inline">\(g\)</span> are the path coefficients of the endogenous and exogenous variables, respectively; <span class="math inline">\(u\)</span> is the error term, which is also referred to as <strong>disturbance</strong>, with the error covariance matrix <span class="math inline">\(\mathbf{D}\)</span>, and subscripts <span class="math inline">\(i=1...P\)</span>.</p>
+<ul>
+<li>More concisely, the matrix is:</li>
+</ul>
+<p><span class="math display" id="eq:pa-matrix">\[
+\mathbf{Y=BY+G X}+\mathbf{U}
+\tag{2}
+\]</span>
+where <span class="math inline">\(\mathbf{B}\)</span> and <span class="math inline">\(\mathbf{G}\)</span> are the matrices of the path coefficients.</p>
+<ul>
+<li><p>The covariance structure of the exogenous variables <span class="math inline">\(\mathbf{C}\)</span> is usually of little interest or unanalyzed. Disturbance <span class="math inline">\(\mathbf{U} \sim N(0,\mathbf{D})\)</span>, where <span class="math inline">\(\mathbf{D}\)</span> is the <span class="math inline">\(P \times P\)</span> error covariance matrix.</p>
+<ul>
+<li>Although <span class="math inline">\(\mathbf{D}\)</span> is usually diagonal, it can be non-diagonal with correlated disturbances.</li>
+</ul></li>
+<li><p>It’s assumed that the exogenous variables and disturbances are uncorrelated, <span class="math inline">\(\text{COV}(\mathbf{X,U})=0\)</span></p></li>
+<li><p>In model specification the observed variables are assumed to randomly sampled from some defined population. Accordingly, the observed or sample covariance matrix <span class="math inline">\(\mathbf{S}\)</span> asymptotically approaches the population covariance matrix <span class="math inline">\(\mathbf{\Sigma}\)</span>.</p>
+<ul>
+<li>It means that the two matrices are getting closer to each other with larger sample size</li>
+</ul></li>
+<li><p>Here is an example of path model diagram with four observed variables (two exogenous vs. two endogenous):</p></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:typ-pa"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>, shape = none,width = 0.3]\naD_2 [pos = \"1,0!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n# a [pos = \"-2,3!\", width=1.5, label=\"(a) Recursive\",shape = plaintext]\n\naX_1->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_1->aY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naX_2->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\naX_2->aY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>]\naY_1->aY_2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naD_1->aY_1\naD_2->aY_2\naX_1->aX_2[dir = both,tailport = \"w\", headport = \"w\",label = <c<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nadummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\",label = <c<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_2->aX_2[dir = both,tailport = \"n\", headport = \"n\",label = <c<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>]\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: Path Model with Four Variables
+</p>
+</div>
+<ul>
+<li><span class="math inline">\(c\)</span>s are elements in <span class="math inline">\(\mathbf{C}\)</span>, and usually obtained directly from <span class="math inline">\(\mathbf{S}\)</span>
+<ul>
+<li>They don’t need to be estimated per se, but still count as unknown parameters when computing the degree of freedom.</li>
+</ul></li>
+<li>The related structural equations are:</li>
+</ul>
+<p><span class="math display" id="eq:pa-4v">\[
+\begin{bmatrix}  y_{1} \\ y_{2} \\ \end{bmatrix} 
+= \begin{bmatrix}
+   0 &amp; 0 \\
+   b_{21} &amp; 0 \\
+ \end{bmatrix}
+ \begin{bmatrix}  y_{1} \\ y_{2} \\ \end{bmatrix} +
+ \begin{bmatrix}
+   g_{11} &amp; g_{12} \\
+   g_{21} &amp; g_{22} \\
+ \end{bmatrix}
+  \begin{bmatrix}  x_{1} \\ x_{2} \\ \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2} \\ \end{bmatrix}.
+  \tag{3}
+\]</span>
+where
+<span class="math display">\[
+ \mathbf{D} = \begin{bmatrix}
+   d_{11} &amp; 0 \\
+   0 &amp; d_{22} \\
+ \end{bmatrix},
+\]</span></p>
+<p>and
+<span class="math display">\[
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} &amp; c_{21} \\
+   c_{21} &amp; c_{22} \\
+ \end{bmatrix}.
+\]</span></p>
+<ul>
+<li>All model parameters are included in four matrices: <span class="math inline">\(\mathbf{B, G, D,C}\)</span>
+<ul>
+<li>Model parameters link the equation, diagram, and table together; they are the key to fully understand the entire modeling process</li>
+</ul></li>
+</ul>
+</div>
+<div id="recursive-vs.-nonrecursive" class="section level3">
+<h3>Recursive vs. Nonrecursive</h3>
+<ul>
+<li>It’s important to distinguish between recursive and nonrecursive models in PA. <strong>Recursive models</strong> are the most straightforward and have two basic features: their disturbances are uncorrelated, and all causal effects are unidirectional.
+<ul>
+<li>The model in Figure <a href="#fig:typ-pa">1</a> is recursive</li>
+<li>One important feature of recursive model is that it’s possible to write <span class="math inline">\(\mathbf{B}\)</span> as a lower or upper triangle matrix (e.g., Equation <a href="#eq:pa-4v">(3)</a>).</li>
+</ul></li>
+<li><strong>Nonrecursive models</strong> have feedback loops or may have correlated disturbances. Figure <a href="#fig:non-recursive">2</a> are two nonrecursive models. The model on the left is nonrecursive because it has a direct feedback loop in which <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span> are specified as both causes and effects of each other (<span class="math inline">\(y_1\leftrightarrows y_2\)</span>).
+<ul>
+<li>Note that models with indirect feedback loops, such as <span class="math inline">\(y_1\rightarrow y_2 \rightarrow y_3\rightarrow y_1\)</span>, are also nonrecursive.</li>
+</ul></li>
+<li>The model on the right is also considered as nonrecursive because it has a direct effect between the endogenous variables with correlated disturbances between them
+<ul>
+<li>Correlated disturbances with direct effect is fine</li>
+<li>Although it might seem unusual to specify correlated disturbances, they can be suggested during model respecification or modification (e.g., by the modification index)</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:non-recursive"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\naD_2 [pos = \"1,0!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n# a [pos = \"-2,3!\", width=1.5, label=\"(a) Recursive\",shape = plaintext]\nadummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aY_1 \naX_1->aY_2 \naX_2->aY_1 \naX_2->aY_2 \naY_1->aY_2\naY_2:ne->aY_1:se\naD_1->aY_1\naD_2->aY_2\naX_1->aX_2[dir = both,tailport = \"w\", headport = \"w\"]\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\"]\naX_2->aX_2[dir = both,tailport = \"n\", headport = \"n\"]\n\nbX_1 [pos = \"3,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbX_2 [pos = \"3,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nbY_1 [pos = \"5,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_2 [pos = \"5,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbD_1 [pos = \"6,2!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\nbD_2 [pos = \"6,0!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,   shape = none,width = 0.3]\n# b [pos = \"3,3!\", width=1.5, label=\"(b) Nonrecursive\",shape = plaintext]\nbdummy [pos = \"3,1!\", width=1.5, label=\"\", color=white]\nbX_1->bY_1\nbX_1->bY_2\nbX_2->bY_1\nbX_2->bY_2\nbY_1->bY_2\n# bY_2->bY_1[tailport = \"n\", headport = \"s\"]\nbD_1->bY_1\nbD_2->bY_2\nbX_1->bX_2[dir = both,tailport = \"w\", headport = \"w\"]\nbX_1->bX_1[dir = both,tailport = \"n\", headport = \"n\"]\nbX_2->bX_2[dir = both,tailport = \"n\", headport = \"n\"]\n\nbD_1->bD_2[dir=both,label=\"\", splines=curved, tailport = \"e\", headport = \"e\"]\nbdummy1 [pos = \"6,1!\",  width=1.5,label=\"\", color=white]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 2: Nonrecursive Path Model
+</p>
+</div>
+<ul>
+<li><strong>Nonrecursive models</strong> are more complicated in terms of model identification and estimation, and are rarely used in education and psychology; they will not be covered in this course</li>
+</ul>
+</div>
+<div id="basic-types-of-model-and-effects" class="section level3">
+<h3>Basic Types of Model and Effects</h3>
+<ul>
+<li><p>There are several basic types of models with associated effects. Direct effect refers to the direct influence of the cause variable (exogenous or endogenous) on the outcome (endogenous). it’s the most common type of effect with all free parameters in the <span class="math inline">\(\mathbf{B}\)</span> and <span class="math inline">\(\mathbf{G}\)</span> matrices (see Equation <a href="#eq:pa-gen">(1)</a> or Figure <a href="#fig:typ-pa">1</a>).</p></li>
+<li><p>Other types can be found in Figure <a href="#fig:indirect">3</a>:</p>
+<ul>
+<li><ol style="list-style-type: lower-alpha">
+<li>is the indirect effect, which refers to the indirect influence of the cause variable on the outcome through the intervening variable. It’s the product of associated direct effects: <span class="math inline">\(g_{11}b_{21}\)</span></li>
+</ol></li>
+<li><ol start="2" style="list-style-type: lower-alpha">
+<li>is the spurious effect of the two endogenous variables due to common cause. It’s also the product of associated direct effects: <span class="math inline">\(g_{11}g_{21}\)</span></li>
+</ol></li>
+<li><ol start="3" style="list-style-type: lower-alpha">
+<li>is the unanalyzed effect of correlated causes: <span class="math inline">\(c_{21}\)</span></li>
+</ol></li>
+<li><ol start="4" style="list-style-type: lower-alpha">
+<li>is the Unanalyzed effect of correlated disturbances: <span class="math inline">\(d_{21}\)</span></li>
+</ol></li>
+</ul></li>
+<li><p>Except for the direct and indirect effects, all other are noncausal. More complicated models are usually combinations of the basic types: In Figure <a href="#fig:typ-pa">1</a>, we can easily find different types of effects.</p>
+<ul>
+<li>There will be multiple effects between two variables if multiple paths exist (more discussion later)</li>
+<li>Spurious effect only occurs between endogenous variables</li>
+<li>When a path contains both unanalyzed and direct or indirect effects, it is regarded as unanalyzed (e.g., the path containing <span class="math inline">\(x_1\)</span>, <span class="math inline">\(x_2\)</span>, and <span class="math inline">\(y_2\)</span>)</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:indirect"></span>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\", label=\"\",  shape = none,width = 0.3]\naD_2 [pos = \"1,0!\", label=\"\",  shape = none,width = 0.3]\naX_1->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_1->aY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naY_1->aY_2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naD_1->aY_1\naD_2->aY_2\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\",label=\"\"]\na [pos = \"-2,3!\", width=1.5, label=\"(a) Indirect\",shape = plaintext]\n\nbX_1 [pos = \"3,1!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_1 [pos = \"5,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_2 [pos = \"5,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbD_1 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\nbD_2 [pos = \"6,0!\",label=\"\",   shape = none,width = 0.3]\nbX_1->bY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\nbX_1->bY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\n# bY_1->bY_2\n# bY_2->bY_1[tailport = \"n\", headport = \"s\"]\nbD_1->bY_1\nbD_2->bY_2\nbX_1->bX_1[dir = both,tailport = \"n\", headport = \"n\",label=\"\"]\nb [pos = \"3,3!\", width=1.5, label=\"(b) Spurious\",shape = plaintext]\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3: Basic Path Models
+</p>
+</div>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"diagram":"digraph PA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,1!\",label=\"y\"]\naD_1 [pos = \"1,1!\", label=\"\",  shape = none,width = 0.3]\naX_1->aX_2[dir = both,label = <c<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"]\nadummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_2->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\naD_1->aY_1\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\",label=\"\"]\naX_2->aX_2[dir = both,tailport = \"n\", headport = \"n\",label=\"\"]\na [pos = \"-2,3!\", width=1.5, label=\"(c) Correlated Causes\",shape = plaintext]\n\n\nbX_1 [pos = \"3,1!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_1 [pos = \"5,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_2 [pos = \"5,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbD_1 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\nbD_2 [pos = \"6,0!\",label=\"\",   shape = none,width = 0.3]\n# bdummy [pos = \"3,1!\", width=1.5, label=\"\", color=white]\nbX_1->bY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\nbX_1->bY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\n# bY_1->bY_2\n# bY_2->bY_1[tailport = \"n\", headport = \"s\"]\nbD_1->bY_1\nbD_2->bY_2\nb [pos = \"3,3!\", width=1.5, label=\"(d) Correlated Disturbances\",shape = plaintext]\n\nbX_1->bX_1[dir = both,tailport = \"n\", headport = \"n\",label=\"\"]\nbD_1->bD_2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>, splines=curved, tailport = \"e\", headport = \"e\"]\nbdummy1 [pos = \"6,1!\",  width=1.5,label=\"\", color=white]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+</div>
+<div id="model-identification" class="section level3">
+<h3>Model Identification</h3>
+<ul>
+<li><p>A <strong>free parameter</strong> (also referred as unknown parameter) is to be freely estimated by the algorithm based on the sample data (i.e., no constraint).</p>
+<ul>
+<li>it includes the path coefficients in <span class="math inline">\(\mathbf{B}\)</span> and <span class="math inline">\(\mathbf{G}\)</span>, covariance in <span class="math inline">\(\mathbf{C}\)</span> and disturbances in <span class="math inline">\(\mathbf{C}\)</span></li>
+<li>In Equation <a href="#eq:pa-gen">(1)</a>, the number of free parameters are 1, 4, 3, and 2 in <span class="math inline">\(\mathbf{B}\)</span>, <span class="math inline">\(\mathbf{G}\)</span>, <span class="math inline">\(\mathbf{C}\)</span>, <span class="math inline">\(\mathbf{C}\)</span>, respectively.</li>
+</ul></li>
+<li><p>In contrast, a <strong>fixed parameter</strong> is constrained or specified to equal a constant (e.g., 0 or 1). That is, the algorithm <em>accepts</em> this constant as the estimate of the parameter regardless of the data.</p>
+<ul>
+<li>Three path coefficients in <span class="math inline">\(\mathbf{B}\)</span> at Equation <a href="#eq:pa-gen">(1)</a> are fixed as zero</li>
+</ul></li>
+<li><p>A <strong>constrained parameter</strong> is estimated by the algorithm within some restriction (e.g., equality, inequality, or nonlinear relationship with some other parameters).</p>
+<ul>
+<li>In Figure <a href="#fig:typ-pa">1</a>, we can constrained <span class="math inline">\(g_{11}=g_{22}\)</span> (and the number of free parameter will be one less), and test the equality constraint as a hypothesis.</li>
+</ul></li>
+<li><p>As mentioned previously, a statistical model is said to be identified if it is analytically possible to derive a unique solution (i.e., unique estimate of each parameter)</p></li>
+<li><p>The similar concepts of under-, just-, or over-identified models apply, with the same <span class="math inline">\(t\)</span>-rule (<span class="math inline">\(t \le u\)</span>) or degree of freedom <span class="math inline">\(df = u – t \ge 0\)</span></p>
+<ul>
+<li><span class="math inline">\(t\)</span> is the number of free or unknown parameters</li>
+<li><span class="math inline">\(u\)</span> is the number of <em>unique</em> elements in the population covariance matrix <span class="math inline">\(\bf{\Sigma}\)</span>, which equals <span class="math inline">\((P+Q)(P+Q + 1)/2\)</span>.</li>
+<li>In Figure <a href="#fig:typ-pa">1</a>, for example, <span class="math inline">\(u=4(4 + 1)/2=10\)</span>, <span class="math inline">\(t=10\)</span> and <span class="math inline">\(df=0\)</span>, which means it is a just-identified model with no degree of freedom</li>
+<li>If one set <span class="math inline">\(g_{11}=g_{22}\)</span> or <span class="math inline">\(b_{21}=0\)</span> (i.e., no direct effect between <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span>), it becomes an over-identified model with <span class="math inline">\(df=1\)</span></li>
+</ul></li>
+<li><p>The <span class="math inline">\(t\)</span>-rule is still a necessary, but not sufficient, condition for model identification under PA</p>
+<ul>
+<li>For nonrecursive models (e.g., with direct feedback loop), they are unidentified even when <span class="math inline">\(df \ge 0\)</span>; the rank and order conditions are suggested to figure out the identification status of a nonrecursive model (see Bollen, 1989, pp. 98-103)</li>
+</ul></li>
+<li><p>Identification for PA is clear with the following two sufficient (but not necessary) rules:</p>
+<ul>
+<li>Recursive rule: Because of their particular characteristics, recursive path models are identified (Bollen, 1989, pp. 95–98)</li>
+<li>Null <span class="math inline">\(\mathbf{B}\)</span> rule: when <span class="math inline">\(\mathbf{B}=0\)</span> (i.e., no direct effect between any two endogenous variables), the path model is identified</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="model-estimation-and-evaluation" class="section level2">
+<h2><strong>Model Estimation and Evaluation</strong></h2>
+<ul>
+<li>For just- or over-identified model, the population covariance matrix <span class="math inline">\(\bf{\Sigma}\)</span> can be expressed as a function of the model-implied covariance matrix <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span>, where <span class="math inline">\(\boldsymbol{\omega}\)</span> contains all free parameters in <span class="math inline">\(\mathbf{B, G, D,C}\)</span>, namely we have a basic hypothesis <span class="math inline">\(\boldsymbol{\Sigma=\Sigma(\omega)}\)</span>
+<ul>
+<li>For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)</li>
+<li>For over-identified model, we rely on estimation to obtain approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error) and fit statistics</li>
+<li>During model estimation, it’s the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> that is being approximated with <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> using specific estimation method, under the assumption of random sampling.</li>
+</ul></li>
+<li>In PA, <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> can be divided into three pieces, each with its own set of parameters (see Bollen, 1989, pp. 85-86 for derivation):
+<ul>
+<li>the covariance matrix of <span class="math inline">\(\bf{Y}\)</span>,</li>
+</ul></li>
+</ul>
+<p><span class="math display">\[
+\boldsymbol{\Sigma_{y}(\omega)}=\mathbf{(I-B)^{-1}(GCG^T+D)(I-B)^{-1T}}
+\]</span>
+where <span class="math inline">\(\mathbf{A^{-1}}\)</span> is the inverse of matrix <span class="math inline">\(\mathbf{A}\)</span>, and <span class="math inline">\(\mathbf{A^{T}}\)</span> is the transpose of <span class="math inline">\(\mathbf{A}\)</span>.</p>
+<ul>
+<li>the covariance matrix of <span class="math inline">\(\bf{x}\)</span> with <span class="math inline">\(\bf{Y}\)</span>,</li>
+</ul>
+<p><span class="math display">\[
+\boldsymbol{\Sigma_{xy}(\omega)}=\mathbf{CG^T(I-B)^{-1T}}
+\]</span>
+- the covariance matrix of <span class="math inline">\(\bf{x}\)</span>,</p>
+<p><span class="math display">\[
+\boldsymbol{\Sigma_{x}(\omega)}=\mathbf{C}
+\]</span></p>
+<ul>
+<li>The widely used maximum likelihood (ML) estimation maximizes the likelihood of observing the sample matrix based on an assumption that the endogenous variables are multivariate-normally distributed, as <span class="math inline">\(\bf{Y} \sim N[0,\boldsymbol{\Sigma_y}]\)</span>, where <span class="math inline">\(\boldsymbol{\Sigma_y}\)</span> is the population covariance matrix of <span class="math inline">\(\bf{Y}\)</span>.
+<ul>
+<li>Statistically, it is equivalent to minimize the discrepancy between <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> and the <span class="math inline">\(\bf{S}\)</span> through the fitting or discrepancy function:</li>
+</ul></li>
+</ul>
+<p><span class="math display" id="eq:obj-fun">\[
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(P+Q)
+\tag{4},
+\]</span></p>
+<ul>
+<li><p>However complex the mathematics of the ML estimation, the interpretation of parameter estimates is relatively straightforward with both point estimates and standard error to construct interval estimates</p></li>
+<li><p>When a raw data file is analyzed, standard ML estimation assumes that there is no missing value. A special form of ML estimation is needed for raw data files where some observations are missing at random</p></li>
+<li><p>Although usually not a problem when analyzing recursive path models, a converged solution may be inadmissible in ML estimation and other iterative methods.</p>
+<ul>
+<li>This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates or correlation larger than one)</li>
+</ul></li>
+<li><p>Heywood cases can be caused by factors such as specification errors, nonrecursive model, and small sample sizes (e.g., N &lt; 100).</p>
+<ul>
+<li>When you have Heywood case, it’s not necessarily bad things since it can be used as diagnostic information about the model. Researchers should attempt to determine the source of the problem instead of constraining an error variance to be positive in a computer program.</li>
+</ul></li>
+<li><p>For over-identified model, model estimation is approximate, and there is thus a need to evaluate how well the model fits the data, or how close the parameter estimates and population values are.</p>
+<ul>
+<li>Model estimation is also known as model fitting, which is equivalent to test or confirm the null hypothesis <span class="math inline">\(\text{H}_0: \boldsymbol{\Sigma=\Sigma(\omega)}\)</span> based on the chi-square statistics and model degree of freedom</li>
+<li>A variety of fit indexes are available for model evaluation, many of which are derived from the model chi-square statistics</li>
+<li>Indexes strongly suggested to report: <span class="math inline">\(\chi_M^2\)</span> and its <span class="math inline">\(p\)</span>-value, the RMSEA, its 90% interval, CFI, and SRMR</li>
+</ul></li>
+<li><p>When the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> is standardized as a correlation matrix <span class="math inline">\(\bf{R}\)</span>, all parameter estimates will be standardized, similar to the standardized coefficients in regression, and is known as the standardized solution</p>
+<ul>
+<li>Due to scale invariance, the fitting result remain the same</li>
+<li>It’s a good practice to report both unstandardized and standardized estimates, since the two can give meaningful information from different perspectives.</li>
+</ul></li>
+<li><p>Example covariance structure with four variables:</p></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:typ-pa-tab">Table 2: </span>Example Covariance Structure S, N = 500
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+x1
+</th>
+<th style="text-align:right;">
+x2
+</th>
+<th style="text-align:right;">
+y1
+</th>
+<th style="text-align:right;">
+y2
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+x1
+</td>
+<td style="text-align:right;">
+0.952
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+x2
+</td>
+<td style="text-align:right;">
+-0.020
+</td>
+<td style="text-align:right;">
+1.027
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y1
+</td>
+<td style="text-align:right;">
+0.552
+</td>
+<td style="text-align:right;">
+0.190
+</td>
+<td style="text-align:right;">
+1.32
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y2
+</td>
+<td style="text-align:right;">
+0.710
+</td>
+<td style="text-align:right;">
+0.853
+</td>
+<td style="text-align:right;">
+1.10
+</td>
+<td style="text-align:right;">
+2.52
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Before obtaining parameter estimates, we need to evaluate if the model-data fit is appropriate
+<ul>
+<li>In this special case it is a just-identified model and the fit will be perfect; one might just report that it’s a saturated model without the detailed statistics</li>
+<li>For over-identified model, the following fit statistics should be reported:</li>
+<li><span class="math inline">\(\chi_M^2 (0) =0\)</span>, <span class="math inline">\(p = NA\)</span>, <span class="math inline">\(RMSEA = 0\)</span> with the 90% CI <span class="math inline">\((0, 0)\)</span>, <span class="math inline">\(CFI = 1\)</span>, <span class="math inline">\(SRMR = 0\)</span></li>
+</ul></li>
+<li>Parameter estimates contain rich information. Ex: see Table <a href="#tab:est-m0">3</a> for Figure <a href="#fig:typ-pa">1</a>
+<ul>
+<li>In the standardized solution, the variance of all variables are fixed as one</li>
+<li>Parameters in <span class="math inline">\(\mathbf{C}\)</span> should be directly obtained from the observed covariance structure; thus related SEs and <span class="math inline">\(z\)</span>-scores are not available</li>
+<li>Based on the <span class="math inline">\(z\)</span>-score or <span class="math inline">\(p\)</span>-value, all other parameter estimates are significant</li>
+<li>Based on the standardized estimates, the direct effects range from small to moderate</li>
+<li>Under the standardized solution, the proportion of explained variance (similar to the <span class="math inline">\(R^2\)</span> or coefficient of determination in regression analysis) for <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span> is <span class="math inline">\(1-d_{11}\)</span> and <span class="math inline">\(1-d_{22}\)</span>, respectively.</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-m0">Table 3: </span>Parameter Estimates
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.584
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+12.99
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.496
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+15.93
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{12}\)</span>
+</td>
+<td style="text-align:right;">
+0.197
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+4.54
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.173
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+4.64
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{21}\)</span>
+</td>
+<td style="text-align:right;">
+0.450
+</td>
+<td style="text-align:right;">
+0.053
+</td>
+<td style="text-align:right;">
+8.57
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.277
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+8.83
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.740
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+16.56
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.472
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+18.78
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{21}\)</span>
+</td>
+<td style="text-align:right;">
+0.537
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+11.87
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.388
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+12.22
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.959
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+15.81
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.728
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+23.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.982
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+15.81
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.390
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+16.05
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.951
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}\)</span>
+</td>
+<td style="text-align:right;">
+-0.020
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+-0.021
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+1.025
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+</div>
+<div id="causal-inference-and-modeling" class="section level2">
+<h2><strong>Causal Inference and Modeling</strong></h2>
+<ul>
+<li>Cause and effect or causal inference is the focus of PA; path model is also known as causal model</li>
+</ul>
+<div id="causal-inference-and-specification" class="section level3">
+<h3>Causal Inference and Specification</h3>
+<ul>
+<li>Causal inference in research depends on design, assumptions, and, to a lesser extent, statistical analysis.
+<ul>
+<li>This is because analysis by itself is rarely sufficient to establish causation.</li>
+<li>Some causal assumptions can be checked against the data, but others are not empirically testable.</li>
+<li>Whether unverifiable assumptions are tenable is thus a matter of argument, not statistics.</li>
+<li>Accordingly, the researcher should explicitly articulate such assumptions while reassuring his or her audience that untestable assumptions are reasonable.</li>
+</ul></li>
+<li>Experimental designs in which cases are randomly assigned to conditions are a gold standard for causal inference in the behavioral sciences. Such studies have design elements that bolster internal validity
+<ul>
+<li>Random assignment satisfies temporal precedence, or the requirement that presumed causes must occur before presumed effects</li>
+<li>The control group serves as a counterfactual for the experimental (treatment) group</li>
+<li>Randomization over replications also ensures that the independent variable is uncorrelated with all other potential causes of the outcome. This property concerns isolation, or the absence of other plausible explanations (confounders) that explain the observed covariation between the independent and dependent variables.</li>
+</ul></li>
+<li>In nonexperimental (passive observational) designs, few, if any, design elements may support causal inference. This is especially true if all variables are concurrently measured, such as when a set of questionnaires is completed during a single test session.
+<ul>
+<li>Therefore, the sole basis for causal inference in such designs is assumption, one supported by a convincing, substantive rationale for specifying that <span class="math inline">\(x\)</span> causes <span class="math inline">\(y\)</span> instead of the reverse</li>
+<li>This process relies heavily on the researcher to rule out alternative explanations of the association between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> and also to measure other presumed causes of <span class="math inline">\(y\)</span>; Both require strong substantive knowledge about the phenomenon under study</li>
+<li>If the researcher cannot give a cogent account of directionality specifications, then causal inference in studies with concurrent measurement may be unwarranted.</li>
+</ul></li>
+<li>A basic specification issue revolves around what variables cause a target outcome.
+<ul>
+<li>Because the literature for newer research areas can be limited, decisions about what to include in the model must sometimes be guided more by the researcher’s expertise than by published reports.</li>
+</ul></li>
+<li>In path models, the researcher specifies a model that attempts to explain why <span class="math inline">\(x\)</span>s and <span class="math inline">\(y\)</span>s are correlated.
+<ul>
+<li>Part of this explanation may include direct effects (e.g., <span class="math inline">\(x \rightarrow y\)</span>) and indirect effect <span class="math inline">\(x\rightarrow y_1 \rightarrow y_2\)</span>.</li>
+<li>Other parts of the explanation may reflect presumed noncausal effects, such as a spurious effect between <span class="math inline">\(y_1\)</span> and <span class="math inline">\(y_2\)</span> due to common causes <span class="math inline">\(x\)</span>, or unanalyzed effect (i.e., cause or disturbance correlations).</li>
+</ul></li>
+<li>Just as correlation does not imply causation, statistical causal modeling does not prove causation either. To reasonably infer that <span class="math inline">\(x\)</span> is a cause of <span class="math inline">\(y\)</span>, all of the following conditions must be met:
+<ol style="list-style-type: decimal">
+<li>there is time precedence, that is, <span class="math inline">\(x\)</span> precedes <span class="math inline">\(y\)</span> in time;</li>
+<li>substantive rationale that the direction of the causal relation is correctly specified and there’s a lack of alternative explanation, that is, <span class="math inline">\(X\)</span> causes <span class="math inline">\(Y\)</span> instead of the reverse, and it is not spurious</li>
+<li>the magnitude of association between <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> is moderate or above.</li>
+</ol></li>
+<li>Thus all analyses of causal models proceed on the basis of the above assumptions</li>
+</ul>
+</div>
+<div id="decomposition-of-causal-and-noncausal-effects" class="section level3">
+<h3>Decomposition of Causal and Noncausal Effects</h3>
+<ul>
+<li>For a causal model, it’s important to distinguish between different types of effects
+<ul>
+<li>There exist multiple effects between two variables due to more than one (see Figure <a href="#fig:typ-pa1">4</a>)</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:typ-pa1"></span>
+<div id="htmlwidget-5" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>, shape = none,width = 0.3]\naD_2 [pos = \"1,0!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n# a [pos = \"-2,3!\", width=1.5, label=\"(a) Recursive\",shape = plaintext]\n\naX_1->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_1->aY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naX_2->aY_1 [label = <g<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\naX_2->aY_2 [label = <g<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>]\naY_1->aY_2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\naD_1->aY_1\naD_2->aY_2\naX_1->aX_2[dir = both,tailport = \"w\", headport = \"w\",label = <c<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nadummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\",label = <c<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>]\naX_2->aX_2[dir = both,tailport = \"n\", headport = \"n\",label = <c<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>]\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: Path Model with Four Variables
+</p>
+</div>
+<ul>
+<li>In a recursive path model, the <strong>model-implied correlation</strong> is the sum of all the causal effects and noncausal effects between two variables
+<ul>
+<li>For better interpretation, all variables and path coefficients are standardized (i.e.,standardized solution)</li>
+<li>To figure out all the causal and noncausal effects between any two variables, there are two ways: tracing rule and matrix algebra</li>
+</ul></li>
+<li><strong>Tracing rule</strong> is straightforward and easier to understand with the following principles:
+<ol style="list-style-type: decimal">
+<li>One can go forward or backward causally; but once gone forward, one cannot go backward.</li>
+<li>One can go through only one unanalyzed relation (two-headed arrow).</li>
+<li>One can enter or leave a variable only once.</li>
+</ol></li>
+<li>An alternative definition comes from Chen and Pearl (2015): A valid tracing does not involve colliding arrowheads, such as:</li>
+</ul>
+<p><span class="math display">\[
+\boldsymbol{\rightarrow \leftarrow, ~\leftrightarrow \leftarrow, ~\rightarrow \leftrightarrow, ~\leftrightarrow \leftrightarrow}
+\]</span>
+* Ex: Figure <a href="#fig:typ-pa1">4</a></p>
+<ul>
+<li><p><span class="math inline">\(r(x_1,x_2)=c_{21}\)</span>, but <strong>not</strong> <span class="math inline">\(g_{11}g_{21}\)</span> or <span class="math inline">\(g_{11}g_{21}\)</span> due to Rule 1</p></li>
+<li><p><span class="math inline">\(r(x_1,y_1)=g_{11}+c_{21}g_{12}\)</span></p></li>
+<li><p><span class="math inline">\(r(x_2,y_1)=g_{12}+c_{21}g_{22}\)</span></p></li>
+<li><p><span class="math inline">\(r(x_1,y_2)=g_{21}+g_{11}b_{21}+c_{21}g_{22}+c_{21}g_{12}b_{21}\)</span></p></li>
+<li><p><span class="math inline">\(r(x_2,y_2)=g_{22}+g_{12}b_{21}+c_{21}g_{21}+c_{21}g_{11}b_{21}\)</span></p></li>
+<li><p><span class="math inline">\(r(y_2,y_2)=b_{21}+g_{12}g_{22}+g_{11}g_{21}+g_{11}c_{21}g_{22}+g_{12}c_{21}g_{21}\)</span></p></li>
+<li><p>Use of the tracing rules is error-prone because it can be difficult to spot all of the valid tracings in larger models, and these rules do not apply to models with causal loops (i.e., nonrecursive)</p></li>
+<li><p>In contrast, matrix algebra provide a better solution, especially for complicated model.</p></li>
+</ul>
+<p>For instance,</p>
+<p><span class="math display" id="eq:eff-dec">\[
+\begin{align*}
+COV(x_1,y_1) &amp; = COV(x_1,g_{11}x_1+g_{12}x_2+u_1) \\
+ &amp; =g_{11}COV(x_1,x_1)+g_{12}COV(x_1,x_2)+COV(x_1,u_1)
+\end{align*}.
+\tag{5}
+\]</span>
+Since all variables are standardized and <span class="math inline">\(COV(x_1,u_1)=0\)</span> based on model assumption, we have <span class="math inline">\(r(x_1,y_1)=g_{11}+c_{21}g_{12}\)</span></p>
+<p>Similarly,
+<span class="math display" id="eq:eff-dec1">\[
+\begin{align*}
+COV(x_1,y_2) &amp; = COV(x_1,b_{21}y_1+g_{21}x_1+g_{22}x_2+u_2) \\
+ &amp; =b_{21}COV(x_1,y_1)+g_{21}COV(x_1,x_1)+g_{22}COV(x_1,x_2)+COV(x_1,u_2) \\
+ &amp; = b_{21}(g_{11}+c_{21}g_{12})+g_{21}+g_{22}c_{21}
+\end{align*},
+\tag{6}
+\]</span>
+which is the same as the tracing-rule result above: <span class="math inline">\(r(x_1,y_2)=g_{21}+g_{11}b_{21}+c_{21}g_{22}+c_{21}g_{12}b_{21}\)</span>.</p>
+<ul>
+<li>Either way, we can decompose the total effects between any two variables as follows:</li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-3">Table 4: </span>Decomposition of Effects
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Variables
+</th>
+<th style="text-align:left;">
+DE
+</th>
+<th style="text-align:left;">
+IE
+</th>
+<th style="text-align:left;">
+Noncausal
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x_1,x_2\)</span>
+</td>
+<td style="text-align:left;">
+–
+</td>
+<td style="text-align:left;">
+–
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}\)</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x_1,y_1\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{11}\)</span>
+</td>
+<td style="text-align:left;">
+–
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}g_{12}\)</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x_2,y_1\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{12}\)</span>
+</td>
+<td style="text-align:left;">
+–
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}g_{22}\)</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x_1,y_2\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{21}\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{11}b_{21}\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}g_{22}+c_{21}g_{12}b_{21}\)</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(x_2,y_2\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{22}\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{12}b_{21}\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}g_{21}+c_{21}g_{11}b_{21}\)</span>
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(y_1,y_2\)</span>
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(b_{21}\)</span>
+</td>
+<td style="text-align:left;">
+–
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(g_{12}g_{22}+g_{11}g_{21}+g_{11}c_{21}g_{22}+g_{12}c_{21}g_{21}\)</span>
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The above equations also imply how one can obtain analytical solution (i.e., without estimation) from a saturated model where the number of unknown parameters and equations are exactly the same</li>
+</ul>
+</div>
+<div id="indirect-effects-versus-mediation" class="section level3">
+<h3>Indirect Effects versus Mediation</h3>
+<ul>
+<li><p>Indirect effects are always part of mediation, but they are not synonymous. This is because mediation refers to the causal hypothesis that one variable causes changes in another variable, which in turn leads to changes in the outcome variable (Little, 2013).</p></li>
+<li><p>The emphasis on changes in the above definition of mediation is because without evidence for change, the only effects that could be supported are indirect effects, not mediation. In other words, mediation always involves indirect effects, but not all indirect effects automatically signal mediation.</p></li>
+<li><p>This is especially true in nonexperimental designs with no time precedence. Such designs are also called cross-sectional designs.</p></li>
+<li><p>In general, use of the term mediation should be reserved for designs that feature time precedence;
+otherwise, use of the term indirect effect is more realistic.</p></li>
+</ul>
+</div>
+</div>
+<div id="model-comparisons" class="section level2">
+<h2><strong>Model Comparisons</strong></h2>
+<ul>
+<li>For the same data or covariance structure, one can specify different models for comparisons, given there is substantive rationale
+<ul>
+<li>In addition to Figure <a href="#fig:typ-pa1">4</a>, Figure <a href="#fig:mod-com">5</a> presents several model specifications to the same covariance structure in previous chapter</li>
+</ul></li>
+<li>Model evaluation described in previous chapter is considered as absolute fit
+<ul>
+<li>Evaluate if the model fits the data on absolute standards</li>
+<li>Based on Table <a href="#tab:typ-pa-tab">2</a>, Model (b) and (d) don’t fit the data well; Figure <a href="#fig:typ-pa1">4</a> and Model (c) are just-identified or saturated models</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mod-com"></span>
+<div id="htmlwidget-6" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\", label=\"\",  shape = none,width = 0.3]\naD_2 [pos = \"1,0!\", label=\"\",  shape = none,width = 0.3]\nadummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aY_1 \naX_1->aY_2 \naX_2->aY_1 \naX_2->aY_2 \naY_1->aY_2\n# aY_2->aY_1 \naD_1->aY_1\naD_2->aY_2\n# aX_1->aX_2[dir = both,tailport = \"w\", headport = \"w\"]\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\"]\naX_2->aX_2[dir = both,tailport = \"n\", headport = \"n\"]\na [pos = \"-2,3!\", width=1.5, label=\"(a)\",shape = plaintext]\n\nbX_1 [pos = \"3,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbX_2 [pos = \"3,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nbY_1 [pos = \"5,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_2 [pos = \"5,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbD_1 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\nbD_2 [pos = \"6,0!\",label=\"\",   shape = none,width = 0.3]\nbdummy [pos = \"3,1!\", width=1.5, label=\"\", color=white]\nbX_1->bY_1\nbX_1->bY_2\nbX_2->bY_1\nbX_2->bY_2\n# bY_1->bY_2\n# bY_2->bY_1[tailport = \"n\", headport = \"s\"]\nbD_1->bY_1\nbD_2->bY_2\nbX_1->bX_2[dir = both,tailport = \"w\", headport = \"w\"]\nbX_1->bX_1[dir = both,tailport = \"n\", headport = \"n\"]\nbX_2->bX_2[dir = both,tailport = \"n\", headport = \"n\"]\nb [pos = \"3,3!\", width=1.5, label=\"(b)\",shape = plaintext]\n# bD_1->bD_2[dir=both,label=\"\", splines=curved, tailport = \"e\", headport = \"e\"]\n# bdummy1 [pos = \"6,1!\",  width=1.5,label=\"\", color=white]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: Alternative Model Specifications
+</p>
+</div>
+<div id="htmlwidget-7" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\naX_1 [pos = \"-2,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naX_2 [pos = \"-2,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naY_1 [pos = \"0,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\naY_2 [pos = \"0,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\naD_1 [pos = \"1,2!\", label=\"\",  shape = none,width = 0.3]\naD_2 [pos = \"1,0!\", label=\"\",  shape = none,width = 0.3]\n# adummy [pos = \"-2,1!\", width=1.5, label=\"\", color=white]\naX_1->aY_1 \naX_1->aY_2 \naX_2->aY_1 \naX_2->aY_2 \naY_1->aY_2\n# aY_2->aY_1 \naD_1->aY_1\naD_2->aY_2\naX_1->aX_2\naX_1->aX_1[dir = both,tailport = \"n\", headport = \"n\"]\naX_2->aX_2[dir = both,tailport = \"s\", headport = \"s\"]\na [pos = \"-2,3!\", width=1.5, label=\"(c)\",shape = plaintext]\n\nbX_1 [pos = \"3,2!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbX_2 [pos = \"3,0!\",label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nbY_1 [pos = \"5,2!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbY_2 [pos = \"5,0!\",label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbD_1 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\nbD_2 [pos = \"6,0!\",label=\"\",   shape = none,width = 0.3]\n# bdummy [pos = \"3,1!\", width=1.5, label=\"\", color=white]\nbX_1->bY_1\nbX_1->bY_2\nbX_2->bY_1\nbX_2->bY_2\n# bY_1->bY_2\n# bY_2->bY_1[tailport = \"n\", headport = \"s\"]\nbD_1->bY_1\nbD_2->bY_2\nbX_1->bX_2\nbX_1->bX_1[dir = both,tailport = \"n\", headport = \"n\"]\nbX_2->bX_2[dir = both,tailport = \"s\", headport = \"s\"]\nb [pos = \"3,3!\", width=1.5, label=\"(d)\",shape = plaintext]\n# bD_1->bD_2[dir=both,label=\"\", splines=curved, tailport = \"e\", headport = \"e\"]\n# bdummy1 [pos = \"6,1!\",  width=1.5,label=\"\", color=white]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<ul>
+<li>In contrast, model comparison is a relative fit: to select the best model among competing candidates
+<ul>
+<li>Two types of comparisons: nested vs. non-nested</li>
+</ul></li>
+<li>Two models are <strong>hierarchical</strong> or <strong>nested</strong> if one is a subset of the other
+<ul>
+<li>Unrestricted: the one with more parameters to estimate</li>
+<li>Restricted model: the one with less parameters to estimate</li>
+<li>The unrestricted model can be transformed into the restricted model by imposing constraints on the parameters</li>
+<li>The restricted model can be transformed into the unrestricted model by relaxing constraints on the parameters</li>
+</ul></li>
+<li>Ex: in Figure <a href="#fig:mod-com">5</a> and Figure <a href="#fig:typ-pa1">4</a>, there are different pairs of nested models (unrestricted vs. restricted):
+<ul>
+<li>Figure <a href="#fig:typ-pa1">4</a> vs. Model (a)</li>
+<li>Figure <a href="#fig:typ-pa1">4</a> vs. Model (b)</li>
+<li>Model (c) and (d)</li>
+</ul></li>
+<li>The likelihood ratio test (LRT) is adopted with the assumption <span class="math inline">\(\chi_M^2\)</span> is a chi-square distribution with <span class="math inline">\(df_M\)</span> degree of freedom:
+<ul>
+<li>The chi-square difference statistic, <span class="math inline">\(\chi_D^2=\chi_{M,res}^2-\chi_{M,unr}^2\)</span></li>
+<li>Its degrees of freedom, <span class="math inline">\(df_D=df_{M,res}-df_{M,unr}\)</span></li>
+</ul></li>
+<li>Ex: in Table <a href="#tab:typ-pa-tab">2</a>:
+<ul>
+<li>The chi-square difference statistic between Figure <a href="#fig:typ-pa1">4</a> and Model (b), or between Model (c) and (d) is significant, with <span class="math inline">\(\chi_D^2(1)=45.776\)</span>, <span class="math inline">\(p&lt;.0001\)</span></li>
+<li>But the difference between Model (a) and Figure <a href="#fig:typ-pa">1</a> is insignificant, with <span class="math inline">\(\chi_D^2(1)=0.154\)</span>, <span class="math inline">\(p=0.695\)</span></li>
+</ul></li>
+<li>If two models are not nested (i.e., neither model’s parameters form a subset of the other model’s parameters), the above chi-square difference statistic cannot be used for model comparison
+<ul>
+<li>Instead, we can adopt the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC)</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:fit-pa-tab">Table 5: </span>Fit Indexes for Different Model Specifications
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Fig 1
+</th>
+<th style="text-align:right;">
+a
+</th>
+<th style="text-align:right;">
+b
+</th>
+<th style="text-align:right;">
+c
+</th>
+<th style="text-align:right;">
+d
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CHISQ
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.213
+</td>
+<td style="text-align:right;">
+124.119
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+124.119
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DF
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PVALUE
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.645
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.496
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.496
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.LOWER
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.425
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.425
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.UPPER
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.092
+</td>
+<td style="text-align:right;">
+0.572
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.572
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CFI
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.803
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.803
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SRMR
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.010
+</td>
+<td style="text-align:right;">
+0.089
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.089
+</td>
+</tr>
+</tbody>
+</table>
+<div id="equivalent-models" class="section level3">
+<h3>Equivalent Models</h3>
+<ul>
+<li>Equivalent models are models mathematically identical but with a different configuration of model structure
+<ul>
+<li>They are usually transformation of constraints on the same variables</li>
+<li>They also have equal goodness-of-fit indexes, including <span class="math inline">\(\chi_M^2\)</span> (and degree of freedom) and all other fit statistics described earlier</li>
+<li>Thus, the researchers need to explain why their final model should be preferred over other equivalent models.</li>
+</ul></li>
+<li>Ex: In Figure <a href="#fig:mod-com">5</a>, Models (b) and (d) are equivalent, by transforming the correlations as direct effects
+<ul>
+<li>Thus, explanation is needed why one is preferred to the other</li>
+</ul></li>
+</ul>
+</div>
+<div id="model-modification-and-the-modification-index" class="section level3">
+<h3>Model Modification and the Modification Index</h3>
+<ul>
+<li><p>When the model is slightly modified, the original and modified models are usually nested with each other</p>
+<ul>
+<li>Ex: adding a direct path to Model (b) in Figure <a href="#fig:mod-com">5</a> becomes Figure <a href="#fig:typ-pa1">4</a><br />
+</li>
+<li>We can apply the same chi-square difference statistic <span class="math inline">\(\chi_D^2\)</span> with a single degree of freedom to compare the models</li>
+<li>That is, it estimates <span class="math inline">\(\chi_D^2(1)\)</span> for <strong>adding</strong> a parameter (e.g, direct effect).</li>
+<li>Usually, MI values larger than significant at <span class="math inline">\(.05\)</span> level, or <span class="math inline">\(\chi_D^2(1)&gt;3.84\)</span>, should be of concern, and the largest value should be prioritized.</li>
+</ul></li>
+<li><p>Associated with the MI is the expected parameter change statistic (EPC), which reflects the approximate value of the new parameter if added to the model.</p></li>
+<li><p>Table <a href="#tab:mi-ex-tab">6</a> presents the MI values of significant parameter changes for Model (b) in Figure <a href="#fig:mod-com">5</a>:</p></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:mi-ex-tab">Table 6: </span>Modification Indexes above 3.84
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+MI
+</th>
+<th style="text-align:right;">
+EPC
+</th>
+<th style="text-align:right;">
+Std EPC
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{12}\)</span>
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+0.515
+</td>
+<td style="text-align:right;">
+0.515
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{12}\)</span>
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+0.409
+</td>
+<td style="text-align:right;">
+0.409
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{21}\)</span>
+</td>
+<td style="text-align:right;">
+110
+</td>
+<td style="text-align:right;">
+0.537
+</td>
+<td style="text-align:right;">
+0.537
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="parameter-testing" class="section level3">
+<h3>Parameter Testing</h3>
+<ul>
+<li><p>We can evaluate individual parameters (free or constrained) in the model with one of the following methods:</p>
+<ol style="list-style-type: decimal">
+<li>Evaluate the significance of parameter estimates with <span class="math inline">\(z\)</span>-score and <span class="math inline">\(p\)</span>-value</li>
+<li>Use LRT to compare models with different specifications, Ex: Model (c) vs. (d) in Figure <a href="#fig:mod-com">5</a></li>
+<li>Wald test with constrained parameters</li>
+</ol></li>
+<li><p>The Wald test is powerful and flexible; it can test a set of parameter constraints without affecting the estimation of the original model. We will illustrate the steps of Wald test with Figure <a href="#fig:typ-pa1">4</a></p></li>
+<li><p>Ex: assume we want to compare the direct effects (DEs), indirect effects (IEs), and total causal effects (TEs) of <span class="math inline">\(x_1\)</span> and <span class="math inline">\(x_2\)</span> on <span class="math inline">\(y_2\)</span>. In the first step, we create constrained parameters for the IE and TE, as:</p>
+<ul>
+<li><span class="math inline">\(IE_1=g_{11}b_{21}; ~IE_2=g_{12}b_{21}\)</span></li>
+<li><span class="math inline">\(TE_1=g_{21}+g_{11}b_{21}; ~TE_2=g_{22}+g_{12}b_{21}\)</span></li>
+</ul></li>
+<li><p>In the second step, we can setup the associate hypotheses, as:</p>
+<ul>
+<li><span class="math inline">\(H_{DE}: ~g_{21}=g_{22}\)</span></li>
+<li><span class="math inline">\(H_{IE}: ~IE_1=IE_2\)</span></li>
+<li><span class="math inline">\(H_{TE}: ~TE_1=TE_2\)</span></li>
+</ul></li>
+<li><p>In the third step, we re-estimate the model with the same data and new constraints</p>
+<ul>
+<li>One can see that all the effects are statistically significant</li>
+<li>However, it’s difficult to tell if the effects are significantly different</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-m1">Table 7: </span>Parameter Estimates
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.584
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+12.99
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.496
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+15.93
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{12}\)</span>
+</td>
+<td style="text-align:right;">
+0.197
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+4.54
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.173
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+4.64
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{21}\)</span>
+</td>
+<td style="text-align:right;">
+0.450
+</td>
+<td style="text-align:right;">
+0.053
+</td>
+<td style="text-align:right;">
+8.57
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.277
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+8.83
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(g_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.740
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+16.56
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.472
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+18.78
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{21}\)</span>
+</td>
+<td style="text-align:right;">
+0.537
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+11.87
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.388
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+12.22
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.959
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+15.81
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.728
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+23.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.982
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+15.81
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.390
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+16.05
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.951
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{21}\)</span>
+</td>
+<td style="text-align:right;">
+-0.020
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+-0.021
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+1.025
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(IE_1\)</span>
+</td>
+<td style="text-align:right;">
+0.313
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+8.76
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.193
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+9.47
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(IE_2\)</span>
+</td>
+<td style="text-align:right;">
+0.106
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+4.24
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.067
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+4.42
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(TE_1\)</span>
+</td>
+<td style="text-align:right;">
+0.764
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+14.84
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.469
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+17.43
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(TE_2\)</span>
+</td>
+<td style="text-align:right;">
+0.845
+</td>
+<td style="text-align:right;">
+0.050
+</td>
+<td style="text-align:right;">
+17.06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.539
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+21.38
+</td>
+<td style="text-align:right;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Finally, hypotheses testing is conducted with the Wald test statistics:</p>
+<ul>
+<li><span class="math inline">\(H_{DE}: Wald(1)=19.9, ~p&lt;.0001\)</span></li>
+<li><span class="math inline">\(H_{IE}: Wald(1)=30.7, ~p&lt;.0001\)</span></li>
+<li><span class="math inline">\(H_{TE}: Wald(1)=1.34, ~p=.248\)</span></li>
+</ul></li>
+<li><p>It’s interesting to see that the difference of the TE is insignificant, although the difference of either the DE or IE is significant.</p></li>
+<li><p>As shown, We often want to conduct null hypothesis significance test if the causal effects are significantly different from zero and/or each other. For the IE, special treatment is preferred for a more rigorous testing.</p>
+<ul>
+<li>Remember that the IE is a product of two DEs; although the ML estimate of each DE can be considered as normally distributed (i.e., with the <span class="math inline">\(z\)</span> statistic and symmetric interval estimates), the product of them tends to be positively skewed (i.e., nonnormal), invalidating the use of <span class="math inline">\(z\)</span>-score and associated standard error to construct symmetric interval.</li>
+<li>Instead, a better strategy is to conduct nonparametric bootstrapping, which is a resampling method to estimate the empirical sampling distribution of the indirect effect (Mackinnon et al., 2002, Psych Methods); with the empirical distribution, we can construct a confidence interval for significance testing</li>
+</ul></li>
+<li><p>Unfortunately, the bootstrapping method needs raw data and won’t work when only the covariance structure is available.</p></li>
+</ul>
+</div>
+<div id="model-trimming-and-building" class="section level3">
+<h3>Model Trimming and Building</h3>
+<ul>
+<li><p>There are two contexts in which hierarchical path models are usually compared. In <strong>model trimming</strong>, the researcher typically begins the analysis with a just-identified model and simplifies it by eliminating paths.</p>
+<ul>
+<li>This is done by specifying that at least one path previously freely estimated is now constrained to equal zero.</li>
+<li>As a model is trimmed, its overall fit to the data typically becomes worse (e.g.,<span class="math inline">\(\chi_M^2\)</span>increases).</li>
+</ul></li>
+<li><p>The starting point for <strong>model building</strong> is usually a bare-bones, over-identified model to which paths are added.</p>
+<ul>
+<li>Typically, at least one previously fixed-to-zero path is specified as a free parameter.</li>
+<li>Model fit generally improves as paths are added (e.g.,<span class="math inline">\(\chi_M^2\)</span>decreases).</li>
+</ul></li>
+<li><p>However, the goal of both trimming and building is to find a parsimonious model that still fits the data reasonably well. Models can be trimmed or built according to one of two different standards: theoretical or empirical.</p>
+<ul>
+<li>Theoretical respecification represents tests of specific, a priori hypotheses. Thus, respecification of a model to test hierarchical versions of it is guided by the researcher’s hypotheses, and the main challenge comes from the theoretical or substantive rationale for the hypotheses.</li>
+<li>For empirically based respecification, paths are deleted or added according to statistical criteria, which is entirely data-driven. In this case the researcher should worry about capitalization on chance: a path may be statistically significant due only to chance of variation, and its inclusion in the model would be akin to a Type I error; likewise, a path that corresponds to a true causal effect may not be statistically significant in a particular sample, and its exclusion from the model would be essentially a Type II error.</li>
+<li>In practice, it might be more realistic to allow some empirical modifications on the basis of a theoretical respecification (i.e., to give a greater role for theory in model respecification).</li>
+</ul></li>
+<li><p>The <strong>chi-square difference</strong> statistic, <span class="math inline">\(\chi_D^2\)</span>, can be used to test the statistical significance of the decrement in overall fit as paths are eliminated (trimming) or the improvement in fit as paths are added (building).</p></li>
+<li><p>Following is an example of Model Trimming vs. Building</p>
+<ul>
+<li>For model trimming, we begin with a just-identified model and adopt the univariate or multivariate Wald W test statistics to test if individual direct effects in dash lines are significant and thus can be dropped, one-by-one or collectively, respectively</li>
+<li>For model building, we begin with a bare-bone model and adopt the modification index with expected parameter change to add significant direct effect one by one until insignificant change</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-5"></span>
+<div id="htmlwidget-8" style="width:672px;height:960px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8">{"x":{"diagram":"\ndigraph SEM {\n\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,outputorder = edgesfirst,splines=true]\n\nnode [shape = rectangle]\n\nExe [pos = \"-4,2!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nHar [pos = \"-4,0!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nFit [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nStr [pos = \"-1,-1!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nIll [pos = \"2,1!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nD_Fi [pos = \"1,4!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>, shape = none]\nD_St [pos = \"1,-2!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>, shape = none]\nD_ll [pos = \"3,2!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>, shape = none]\ndummy [pos = \"-4.2,1!\", width=2, label=\"\", color=white]\na [pos = \"-4,4!\", width=1.5, label=\"(a) Model Trimming (based on A Jusst-Identified Model)\",shape = plaintext]\n\nExe:w->Har:w [label = \"\",dir = both,shape=curve]\nExe->Fit[label = \"\"]\nExe->Str[label = \"\",style=\"dashed\"]\nExe->Ill[label = \".\",style=\"dashed\"]\nHar->Fit[label = \".\",style=\"dashed\"]\nHar->Str[label = \"\"]\nHar->Ill[label = \"\",style=\"dashed\"]\nFit->Ill[label = \"\"]\nFit->Str[label = \"\",style=\"dashed\"]\nStr->Ill[label = \"\"]\n\nD_Fi->Fit \nD_ll->Ill \nD_St->Str \n\nExe->Exe [label = \"\",dir = both,tailport = \"n\", headport = \"n\"]\nHar->Har [label = \"\",dir = both,tailport = \"n\", headport = \"n\"]\n\n\n\nbExe [pos = \"-4,-6!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbHar [pos = \"-4,-8!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nbFit [pos = \"-1,-5!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nbStr [pos = \"-1,-9!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nbIll [pos = \"2,-7!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nbD_Fi [pos = \"1,-4!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>, shape = none]\nbD_St [pos = \"1,-10!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>, shape = none]\nbD_ll [pos = \"3,-6!\", label = <u<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>, shape = none]\nbdummy [pos = \"-4.2,-7!\", width=2, label=\"\", color=white]\nb [pos = \"-4,-4!\", width=1.5, label=\"(b) Model Building (based on A Bare-bone Model\",shape = plaintext]\n\nbExe:w->bHar:w [label = \"\",dir = both,shape=curve]\nbExe->bFit[label = \"\"]\n# Exe->Str[label = \"\",style=\"dashed\"]\n# Exe->Ill[label = \".\",style=\"dashed\"]\n# Har->Fit[label = \".\",style=\"dashed\"]\nbHar->bStr[label = \"\"]\n# Har->Ill[label = \"\",style=\"dashed\"]\nbFit->bIll[label = \"\"]\n# Fit->Str[label = \"\",style=\"dashed\"]\nbStr->bIll[label = \"\"]\n\nbD_Fi->bFit \nbD_ll->bIll \nbD_St->bStr \n\nbExe->bExe [label = \"\",dir = both,tailport = \"n\", headport = \"n\"]\nbHar->bHar [label = \"\",dir = both,tailport = \"n\", headport = \"n\"]\n}\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 6: Example of Model Trimming vs. Building
+</p>
+</div>
+</body>
+</div>
+</div>
+
+</main>
+
+  <footer>
+  <script src="//yihui.org/js/math-code.js"></script>
+<script async src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<script async src="//yihui.org/js/center-img.js"></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2020 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+

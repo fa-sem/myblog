@@ -1,0 +1,4479 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Structural Model with Latent Variables | A minimal Hugo website</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/fonts.css" />
+    
+  </head>
+
+  <body>
+    <nav>
+    <ul class="menu">
+      
+      <li><a href="/">Home</a></li>
+      
+      <li><a href="/about/">About</a></li>
+      
+      <li><a href="/categories/">Categories</a></li>
+      
+      <li><a href="/tags/">Tags</a></li>
+      
+      <li><a href="/index.xml">Subscribe</a></li>
+      
+    </ul>
+    <hr/>
+    </nav>
+
+<div class="article-meta">
+<h1><span class="title">Structural Model with Latent Variables</span></h1>
+<h2 class="author">Jinsong Chen</h2>
+
+</div>
+
+<main>
+
+<script src="/post/1/01/01/structural-model-with-latent-variables/index_files/header-attrs/header-attrs.js"></script>
+<script src="/post/1/01/01/structural-model-with-latent-variables/index_files/kePrint/kePrint.js"></script>
+<link href="/post/1/01/01/structural-model-with-latent-variables/index_files/lightable/lightable.css" rel="stylesheet" />
+<script src="/post/1/01/01/structural-model-with-latent-variables/index_files/htmlwidgets/htmlwidgets.js"></script>
+<script src="/post/1/01/01/structural-model-with-latent-variables/index_files/viz/viz.js"></script>
+<link href="/post/1/01/01/structural-model-with-latent-variables/index_files/DiagrammeR-styles/styles.css" rel="stylesheet" />
+<script src="/post/1/01/01/structural-model-with-latent-variables/index_files/grViz-binding/grViz.js"></script>
+
+
+<style type="text/css">
+
+body {
+  font-size: 2em;
+}
+
+</style>
+<body>
+<hr />
+<div id="introduction" class="section level2">
+<h2><strong>Introduction</strong></h2>
+<ul>
+<li><p>The most general kind of model in SEM is a structural model with latent variables, which is also known as a structural regression (SR) model or full structural equation model (full model)</p>
+<ul>
+<li>It can be regarded as a marriage of the path analysis and (confirmatory) factor analysis, and relies on many principles and assumptions under both the PA and CFA</li>
+<li>Thus, a full model can be decomposed into a structural and measurement component</li>
+</ul></li>
+<li><p>Although the coupling of PA and CFA seems straightforward, a full model with both a structural and measurement component can be very complicated, with different combinations of the exogenous and endogenous variables and/or the observed and latent variables.</p>
+<ul>
+<li>From the structural perspective, the focus is to decompose the model-implied correlation or covariance into causal and noncausal effects</li>
+<li>From the measurement perspective, the focus is to analyze the latent construct and pattern underlying the observed variables.</li>
+</ul></li>
+<li><p>As mentioned, the key to fully understand the complexity of the modeling process are model parameters. But notation system with both exogenous and endogenous variables in the full model is tedious.</p></li>
+<li><p>Although the idea to distinguish exogenous and endogenous variables is didactically meaningful or heuristic, it often brings more complexity to understand models with latent variables.</p></li>
+<li><p>Here we’ll adopt a simpler <strong>all <span class="math inline">\(y\)</span> notation</strong> system, which extends the notation system used in CFA with a path matrix:</p>
+<ul>
+<li>All observed variables are represented as <span class="math inline">\(y\)</span>s</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:unnamed-chunk-2">Table 1: </span>All <span class="math inline">\(y\)</span> Notation
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Symbol
+</th>
+<th style="text-align:left;">
+Matrix Form
+</th>
+<th style="text-align:left;">
+Dimension
+</th>
+<th style="text-align:left;">
+Meaning
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(y\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+Y
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Indicator or item, observed variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(f\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+F
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(K \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Factor, latent variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(e\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+E
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Measurement error, error variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(u\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+U
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times 1\)</span>
+</td>
+<td style="text-align:left;">
+Disturbance, error variable
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+B
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(P \times K\)</span>
+</td>
+<td style="text-align:left;">
+Path coefficient, parameter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+A
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times K\)</span>
+</td>
+<td style="text-align:left;">
+Loading, parameter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+C
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(K \times K\)</span>
+</td>
+<td style="text-align:left;">
+Factor covariance, parameter
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d\)</span>
+</td>
+<td style="text-align:left;font-weight: bold;">
+D
+</td>
+<td style="text-align:left;">
+<span class="math inline">\(J \times J\)</span>
+</td>
+<td style="text-align:left;">
+Error covariance, parameter
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>We will first consider Standard full models, where all variables in the structural component are latent variables (i.e., factors)
+<ul>
+<li>In the second part we’ll extend the idea to a mix of latent and observed variables by introducing the concept of single-indicator factor</li>
+</ul></li>
+</ul>
+</div>
+<div id="model-specification-and-identification" class="section level2">
+<h2><strong>Model Specification and Identification</strong></h2>
+<div id="general-representation" class="section level3">
+<h3>General Representation</h3>
+<ul>
+<li>In general, we can assume there are <span class="math inline">\(J\)</span> indicators <span class="math inline">\(y\)</span> and <span class="math inline">\(K\)</span> factors <span class="math inline">\(f\)</span>. Out of the <span class="math inline">\(K\)</span> factors, <span class="math inline">\(P\)</span> are endogenous. A general representation for the structural and measurement components, respectively, is:</li>
+</ul>
+<p><span class="math display" id="eq:full-str">\[
+f_p=\sum_{k=1}^{K}b_{pk}f_{k}+u_p,
+\tag{1}
+\]</span></p>
+<p>and
+<span class="math display" id="eq:full-mea">\[
+y_j= \sum_{k=1}^{K} a_{jk} f_{k} + {e}_j.
+\tag{2}
+\]</span></p>
+<p>where <span class="math inline">\(b\)</span>s and <span class="math inline">\(a\)</span>s are the path and loading coefficients, respectively; <span class="math inline">\(u\)</span>s and <span class="math inline">\(E\)</span>s are the disturbances for the endogenous latent variables and measurement errors of the indicators, respectively; subscripts <span class="math inline">\(p=1...P\)</span> and <span class="math inline">\(j=1...J\)</span>.</p>
+<ul>
+<li>Model parameters can be better understood through the matrix form, as:</li>
+</ul>
+<p><span class="math display" id="eq:full-str-mat">\[
+\mathbf{F=BF}+\mathbf{U},
+\tag{3}
+\]</span></p>
+<p><span class="math display" id="eq:full-mea-mat">\[
+\mathbf{Y} =\mathbf{AF+E}.
+\tag{4}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{B}\)</span> is the <span class="math inline">\(P \times K\)</span> matrix of path coefficients or direct effects, and <span class="math inline">\(\mathbf{A}\)</span> the <span class="math inline">\(J \times K\)</span> loading matrix.</p>
+<ul>
+<li><p>Variances and covariances among exogenous latent variables and those among disturbances <span class="math inline">\(\mathbf{U}\)</span> are now represented together in a <span class="math inline">\(K \times K\)</span> covariance matrix <span class="math inline">\(\mathbf{C}\)</span>.</p></li>
+<li><p>Variances and covariances among measurement errors <span class="math inline">\(\mathbf{E}\)</span> are represented in a <span class="math inline">\(J \times J\)</span>
+covariance matrix <span class="math inline">\(\mathbf{D}\)</span>.</p></li>
+<li><p>All model parameters <span class="math inline">\(\boldsymbol{\omega}\)</span> are contained in four matrices: <span class="math inline">\(\mathbf{B, A,C, D}\)</span></p>
+<ul>
+<li>There are a variety of constraints on the matrices for model identification</li>
+</ul></li>
+<li><p>Here is an example of standard full model diagram with four latent variables, each with two indicators:</p></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:srm-4f"></span>
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"3,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"1,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\ny7[pos = \"-1,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\ny8[pos = \"-3,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nF4[pos = \"-2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nD1 [pos = \"-3,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\nD2 [pos = \"3,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\ndummy [pos = \"0,-1!\", width=1, height=1, label=\"\", color=white]\n\nF4->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>44<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"] \nF3->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>34<\/SUB><\/FONT>>]\nF3->F3[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>33<\/SUB><\/FONT>>,tailport = \"e\", headport = \"e\"]\nF2->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\nF3->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>13<\/SUB><\/FONT>>]\nF3->F2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>23<\/SUB><\/FONT>>]\nF4->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>14<\/SUB><\/FONT>>]\nF4->F2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>24<\/SUB><\/FONT>>]\nD1->F1\nD2->F2\n# D3->F3\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nF2->y3 [label = \"1\"]\nF2->y4 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>42<\/SUB><\/FONT>>]\nF3->y5 [label = \"1\"]\nF3->y6 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>63<\/SUB><\/FONT>>]\nF4->y7 [label = \"1\"]\nF4->y8 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>84<\/SUB><\/FONT>>]\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny2e [pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny3e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny4e[pos = \"3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny5e[pos = \"3,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny6e[pos = \"1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny7e[pos = \"-1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny8e[pos = \"-3,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>,shape=none,width = 0.3]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\ny7e->y7\ny8e->y8\n# name [pos = \"-3,5!\", width=1.5, label=\"(a) Structural Regression Model\",shape = plaintext]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 1: Structural Model with Four Latent Variables
+</p>
+</div>
+<ul>
+<li>The related equations for the structural part are:</li>
+</ul>
+<p><span class="math display" id="eq:full-4v">\[
+\begin{bmatrix}  f_{1} \\f_{2} \end{bmatrix} 
+= \begin{bmatrix}
+   0 &amp; b_{12} &amp; b_{13} &amp; b_{14} \\
+   0 &amp; 0 &amp; b_{23} &amp; b_{24}
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2}  \end{bmatrix}.
+  \tag{5}
+\]</span></p>
+<p>Note that <span class="math inline">\(\mathbf{B}\)</span> can be decomposed into the endogenous part:
+<span class="math display">\[
+\mathbf{B_n}=
+ \begin{bmatrix}
+   0 &amp; b_{12} \\
+   0 &amp; 0 
+ \end{bmatrix}
+\]</span>
+and exogenous part:
+<span class="math display">\[
+\mathbf{B_x}=
+ \begin{bmatrix}
+ b_{13} &amp; b_{14} \\
+  b_{23} &amp; b_{24}
+ \end{bmatrix}
+\]</span></p>
+<ul>
+<li>The related equations for the measurement part are:</li>
+</ul>
+<p><span class="math display">\[
+\begin{bmatrix}  y_{1} \\ y_{2} \\ y_{3} \\ y_{4}\\ y_{5}\\ y_{6} \\ y_{7}\\ y_{8}\end{bmatrix} 
+= 
+\underbrace{\begin{bmatrix}
+   1 &amp; 0 &amp;  0&amp; 0  \\
+   a_{21} &amp; 0 &amp;  0 &amp; 0  \\
+   0 &amp; 1 &amp;  0 &amp; 0 \\
+   0 &amp; a_{42} &amp;  0&amp; 0 \\
+   0 &amp; 0 &amp;  1 &amp; 0 \\
+   0 &amp; 0 &amp;  a_{63}&amp; 0  \\
+   0 &amp; 0 &amp;  0 &amp; 1 \\
+   0 &amp; 0 &amp; 0 &amp;a_{84}  \\
+ \end{bmatrix}}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  E_{1} \\ E_{2} \\ E_{3} 
+  \\ E_{4}\\ E_{5}\\ E_{6} \\ E_{7} \\ E_{8}\end{bmatrix}. \\
+\mathbf{A}
+\]</span>
+* The loading matrix is sparse (i.e., most elements are zero). Parameters in two other matrices are:</p>
+<p><span class="math display">\[
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} &amp; 0 &amp; 0 &amp; 0\\
+   0 &amp; c_{22} &amp; 0&amp; 0 \\
+   0 &amp; 0 &amp; c_{33}&amp; c_{34} \\
+   0 &amp; 0 &amp; c_{34} &amp; c_{44} \\
+ \end{bmatrix}.
+\]</span>
+* Note that <span class="math inline">\(c_{11}\)</span> and <span class="math inline">\(c_{22}\)</span> are the covariances of <span class="math inline">\(u_{1}\)</span> and <span class="math inline">\(u_{2}\)</span>, respectively. <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix with diagonal terms <span class="math inline">\((d_{11},d_{22},...,d_{88})\)</span></p>
+<ul>
+<li>The above full model consists of the following measurement and structural models:</li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:cfa-4f"></span>
+<div id="htmlwidget-2" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-2">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"3,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"1,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\ny7[pos = \"-1,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\ny8[pos = \"-3,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nF4[pos = \"-2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nd34 [pos = \"0,-1!\", width=1, height=1, label=\"\", color=white]\nd12 [pos = \"0,1!\", width=1, height=1, label=\"\", color=white]\nd23 [pos = \"2,0!\", width=1, height=1, label=\"\", color=white]\nd24 [pos = \"-2,0!\", width=1, height=1, label=\"\", color=white]\n\nF4->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>44<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"] \nF3->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>34<\/SUB><\/FONT>>]\nF3->F3[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>33<\/SUB><\/FONT>>,tailport = \"e\", headport = \"e\"]\nF2->F2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>22<\/SUB><\/FONT>>,tailport = \"e\", headport = \"e\"]\nF1->F1[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>11<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"]\nF2->F1 [dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>,tailport = \"nw\", headport = \"ne\"]\nF3->F1 [dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>13<\/SUB><\/FONT>>]\nF3->F2 [dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>23<\/SUB><\/FONT>>,tailport = \"ne\", headport = \"se\"]\nF4->F1 [dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>14<\/SUB><\/FONT>>]\nF4->F2 [dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>24<\/SUB><\/FONT>>]\n# D1->F1\n# D2->F2\n# D3->F3\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nF2->y3 [label = \"1\"]\nF2->y4 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>42<\/SUB><\/FONT>>]\nF3->y5 [label = \"1\"]\nF3->y6 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>63<\/SUB><\/FONT>>]\nF4->y7 [label = \"1\"]\nF4->y8 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>84<\/SUB><\/FONT>>]\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny2e [pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny3e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny4e[pos = \"3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny5e[pos = \"3,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny6e[pos = \"1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny7e[pos = \"-1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny8e[pos = \"-3,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>,shape=none,width = 0.3]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\ny5e->y5\ny6e->y6\ny7e->y7\ny8e->y8\n# name [pos = \"-3,5!\", width=1.5, label=\"(a) Structural Regression Model\",shape = plaintext]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 2: Measurement Model
+</p>
+</div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:pa-4f"></span>
+<div id="htmlwidget-3" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-3">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\nay_1 [pos = \"-2,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nay_4 [pos = \"-2,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nay_2 [pos = \"0,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nay_3 [pos = \"0,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\naD_2 [pos = \"1,2!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>, shape = none,width = 0.3]\naD_1 [pos = \"-3,2!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n\nay_2->ay_1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\nay_3->ay_1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>13<\/SUB><\/FONT>>]\nay_4->ay_1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>14<\/SUB><\/FONT>>]\nay_3->ay_2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>23<\/SUB><\/FONT>>]\nay_4->ay_2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>24<\/SUB><\/FONT>>]\naD_1->ay_1\naD_2->ay_2\nay_3->ay_4[dir = both,tailport = \"s\", headport = \"s\",label = <c<FONT POINT-SIZE=\"8\"><SUB>34<\/SUB><\/FONT>>]\nadummy [pos = \"-1,-0.2!\", width=1, height=1, label=\"\", color=white]\nay_3->ay_3[dir = both,tailport = \"e\", headport = \"e\",label = <c<FONT POINT-SIZE=\"8\"><SUB>33<\/SUB><\/FONT>>]\nay_4->ay_4[dir = both,tailport = \"w\", headport = \"w\",label = <c<FONT POINT-SIZE=\"8\"><SUB>44<\/SUB><\/FONT>>]\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 3: Structrual Model
+</p>
+</div>
+<ul>
+<li>If one understands the fundamentals of PA and CFA, there is relatively little new to learn about specification of standard full models because it can be decomposed into two parts, each requiring consideration of basically the same issues as in PA and CFA. For example:
+<ul>
+<li>For the measurement component, one can choose standardized factor or reference indicator</li>
+<li>For the structural component, the basic type of effects are direct, indirect, spurious and analyzed (the latter two are noncausal)</li>
+</ul></li>
+<li>It also means that the modeling process can be divided into two steps, with the first step for the measurement component only, and the second step for the full model.
+<ul>
+<li>The two-step concept is implemented throughout the modeling process from identification, estimation, evaluation, comparison, and modification.</li>
+</ul></li>
+</ul>
+</div>
+<div id="model-identification" class="section level3">
+<h3>Model Identification</h3>
+<ul>
+<li><p>Any full model must satisfy the two necessary requirements for identification as any other kind of structural equation model:</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(t\)</span>-Rule: the number of observations, which is <span class="math inline">\(u = J (J + 1)/2\)</span> must equal or exceed the number of free parameters <span class="math inline">\(t\)</span>, that is, the model degrees of freedom must be at least zero (<span class="math inline">\(df_M \geq 0\)</span>);</li>
+<li>each factor must have a scale (i.e., standardized factor or reference indicator).</li>
+</ol></li>
+<li><p>The <span class="math inline">\(t\)</span>-rule helps to make sure the model is just- or over-identified. As mentioned above, all model parameters <span class="math inline">\(\boldsymbol{\omega}\)</span>, together with constraints for identification, are contained in four matrices: <span class="math inline">\(\mathbf{B, A,C, D}\)</span>.</p></li>
+<li><p>Based on the two-step concept, the measurement model is respecified as a CFA model and evaluated for identification.</p></li>
+<li><p>In Figure <a href="#fig:cfa-4f">2</a>, for example, <span class="math inline">\(u=8(8 + 1)/2=36\)</span>, <span class="math inline">\(t=22\)</span> and <span class="math inline">\(df=14\)</span>, which means it is a over-identified model with 14 degree of freedom</p></li>
+<li><p>Similarly, we need to pay attention to CFA issues such as local or empirical under-identification</p></li>
+<li><p>The measurement model is subjected to the same CFA rule that, if a single factor has at least three indicators, the model is identified, and if a model with two or more factors has at least two indicators per factor, the model is identified.</p></li>
+<li><p>For the structural part, in addition to the <span class="math inline">\(t\)</span>-rule, we should also evaluate if it’s a recursive model (e.g., without direct or indirect feedback loop)</p>
+<ul>
+<li>One important feature of recursive model is that it’s possible to write the endogenous part of the path matrix <span class="math inline">\(\mathbf{B_n}\)</span> as a lower or upper triangle matrix (see Equation <a href="#eq:full-4v">(5)</a>).</li>
+<li>Null <span class="math inline">\(\mathbf{B_n}\)</span> rule: when <span class="math inline">\(\mathbf{B_n}=0\)</span> (i.e., no direct effect between any two endogenous factors), the structural is identified</li>
+</ul></li>
+<li><p>When both the measurement and structural models are identified, the full model is identified</p>
+<ul>
+<li>This is a sufficient but not necessary condition (more discussion later)</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="from-estimation-to-modification" class="section level2">
+<h2><strong>From Estimation to Modification</strong></h2>
+<ul>
+<li><p>When the full model is identified, the rest of the modeling process can be analyzed together in each step</p></li>
+<li><p>For just- or over-identified model, the population covariance matrix can be expressed as a function of the model-implied covariance matrix, namely we have a basic hypothesis <span class="math inline">\(\boldsymbol{\Sigma=\Sigma(\omega)}\)</span></p>
+<ul>
+<li>For just-identified model, the model is saturated with no degree of freedom, and we will get exact solution (i.e., linear transformation)</li>
+<li>For over-identified model, we rely on estimation to obtain approximate solution (i.e., point estimates) with related uncertainty (i.e., standard error) and fit statistics</li>
+<li>During model estimation, it’s the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> that is being approximated with <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> using specific estimation method, under the assumption of random sampling.</li>
+</ul></li>
+<li><p>The widely used maximum likelihood (ML) estimation maximizes the likelihood of observing the sample matrix based on an assumption that the observed variables are multivariate-normally distributed, as <span class="math inline">\(\bf{Y} \sim N[0,\boldsymbol{\Sigma}]\)</span>.</p>
+<ul>
+<li>Statistically, it is equivalent to minimize the discrepancy between <span class="math inline">\(\boldsymbol{\Sigma(\omega)}\)</span> and the <span class="math inline">\(\bf{S}\)</span> through the fitting or discrepancy function:</li>
+</ul></li>
+</ul>
+<p><span class="math display" id="eq:obj-fun">\[
+F_{ML} = tr[\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})]-ln|\mathbf{S\Sigma}^{-1}(\boldsymbol{\omega})|-(J+K)
+\tag{6},
+\]</span>
+* However complex the mathematics of MLE, the interpretation of parameter estimates is relatively straightforward with both point estimates and standard error to construct interval estimates</p>
+<ul>
+<li>Although usually not a problem when analyzing recursive path models, a converged solution may be inadmissible in ML estimation and other iterative methods.
+<ul>
+<li>This problem is most evident by a parameter estimate with an illogical value, such as Heywood cases (e.g., negative variance estimates)</li>
+</ul></li>
+<li>When the sample covariance matrix <span class="math inline">\(\bf{S}\)</span> is standardized as a correlation matrix <span class="math inline">\(\bf{R}\)</span> with standardized factors, all parameter estimates will be standardized, similar to the standardized coefficients in regression, and is known as the standardized solution
+<ul>
+<li>Due to scale invariance, the fitting result remain the same</li>
+<li>It’s a good practice to report both unstandardized and standardized estimates, since the two can give meaningful information from different perspectives.</li>
+</ul></li>
+<li>The following example covariance matrix will be used for illustration of model estimation and evaluation:</li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:typ-sr-tab">Table 2: </span>Sample Covariance Structure S, N = 500
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+y1
+</th>
+<th style="text-align:right;">
+y2
+</th>
+<th style="text-align:right;">
+y3
+</th>
+<th style="text-align:right;">
+y4
+</th>
+<th style="text-align:right;">
+y5
+</th>
+<th style="text-align:right;">
+y6
+</th>
+<th style="text-align:right;">
+y7
+</th>
+<th style="text-align:right;">
+y8
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+y1
+</td>
+<td style="text-align:right;">
+0.965
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y2
+</td>
+<td style="text-align:right;">
+0.615
+</td>
+<td style="text-align:right;">
+1.075
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y3
+</td>
+<td style="text-align:right;">
+0.389
+</td>
+<td style="text-align:right;">
+0.480
+</td>
+<td style="text-align:right;">
+1.147
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y4
+</td>
+<td style="text-align:right;">
+0.402
+</td>
+<td style="text-align:right;">
+0.456
+</td>
+<td style="text-align:right;">
+0.770
+</td>
+<td style="text-align:right;">
+1.102
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y5
+</td>
+<td style="text-align:right;">
+0.247
+</td>
+<td style="text-align:right;">
+0.269
+</td>
+<td style="text-align:right;">
+0.290
+</td>
+<td style="text-align:right;">
+0.304
+</td>
+<td style="text-align:right;">
+0.964
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y6
+</td>
+<td style="text-align:right;">
+0.245
+</td>
+<td style="text-align:right;">
+0.274
+</td>
+<td style="text-align:right;">
+0.315
+</td>
+<td style="text-align:right;">
+0.321
+</td>
+<td style="text-align:right;">
+0.618
+</td>
+<td style="text-align:right;">
+0.985
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y7
+</td>
+<td style="text-align:right;">
+0.239
+</td>
+<td style="text-align:right;">
+0.253
+</td>
+<td style="text-align:right;">
+0.345
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+<td style="text-align:right;">
+0.291
+</td>
+<td style="text-align:right;">
+0.259
+</td>
+<td style="text-align:right;">
+0.887
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y8
+</td>
+<td style="text-align:right;">
+0.204
+</td>
+<td style="text-align:right;">
+0.212
+</td>
+<td style="text-align:right;">
+0.357
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+<td style="text-align:right;">
+0.261
+</td>
+<td style="text-align:right;">
+0.275
+</td>
+<td style="text-align:right;">
+0.542
+</td>
+<td style="text-align:right;">
+0.959
+</td>
+</tr>
+</tbody>
+</table>
+<div id="analysis-of-the-measurement-model" class="section level3">
+<h3>Analysis of the Measurement Model</h3>
+<ul>
+<li><p>For the measurement model, model evaluate is more important than estimation, since parameter estimates are usually of little interest at this stage:</p>
+<ul>
+<li>The fit statistics is acceptable: <span class="math inline">\(\chi_M^2 (14) =8.367\)</span>, <span class="math inline">\(p = .969\)</span>, <span class="math inline">\(RMSEA = 0\)</span> with the 90% confidence interval <span class="math inline">\((0, .023)\)</span>, <span class="math inline">\(CFI = 1\)</span>, <span class="math inline">\(SRMR = .012\)</span></li>
+</ul></li>
+<li><p>When the model fit is problematic, the measurement model can be adjusted based on the Modification Index (MI)</p></li>
+<li><p>Similar to CFA, possible modifications of the measurement model include error covariance and adding or removing of cross-loadings.</p>
+<ul>
+<li>When there are many indicators, some indicators with poor loadings can be removed, given the removal is not negatively influential to model identification, substantive representation, and fit statistics</li>
+<li>Modification indexes in the below table are either cross-loadings or error covariance, and the values are well-below 3.84</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:mi-ex-tab">Table 3: </span>Modification Indexes above 1
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+MI
+</th>
+<th style="text-align:right;">
+EPC
+</th>
+<th style="text-align:right;">
+Std EPC
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{71}\)</span>
+</td>
+<td style="text-align:right;">
+1.41
+</td>
+<td style="text-align:right;">
+0.112
+</td>
+<td style="text-align:right;">
+0.081
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{81}\)</span>
+</td>
+<td style="text-align:right;">
+1.41
+</td>
+<td style="text-align:right;">
+-0.109
+</td>
+<td style="text-align:right;">
+-0.080
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{34}\)</span>
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+0.100
+</td>
+<td style="text-align:right;">
+0.074
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{44}\)</span>
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+-0.096
+</td>
+<td style="text-align:right;">
+-0.072
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{13}\)</span>
+</td>
+<td style="text-align:right;">
+1.71
+</td>
+<td style="text-align:right;">
+-0.038
+</td>
+<td style="text-align:right;">
+-0.038
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{38}\)</span>
+</td>
+<td style="text-align:right;">
+1.40
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{57}\)</span>
+</td>
+<td style="text-align:right;">
+2.09
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{67}\)</span>
+</td>
+<td style="text-align:right;">
+2.24
+</td>
+<td style="text-align:right;">
+-0.041
+</td>
+<td style="text-align:right;">
+-0.041
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="analysis-of-the-full-model" class="section level3">
+<h3>Analysis of the Full Model</h3>
+<ul>
+<li>To evaluate if the full model is appropriate before obtaining the parameter estimate
+<ul>
+<li>In this case, the measurement and full models are equivalent models, and the fit statistics are the same: <span class="math inline">\(\chi_M^2 (14) =8.367\)</span>, <span class="math inline">\(p = .969\)</span>, <span class="math inline">\(RMSEA = 0\)</span> with the 90% confidence interval <span class="math inline">\((0, .023)\)</span>, <span class="math inline">\(CFI = 1\)</span>, <span class="math inline">\(SRMR = .012\)</span></li>
+</ul></li>
+<li>Parameter estimates:
+<ul>
+<li>Note the difference of the fixed parameters under the two solutions</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-m0">Table 4: </span>Parameter Estimates
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.742
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+21.632
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.158
+</td>
+<td style="text-align:right;">
+0.100
+</td>
+<td style="text-align:right;">
+11.606
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.814
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+23.934
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{32}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.835
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+31.068
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{42}\)</span>
+</td>
+<td style="text-align:right;">
+0.962
+</td>
+<td style="text-align:right;">
+0.065
+</td>
+<td style="text-align:right;">
+14.878
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.820
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+30.227
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{53}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.799
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+21.135
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{63}\)</span>
+</td>
+<td style="text-align:right;">
+1.004
+</td>
+<td style="text-align:right;">
+0.095
+</td>
+<td style="text-align:right;">
+10.565
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.794
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+21.021
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{74}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.790
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+20.399
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{84}\)</span>
+</td>
+<td style="text-align:right;">
+0.980
+</td>
+<td style="text-align:right;">
+0.096
+</td>
+<td style="text-align:right;">
+10.184
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.744
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+19.363
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{12}\)</span>
+</td>
+<td style="text-align:right;">
+0.434
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+7.245
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.533
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+8.921
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{13}\)</span>
+</td>
+<td style="text-align:right;">
+0.147
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+2.463
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.158
+</td>
+<td style="text-align:right;">
+0.063
+</td>
+<td style="text-align:right;">
+2.521
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{14}\)</span>
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+0.067
+</td>
+<td style="text-align:right;">
+0.664
+</td>
+<td style="text-align:right;">
+0.507
+</td>
+<td style="text-align:right;">
+0.046
+</td>
+<td style="text-align:right;">
+0.069
+</td>
+<td style="text-align:right;">
+0.665
+</td>
+<td style="text-align:right;">
+0.506
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{23}\)</span>
+</td>
+<td style="text-align:right;">
+0.299
+</td>
+<td style="text-align:right;">
+0.072
+</td>
+<td style="text-align:right;">
+4.150
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.263
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+4.385
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{24}\)</span>
+</td>
+<td style="text-align:right;">
+0.468
+</td>
+<td style="text-align:right;">
+0.082
+</td>
+<td style="text-align:right;">
+5.717
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.389
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+6.550
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.433
+</td>
+<td style="text-align:right;">
+0.048
+</td>
+<td style="text-align:right;">
+8.993
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.450
+</td>
+<td style="text-align:right;">
+0.051
+</td>
+<td style="text-align:right;">
+8.851
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.363
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+6.265
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.338
+</td>
+<td style="text-align:right;">
+0.055
+</td>
+<td style="text-align:right;">
+6.112
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.346
+</td>
+<td style="text-align:right;">
+0.050
+</td>
+<td style="text-align:right;">
+6.977
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.302
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+6.722
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.360
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+7.664
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.328
+</td>
+<td style="text-align:right;">
+0.044
+</td>
+<td style="text-align:right;">
+7.372
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{55}\)</span>
+</td>
+<td style="text-align:right;">
+0.348
+</td>
+<td style="text-align:right;">
+0.057
+</td>
+<td style="text-align:right;">
+6.103
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.361
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+5.981
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{66}\)</span>
+</td>
+<td style="text-align:right;">
+0.363
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+6.290
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.370
+</td>
+<td style="text-align:right;">
+0.060
+</td>
+<td style="text-align:right;">
+6.164
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{77}\)</span>
+</td>
+<td style="text-align:right;">
+0.333
+</td>
+<td style="text-align:right;">
+0.053
+</td>
+<td style="text-align:right;">
+6.270
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.376
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+6.151
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{88}\)</span>
+</td>
+<td style="text-align:right;">
+0.427
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+7.896
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.446
+</td>
+<td style="text-align:right;">
+0.057
+</td>
+<td style="text-align:right;">
+7.791
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.308
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+7.108
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.582
+</td>
+<td style="text-align:right;">
+0.050
+</td>
+<td style="text-align:right;">
+11.647
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.546
+</td>
+<td style="text-align:right;">
+0.063
+</td>
+<td style="text-align:right;">
+8.690
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.684
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+14.631
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.615
+</td>
+<td style="text-align:right;">
+0.077
+</td>
+<td style="text-align:right;">
+7.944
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.552
+</td>
+<td style="text-align:right;">
+0.071
+</td>
+<td style="text-align:right;">
+7.756
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{34}\)</span>
+</td>
+<td style="text-align:right;">
+0.273
+</td>
+<td style="text-align:right;">
+0.040
+</td>
+<td style="text-align:right;">
+6.792
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.469
+</td>
+<td style="text-align:right;">
+0.050
+</td>
+<td style="text-align:right;">
+9.380
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="parameter-testing" class="section level3">
+<h3>Parameter Testing</h3>
+<ul>
+<li><p>The causal effects and noncausal effects in the structural part can be decomposed and compared statistically</p></li>
+<li><p>We can adopt Wald test to compare the direct effects (DEs), indirect effects (IEs), and total causal effects (TEs) of <span class="math inline">\(f_3\)</span> and <span class="math inline">\(f_4\)</span> on <span class="math inline">\(f_1\)</span> in Figure <a href="#fig:srm-4f">1</a>. In the first step, we create constrained parameters for the IE and TE, as:</p>
+<ul>
+<li><span class="math inline">\(IE_1=b_{23}b_{12}\)</span></li>
+<li><span class="math inline">\(IE_2=b_{24}b_{12}\)</span></li>
+<li><span class="math inline">\(TE_1=b_{13}+IE_1\)</span></li>
+<li><span class="math inline">\(TE_2=b_{14}+IE_2\)</span></li>
+</ul></li>
+<li><p>In the second step, we can setup the associate hypotheses, as:</p>
+<ul>
+<li><span class="math inline">\(H_{DE}: ~b_{13}=b_{14}\)</span></li>
+<li><span class="math inline">\(H_{IE}: ~IE_1=IE_2\)</span></li>
+<li><span class="math inline">\(H_{TE}: ~TE_1=TE_2\)</span></li>
+</ul></li>
+<li><p>In the third step, we re-estimate the model with the same data and new constraints</p>
+<ul>
+<li>One can see that most effects are statistically significant</li>
+<li>The values of pair effects seem close, but it’s difficult to tell if they are significantly different</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-m1">Table 5: </span>Constrained Parameter Estimates
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{13}\)</span>
+</td>
+<td style="text-align:right;">
+0.147
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+2.463
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.158
+</td>
+<td style="text-align:right;">
+0.063
+</td>
+<td style="text-align:right;">
+2.521
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{14}\)</span>
+</td>
+<td style="text-align:right;">
+0.045
+</td>
+<td style="text-align:right;">
+0.067
+</td>
+<td style="text-align:right;">
+0.664
+</td>
+<td style="text-align:right;">
+0.507
+</td>
+<td style="text-align:right;">
+0.046
+</td>
+<td style="text-align:right;">
+0.069
+</td>
+<td style="text-align:right;">
+0.665
+</td>
+<td style="text-align:right;">
+0.506
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(IE_1\)</span>
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+3.703
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.140
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+3.955
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(IE_2\)</span>
+</td>
+<td style="text-align:right;">
+0.203
+</td>
+<td style="text-align:right;">
+0.044
+</td>
+<td style="text-align:right;">
+4.569
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.207
+</td>
+<td style="text-align:right;">
+0.041
+</td>
+<td style="text-align:right;">
+5.092
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(TE_1\)</span>
+</td>
+<td style="text-align:right;">
+0.277
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+4.296
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.298
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+4.663
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(TE_2\)</span>
+</td>
+<td style="text-align:right;">
+0.248
+</td>
+<td style="text-align:right;">
+0.069
+</td>
+<td style="text-align:right;">
+3.616
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.253
+</td>
+<td style="text-align:right;">
+0.066
+</td>
+<td style="text-align:right;">
+3.857
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Finally, hypotheses testing is conducted with the Wald test statistics:
+<ul>
+<li><span class="math inline">\(H_{DE}: Wald(1)=0.95, ~p=.33\)</span></li>
+<li><span class="math inline">\(H_{IE}: Wald(1)=1.53, ~p=.216\)</span></li>
+<li><span class="math inline">\(H_{TE}: Wald(1)=.0634, ~p=.801\)</span></li>
+</ul></li>
+<li>The null hypotheses that there’s no significant difference between the pair effects cannot be rejected</li>
+</ul>
+</div>
+<div id="model-comparisons" class="section level3">
+<h3>Model Comparisons</h3>
+<ul>
+<li>For the same data or covariance structure, one can specify different models for comparisons, given there is substantive rationale
+<ul>
+<li>In addition to Figure <a href="#fig:srm-4f">1</a>, Figure <a href="#fig:mod-com">4</a> presents several model specifications on the structural component</li>
+<li>All models in Figure <a href="#fig:mod-com">4</a> are nested (i.e., more restricted) within Figure <a href="#fig:srm-4f">1</a></li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mod-com"></span>
+<div id="htmlwidget-4" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-4">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\nay_1 [pos = \"-2,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nay_2 [pos = \"0,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nay_3 [pos = \"0,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nay_4 [pos = \"-2,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\naD_1 [pos = \"-3,2!\",label=\"\",  shape = none,width = 0.3]\naD_2 [pos = \"1,2!\",label=\"\", shape = none,width = 0.3]\n\nay_2->ay_1 [label = \"\"]\nay_3->ay_1 [label = \"\"]\n# ay_4->ay_1 [label = \"\"]\nay_3->ay_2 [label = \"\"]\nay_4->ay_2 [label = \"\"]\naD_1->ay_1\naD_2->ay_2\nay_3->ay_4[dir = both,tailport = \"s\", headport = \"s\",label=\"\"]\nadummy [pos = \"-1,-0.2!\", width=1, height=0.6, label=\"\", color=white]\nay_3->ay_3[dir = both,tailport = \"e\", headport = \"e\",label=\"\"]\nay_4->ay_4[dir = both,tailport = \"w\", headport = \"w\",label=\"\"]\na [pos = \"-2,3!\", width=1.5, label=\"(a)\",shape = plaintext]\n\nby_1 [pos = \"3,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nby_2 [pos = \"5,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nby_3 [pos = \"5,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nby_4 [pos = \"3,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nbD_1 [pos = \"2,2!\",label=\"\",   shape = none,width = 0.3]\nbD_2 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\n\nby_2->by_1 [label = \"\"]\nby_3->by_1 [label = \"\"]\nby_4->by_1 [label = \"\"]\n# by_3->by_2 [label = \"\"]\nby_4->by_2 [label = \"\"]\nbD_1->by_1\nbD_2->by_2\nby_3->by_4[dir = both,tailport = \"s\", headport = \"s\",label=\"\"]\nbdummy [pos = \"4,-0.2!\", width=1, height=0.6, label=\"\", color=white]\nby_3->by_3[dir = both,tailport = \"e\", headport = \"e\",label=\"\"]\nby_4->by_4[dir = both,tailport = \"w\", headport = \"w\",label=\"\"]\nb [pos = \"3,3!\", width=1.5, label=\"(b)\",shape = plaintext]\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: Alternative Model Specifications (only the structural Component is presented)
+</p>
+</div>
+<div id="htmlwidget-5" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-5">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\nay_1 [pos = \"-2,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nay_2 [pos = \"0,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nay_3 [pos = \"0,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nay_4 [pos = \"-2,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\naD_1 [pos = \"-3,2!\",label=\"\",  shape = none,width = 0.3]\naD_2 [pos = \"1,2!\",label=\"\", shape = none,width = 0.3]\n\nay_2->ay_1 [label = \"\"]\nay_3->ay_1 [label = \"\"]\nay_4->ay_1 [label = \"\"]\nay_3->ay_2 [label = \"\"]\n# ay_4->ay_2 [label = \"\"]\naD_1->ay_1\naD_2->ay_2\nay_3->ay_4[dir = both,tailport = \"s\", headport = \"s\",label=\"\"]\nadummy [pos = \"-1,-0.2!\", width=1, height=0.6, label=\"\", color=white]\nay_3->ay_3[dir = both,tailport = \"e\", headport = \"e\",label=\"\"]\nay_4->ay_4[dir = both,tailport = \"w\", headport = \"w\",label=\"\"]\na [pos = \"-2,3!\", width=1.5, label=\"(c)\",shape = plaintext]\n\nby_1 [pos = \"3,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nby_2 [pos = \"5,2!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nby_3 [pos = \"5,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nby_4 [pos = \"3,0!\",label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nbD_1 [pos = \"2,2!\",label=\"\",   shape = none,width = 0.3]\nbD_2 [pos = \"6,2!\",label=\"\",  shape = none,width = 0.3]\n\nby_2->by_1 [label = \"\"]\n# by_3->by_1 [label = \"\"]\nby_4->by_1 [label = \"\"]\nby_3->by_2 [label = \"\"]\nby_4->by_2 [label = \"\"]\nbD_1->by_1\nbD_2->by_2\nby_3->by_4[dir = both,tailport = \"s\", headport = \"s\",label=\"\"]\nbdummy [pos = \"4,-0.2!\", width=1, height=0.6, label=\"\", color=white]\nby_3->by_3[dir = both,tailport = \"e\", headport = \"e\",label=\"\"]\nby_4->by_4[dir = both,tailport = \"w\", headport = \"w\",label=\"\"]\nb [pos = \"3,3!\", width=1.5, label=\"(d)\",shape = plaintext]\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<ul>
+<li><p>According to Table <a href="#tab:fit-com-tab">6</a>, all models are acceptable based on absolute fit statistics</p></li>
+<li><p>For nested models, likelihood ratio or chi-square difference test can be adopted to compare models:</p>
+<ul>
+<li>Figure <a href="#fig:srm-4f">1</a> vs. Model (a): <span class="math inline">\(\chi_D^2(1)=.4314, ~p=.511\)</span></li>
+<li>Figure <a href="#fig:srm-4f">1</a> vs. Model (b): <span class="math inline">\(\chi_D^2(1)=17.270, ~p&lt;.001\)</span></li>
+<li>Figure <a href="#fig:srm-4f">1</a> vs. Model (c): <span class="math inline">\(\chi_D^2(1)=36.899, ~p.001\)</span></li>
+<li>Figure <a href="#fig:srm-4f">1</a> vs. Model (d): <span class="math inline">\(\chi_D^2(1)=6.177, ~p=0.013\)</span></li>
+</ul></li>
+<li><p>Except for Model (a), all other models are significantly different from (i.e. worse than) the original model</p></li>
+<li><p>If two models are not nested, we can adopt the Akaike Information Criterion (AIC) or Bayesian Information Criterion (BIC) for model comparisons</p>
+<ul>
+<li>Model (a), (b), (c), and (d) are not nested with each other</li>
+<li>Based on AIC and BIC (the smaller, the better), Model (a) is still the best model</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:fit-com-tab">Table 6: </span>Fit Indexes for Different Model Specifications
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Fig 1
+</th>
+<th style="text-align:right;">
+a
+</th>
+<th style="text-align:right;">
+b
+</th>
+<th style="text-align:right;">
+c
+</th>
+<th style="text-align:right;">
+d
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+CHISQ
+</td>
+<td style="text-align:right;">
+8.367
+</td>
+<td style="text-align:right;">
+8.799
+</td>
+<td style="text-align:right;">
+25.637
+</td>
+<td style="text-align:right;">
+45.266
+</td>
+<td style="text-align:right;">
+14.545
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DF
+</td>
+<td style="text-align:right;">
+14.000
+</td>
+<td style="text-align:right;">
+15.000
+</td>
+<td style="text-align:right;">
+15.000
+</td>
+<td style="text-align:right;">
+15.000
+</td>
+<td style="text-align:right;">
+15.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PVALUE
+</td>
+<td style="text-align:right;">
+0.869
+</td>
+<td style="text-align:right;">
+0.888
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.485
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.038
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.LOWER
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+RMSEA.CI.UPPER
+</td>
+<td style="text-align:right;">
+0.023
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.062
+</td>
+<td style="text-align:right;">
+0.085
+</td>
+<td style="text-align:right;">
+0.041
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CFI
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.992
+</td>
+<td style="text-align:right;">
+0.977
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SRMR
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+0.042
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIC
+</td>
+<td style="text-align:right;">
+10059.540
+</td>
+<td style="text-align:right;">
+10057.971
+</td>
+<td style="text-align:right;">
+10074.809
+</td>
+<td style="text-align:right;">
+10094.439
+</td>
+<td style="text-align:right;">
+10063.717
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIC
+</td>
+<td style="text-align:right;">
+10152.261
+</td>
+<td style="text-align:right;">
+10146.478
+</td>
+<td style="text-align:right;">
+10163.316
+</td>
+<td style="text-align:right;">
+10182.945
+</td>
+<td style="text-align:right;">
+10152.224
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Similar to PA, the model can be slightly modified and the original and modified models are nested with each other
+<ul>
+<li>Ex: adding a direct path to Models in Figure <a href="#fig:mod-com">4</a> becomes Figure <a href="#fig:srm-4f">1</a><br />
+</li>
+<li>We can apply the same chi-square difference statistic <span class="math inline">\(\chi_D^2\)</span> with a single degree of freedom to compare the original and modified models</li>
+</ul></li>
+</ul>
+<hr />
+</div>
+</div>
+<div id="models-with-latent-and-observed-structural-variables" class="section level2">
+<h2><strong>Models with Latent and Observed Structural Variables</strong></h2>
+<div id="model-specification" class="section level3">
+<h3>Model Specification</h3>
+<ul>
+<li><p>In general, the structural component can be mixed with both latent and observed variables. Figure <a href="#fig:srm1-4f">5</a> is an example with two factors and two exogenous observed variables.</p></li>
+<li><p>One popular type as in the figure is referred as multiple-indicators and multiple-causes (MIMIC) models, in which multiple indicators reflect the underlying factors, and the multiple causes (observed predictors) affect latent variables/factors.</p></li>
+<li><p>MIMIC models have the following characteristics:</p>
+<ul>
+<li>At the structural part, all endogenous variables are factors</li>
+<li>Direct effect between any two factors is not of concern (but their disturbances can be correlated); So to speak, it’s a typical CFA model without any exogenous variables</li>
+<li>All possible paths (direct effects) of the exogenous variables to factors are considered (completely crossed)</li>
+<li>The exogenous variables are usually observed, although they can include factors in some cases</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:srm1-4f"></span>
+<div id="htmlwidget-6" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-6">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"2,-1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nF4[pos = \"-2,-1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nD1 [pos = \"-1,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\nD2 [pos = \"1,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n# D3 [pos = \"3,-1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n# ay_3->ay_4[dir = both,tailport = \"s\", headport = \"s\",label = <c<FONT POINT-SIZE=\"8\"><SUB>34<\/SUB><\/FONT>>]\n\nddummy [pos = \"0,1!\", width=1, height=1, label=\"\", color=white]\nD1->D2[dir=both,label = \"\",tailport = \"n\", headport = \"n\"]\n\ndummy [pos = \"0,-1!\", width=1, height=1, label=\"\", color=white]\nF3->F4[dir=both,label = \"\"]\n\nF4->F4[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] \nF3->F3[dir=both,label = \"\",tailport = \"e\", headport = \"e\"]\n# F2->F1 [label = \"\"]\nF3->F1 [label = \"\"]\nF3->F2 [label = \"\"]\nF4->F1 [label = \"\"]\nF4->F2 [label = \"\"]\nD1->F1\nD2->F2\n# D3->F3\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = \"\"]\nF2->y3 [label = \"1\"]\nF2->y4 [label = \"\"]\n\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny2e [pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny3e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny4e[pos = \"3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none,width = 0.3]\n# y5e[pos = \"2,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>,shape=none,width = 0.3]\n# y6e[pos = \"1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>,shape=none,width = 0.3]\n# y7e[pos = \"-1,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>,shape=none,width = 0.3]\n# y8e[pos = \"-3,-4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>,shape=none,width = 0.3]\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 5: MIMIC
+</p>
+</div>
+<ul>
+<li>Although it appears different from the standard full model we introduced, the issue can be just addressed by considering the exogenous variables as single-indicator factors:
+<ul>
+<li>Note that the loading and measurement error of the single-indicator factor are fixed at one and zero, respectively (i.e., no measurement error)</li>
+<li>It’s equivalent to set constraints <span class="math inline">\(f_3=y_5\)</span> and <span class="math inline">\(f_4=y_6\)</span></li>
+</ul></li>
+<li>With the single-indicator factors, we can utilize the same notation and representation of the standard full model, as in Figure <a href="#fig:mimic-4f">6</a>:</li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:mimic-4f"></span>
+<div id="htmlwidget-7" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-7">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n# edge [arrowhead = vee]\n# Items\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\ny4[pos = \"3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\ny5[pos = \"2,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\ny6[pos = \"-2,-3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\n\n\n#Factors\nF1[pos = \"-2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"2,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nF4[pos = \"-2,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nD1 [pos = \"-1,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,  shape = none,width = 0.3]\nD2 [pos = \"1,1!\",label = <u<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,  shape = none,width = 0.3]\n\n\nddummy [pos = \"0,1!\", width=1, height=1, label=\"\", color=white]\nD1->D2[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>,tailport = \"n\", headport = \"n\"]\n\ndummy [pos = \"0,-1!\", width=1, height=1, label=\"\", color=white]\nF3->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>34<\/SUB><\/FONT>>]\n\nF4->F4[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>44<\/SUB><\/FONT>>,tailport = \"w\", headport = \"w\"] \nF3->F3[dir=both,label = <c<FONT POINT-SIZE=\"8\"><SUB>33<\/SUB><\/FONT>>,tailport = \"e\", headport = \"e\"]\n# F2->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>12<\/SUB><\/FONT>>]\nF3->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>13<\/SUB><\/FONT>>]\nF3->F2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>23<\/SUB><\/FONT>>]\nF4->F1 [label = <b<FONT POINT-SIZE=\"8\"><SUB>14<\/SUB><\/FONT>>]\nF4->F2 [label = <b<FONT POINT-SIZE=\"8\"><SUB>24<\/SUB><\/FONT>>]\nD1->F1\nD2->F2\n\n\n#Loadings\nF1->y1 [label = \"1\"]\nF1->y2 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>21<\/SUB><\/FONT>>]\nF2->y3 [label = \"1\"]\nF2->y4 [label = <&lambda;<FONT POINT-SIZE=\"8\"><SUB>42<\/SUB><\/FONT>>]\nF3->y5 [label = \"1\"]\nF4->y6 [label = \"1\"]\n\n#Errors\ny1e[pos = \"-3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny2e [pos = \"-1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny3e[pos = \"1,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=none,width = 0.3]\ny4e[pos = \"3,4!\", label = <E<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=none,width = 0.3]\n# y5e[pos = \"2,-4!\", label = \"0\",shape=none,width = 0.3]\n# y6e[pos = \"-2,-4!\", label = \"0\",shape=none,width = 0.3]\n\n\ny1e->y1\ny2e->y2\ny3e->y3\ny4e->y4\n# y5e->y5\n# y6e->y6\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 6: MIMIC
+</p>
+</div>
+<ul>
+<li>In equation form, we have:</li>
+</ul>
+<p><span class="math display">\[
+\begin{bmatrix}  f_{1} \\f_{2} \end{bmatrix} 
+= \begin{bmatrix}
+   0 &amp; 0 &amp; b_{13} &amp; b_{14} \\
+   0 &amp; 0 &amp; b_{23} &amp; b_{24}
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  u_{1} \\ u_{2}  \end{bmatrix},
+\]</span></p>
+<p>and:</p>
+<p><span class="math display">\[
+\begin{bmatrix}  y_{1} \\ y_{2} \\ y_{3} \\ y_{4}\\ y_{5}\\ y_{6} \end{bmatrix} = 
+\begin{bmatrix}
+   1 &amp; 0 &amp;  0 &amp; 0  \\
+   a_{21} &amp; 0 &amp;  0 &amp; 0  \\
+   0 &amp; 1 &amp;  0 &amp; 0 \\
+   0 &amp; a_{42} &amp;  0 &amp; 0 \\
+   0 &amp; 0 &amp;  1 &amp; 0\\
+   0 &amp; 0 &amp;  0 &amp; 1 \\
+ \end{bmatrix}
+ \begin{bmatrix}  f_{1} \\ f_{2} \\ f_{3} \\ f_{4} \end{bmatrix} +
+  \begin{bmatrix}  E_{1} \\ E_{2} \\ E_{3} 
+  \\ E_{4}\\ E_{5}\\ E_{6} \end{bmatrix}.
+\]</span></p>
+<p>with:</p>
+<p><span class="math display">\[
+  \mathbf{C} = \begin{bmatrix}
+   c_{11} &amp; c_{12} &amp; 0 &amp; 0\\
+   c_{12} &amp; c_{22} &amp; 0&amp; 0 \\
+   0 &amp; 0 &amp; c_{33}&amp; c_{34} \\
+   0 &amp; 0 &amp; c_{34} &amp; c_{44} \\
+ \end{bmatrix}.
+\]</span>
+and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix with diagonal terms <span class="math inline">\((D_{11},d_{22},...,d_{44})\)</span></p>
+</div>
+<div id="model-identification-1" class="section level3">
+<h3>Model Identification</h3>
+<ul>
+<li><p>For MIMIC models, the path coefficients of endogenous factors <span class="math inline">\(\mathbf{B}=0\)</span>, which is equivalent to the Null <span class="math inline">\(\mathbf{B}\)</span> rule under PA. Thus, the structural component is identified</p></li>
+<li><p>However, identification of the measurement component can be tricky due to the single-indicator factor, and the two-step rule might not work.</p></li>
+<li><p>Ex: Figure <a href="#fig:sing-full">7</a> is a just-identified model with single-indicator factors. However, its measurement model in Figure <a href="#fig:sing-meas">8</a> is under-identified (<span class="math inline">\(df=-1\)</span>)</p></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:sing-full"></span>
+<div id="htmlwidget-8" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-8">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\n# y1e[pos = \"-3,4!\", label = \"\",shape=none,width = 0.5]\ny2e [pos = \"-1,4!\", label = \"\",shape=none,width = 0.5]\n# y3e[pos = \"1,4!\", label = \"\",shape=none,width = 0.5]\n\nF1[pos = \"-3,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"-1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nD1 [pos = \"-1,0!\",label=\"\",  shape = none,width = 0.3]\nD2 [pos = \"1,0!\",label=\"\",  shape = none,width = 0.3]\n\nF1->F2\nF2->F3\nF1->y1 [label = \"1\"]\nF2->y2 [label = \"1\"]\nF3->y3 [label = \"1\"]\nD1->F2\nD2->F3\n\ny2e->y2\n\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 7: Identified Full Model with Single-Indicator Factors
+</p>
+</div>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:sing-meas"></span>
+<div id="htmlwidget-9" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-9">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\ny1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2 [pos = \"-1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\ny3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\n# y1e[pos = \"-3,4!\", label = \"\",shape=none,width = 0.5]\ny2e [pos = \"-1,4!\", label = \"\",shape=none,width = 0.5]\n# y3e[pos = \"1,4!\", label = \"\",shape=none,width = 0.5]\n\n#Factors\nF1[pos = \"-3,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nF2[pos = \"-1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nF3[pos = \"1,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nF1->F1[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF3->F3[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF1->F2[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF1->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF2->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\ndummy [pos = \"-2,1!\", height=1.5, label=\"\", color=white]\ndummy1 [pos = \"0,1!\", height=1.5, label=\"\", color=white]\n# dummy2 [pos = \"-.9,1!\", height=2.5, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"1\"]\nF2->y2 [label = \"1\"]\nF3->y3 [label = \"1\"]\ny2e->y2\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 8: Under-identified Measurement Model with Single-Indicator Factors
+</p>
+</div>
+</div>
+<div id="model-evaluation-and-estimation" class="section level3">
+<h3>Model Evaluation and Estimation</h3>
+<ul>
+<li>Following is the observed covariance structure for the MIMIC model in Figure <a href="#fig:mimic-4f">6</a></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:mimic-tab">Table 7: </span>Sample Covariance Structure S, N = 500
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+y1
+</th>
+<th style="text-align:right;">
+y2
+</th>
+<th style="text-align:right;">
+y3
+</th>
+<th style="text-align:right;">
+y4
+</th>
+<th style="text-align:right;">
+y5
+</th>
+<th style="text-align:right;">
+y6
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+y1
+</td>
+<td style="text-align:right;">
+1.012
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y2
+</td>
+<td style="text-align:right;">
+0.657
+</td>
+<td style="text-align:right;">
+0.989
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y3
+</td>
+<td style="text-align:right;">
+0.428
+</td>
+<td style="text-align:right;">
+0.426
+</td>
+<td style="text-align:right;">
+1.022
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y4
+</td>
+<td style="text-align:right;">
+0.450
+</td>
+<td style="text-align:right;">
+0.414
+</td>
+<td style="text-align:right;">
+0.656
+</td>
+<td style="text-align:right;">
+1.009
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y5
+</td>
+<td style="text-align:right;">
+0.474
+</td>
+<td style="text-align:right;">
+0.470
+</td>
+<td style="text-align:right;">
+0.672
+</td>
+<td style="text-align:right;">
+0.625
+</td>
+<td style="text-align:right;">
+1.075
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y6
+</td>
+<td style="text-align:right;">
+0.600
+</td>
+<td style="text-align:right;">
+0.646
+</td>
+<td style="text-align:right;">
+0.486
+</td>
+<td style="text-align:right;">
+0.462
+</td>
+<td style="text-align:right;">
+0.354
+</td>
+<td style="text-align:right;">
+0.967
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p>Fit evaluation is acceptable: <span class="math inline">\(\chi_M^2 (14) =5.496\)</span>, <span class="math inline">\(p = .358\)</span>, <span class="math inline">\(RMSEA = .014\)</span> with the 90% confidence interval <span class="math inline">\((0, .065)\)</span>, <span class="math inline">\(CFI = 1\)</span>, <span class="math inline">\(SRMR = .013\)</span></p></li>
+<li><p>Parameter estimates:</p>
+<ul>
+<li>The disturbances of the two factors are not correlated (i.e., <span class="math inline">\(c_{12}\)</span> is insignificant)</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-mimic">Table 8: </span>Parameter Estimates
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.785
+</td>
+<td style="text-align:right;">
+0.023
+</td>
+<td style="text-align:right;">
+34.696
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.054
+</td>
+<td style="text-align:right;">
+0.058
+</td>
+<td style="text-align:right;">
+18.323
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.837
+</td>
+<td style="text-align:right;">
+0.021
+</td>
+<td style="text-align:right;">
+40.527
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{32}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.828
+</td>
+<td style="text-align:right;">
+0.021
+</td>
+<td style="text-align:right;">
+39.104
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{42}\)</span>
+</td>
+<td style="text-align:right;">
+0.936
+</td>
+<td style="text-align:right;">
+0.052
+</td>
+<td style="text-align:right;">
+18.034
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.780
+</td>
+<td style="text-align:right;">
+0.023
+</td>
+<td style="text-align:right;">
+33.928
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{13}\)</span>
+</td>
+<td style="text-align:right;">
+0.249
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+8.859
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.326
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+9.314
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{14}\)</span>
+</td>
+<td style="text-align:right;">
+0.537
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+16.152
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.669
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+22.257
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{23}\)</span>
+</td>
+<td style="text-align:right;">
+0.519
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+16.760
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.643
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+20.761
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{24}\)</span>
+</td>
+<td style="text-align:right;">
+0.315
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+10.177
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.371
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+10.599
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.387
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+11.445
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.384
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+10.806
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.296
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+9.244
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.300
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+8.669
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.321
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+9.563
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.315
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+8.974
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(d_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.394
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+11.523
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.391
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+10.911
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.183
+</td>
+<td style="text-align:right;">
+0.026
+</td>
+<td style="text-align:right;">
+7.025
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+8.531
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+0.198
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+6.707
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.283
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+8.137
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{33}\)</span>
+</td>
+<td style="text-align:right;">
+1.073
+</td>
+<td style="text-align:right;">
+0.068
+</td>
+<td style="text-align:right;">
+15.811
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.965
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+15.811
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{34}\)</span>
+</td>
+<td style="text-align:right;">
+0.353
+</td>
+<td style="text-align:right;">
+0.048
+</td>
+<td style="text-align:right;">
+7.335
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.347
+</td>
+<td style="text-align:right;">
+0.039
+</td>
+<td style="text-align:right;">
+8.829
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{12}\)</span>
+</td>
+<td style="text-align:right;">
+-0.002
+</td>
+<td style="text-align:right;">
+0.016
+</td>
+<td style="text-align:right;">
+-0.149
+</td>
+<td style="text-align:right;">
+0.882
+</td>
+<td style="text-align:right;">
+-0.013
+</td>
+<td style="text-align:right;">
+0.085
+</td>
+<td style="text-align:right;">
+-0.149
+</td>
+<td style="text-align:right;">
+0.882
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="cause-indicators" class="section level3">
+<h3>Cause Indicators</h3>
+<ul>
+<li><p>Observed variables of measurement models are usually represented as effect (reflective) indicators that are presumed to be caused by underlying factors and their measurement errors.</p></li>
+<li><p>The specification of observed variables as cause (formative) indicators reflects a different assumption about directionality—that the factor is affected by its indicators, instead of the other way around.</p></li>
+<li><p>It is theoretically possible to specify that all indicators of a factor are cause indicators rather than effect indicators.</p>
+<ul>
+<li>For instance, indicators such as education, income, and occupational prestige could all be causes of a socioeconomic (SES) factor instead of its effects.</li>
+</ul></li>
+<li><p>However, models with only cause indicators can be under-identified:</p>
+<ul>
+<li>In Figure <a href="#fig:cause-ind">9</a>, <span class="math inline">\(df=-4\)</span></li>
+</ul></li>
+<li><p>One solution is to convert the factor to a composite (sum) of the indicators without any error term, and the indicators are known as composite indicators</p>
+<ul>
+<li>The weights for individual indicators can be equal (e.g., 1) or unknown and estimated from the data</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:cause-ind"></span>
+<div id="htmlwidget-10" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-10">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\n# y1 [pos = \"-3,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny1 [pos = \"-1,3!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\n# y3[pos = \"1,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\n# y1e[pos = \"-3,4!\", label = \"\",shape=none,width = 0.5]\ny1e [pos = \"-1,4!\", label = \"\",shape=none,width = 0.5]\n# y3e[pos = \"1,4!\", label = \"\",shape=none,width = 0.5]\n\n#Factors\nF1[pos = \"-3,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nF2[pos = \"-1,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nF3[pos = \"1,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nF1->F1[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF3->F3[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF1->F2[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF1->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF2->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\ndummy [pos = \"-2,0.8!\", height=1, label=\"\", color=white]\ndummy1 [pos = \"0,0.8!\", height=1, label=\"\", color=white]\n# dummy2 [pos = \"-.9,1!\", height=2.5, label=\"\", color=white]\n\n#Loadings\nF1->y1 [label = \"\"]\nF2->y1 [label = \"\"]\nF3->y1 [label = \"\"]\ny1e->y1\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 9: A Factor with All Cause Indicators
+</p>
+</div>
+<ul>
+<li>Another solution is to introduce effect indicators to the factor(s), turning it into a MIMIC model, per se, as shown in Figure <a href="#fig:cause-eff-ind">10</a> (<span class="math inline">\(df=2\)</span>):
+<ul>
+<li>However, substantive rationale is needed for the effect indicators</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:cause-eff-ind"></span>
+<div id="htmlwidget-11" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-11">{"x":{"diagram":"digraph CFA {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       splines=true]\nnode [shape = rectangle]\n\ny1 [pos = \"-2,4!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\ny2[pos = \"0,4!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nt1 [pos = \"-1,3!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nd1 [pos = \"-2,3!\", label = \"\",shape=none,width = 0.5]\ny1e[pos = \"-3,4!\", label = \"\",shape=none,width = 0.5]\ny2e[pos = \"1,4!\", label = \"\",shape=none,width = 0.5]\n\n#Factors\nF1[pos = \"-3,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nF2[pos = \"-1,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nF3[pos = \"1,1!\", label = <x<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nF1->F1[dir=both,label = \"\",tailport = \"w\", headport = \"w\"] # &#x3D5\nF2->F2[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF3->F3[dir=both,label = \"\",tailport = \"w\", headport = \"w\"]\nF1->F2[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF1->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\nF2->F3[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\ndummy [pos = \"-2,.9!\", height=1, label=\"\", color=white]\ndummy1 [pos = \"0,.9!\", height=1, label=\"\", color=white]\n# dummy2 [pos = \"-.9,1!\", height=2.5, label=\"\", color=white]\n\n#Loadings\nF1->t1 [label = \"\"]\nF2->t1 [label = \"\"]\nF3->t1 [label = \"\"]\nd1->t1\nt1 -> y1[label = \"1\"]\nt1 -> y2\ny1e->y1\ny2e->y2\n\n}\n\n","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 10: A Factor with All Cause Indicators
+</p>
+</div>
+</div>
+<div id="higher-order-and-bifactor-models" class="section level3">
+<h3>Higher-order and Bifactor Models</h3>
+<ul>
+<li>In a CFA model with multiple factors, it’s possible to hypothesize that the covariance structure of the factors is explained by higher-order factors.
+<ul>
+<li>The second-order factors are cause with the first-order factors as their effect and sole (direct) indicators (i.e., no observed variable as a direct indicator)</li>
+<li>The first-order factors are cause of the observed variables and indicators of the second-order factors at the same time; as indicators, they are also subject to measurement errors</li>
+<li>The higher-order part is also subject to similar identification rules (e.g., three indicators for a single factor) and standardized options</li>
+</ul></li>
+<li>Ex: In Figure <a href="#fig:ho-cfa-fig">11</a>, the variation among the three first-order factors is caused by a common second-order factor and each factor’s measurement error (uniqueness)
+<ul>
+<li>Note that, when there are only two first-order factors, both higher-order loadings should be fixed at one; otherwise, the model is locally under-identified</li>
+<li>Alternatively, one loading can be freely estimated while fixing the variance of the second-order factor as one - similar to the standardized factor option
+<ul>
+<li>But variance of first-order factors cannot be fixed since they are dependent variables now</li>
+</ul></li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:ho-cfa-fig"></span>
+<div id="htmlwidget-12" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-12">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\nby1 [pos = \"4,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"9,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\nby7[pos = \"10,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\nby8[pos = \"11,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>]\nby9[pos = \"12,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>9<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"8,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF3[pos = \"11,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nbF4[pos = \"8,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nbF4->bF1 [label = \"1\"]\nbF4->bF2 [label = \"\"]\nbF4->bF3 [label = \"\"]\nbF4->bF4[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\n\nbf1e[pos = \"6,1!\", label = \"\",shape=none,width = 0.]\nbf2e[pos = \"9,1!\", label = \"\",shape=none,width = 0.2]\nbf3e[pos = \"12,1!\", label = \"\",shape=none,width = 0.2]\nbf1e->bF1 [label = \"\"]\nbf2e->bF2 [label = \"\"]\nbf3e->bF3 [label = \"\"]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF2->by4 [label = \"1\"]\nbF2->by5 [label = \"\"]\nbF2->by6 [label = \"\"]\nbF3->by7 [label = \"1\"]\nbF3->by8 [label = \"\"]\nbF3->by9 [label = \"\"]\n\n# bF2->by3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\nby1e[pos = \"4,4!\", label = \"\",shape=none]\nby2e[pos = \"5,4!\", label = \"\",shape=none]\nby3e[pos = \"6,4!\", label = \"\",shape=none]\nby4e[pos = \"7,4!\", label = \"\",shape=none]\nby5e[pos = \"8,4!\", label = \"\",shape=none]\nby6e[pos = \"9,4!\", label = \"\",shape=none]\nby7e[pos = \"10,4!\", label = \"\",shape=none]\nby8e[pos = \"11,4!\", label = \"\",shape=none]\nby9e[pos = \"12,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\nby7e->by7\nby8e->by8\nby9e->by9\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 11: Standard Higher-Order Model
+</p>
+</div>
+<ul>
+<li>The higher-order CFA is actually a special case of the bifactor model in Figure <a href="#fig:bifactor-fig">12</a>. Bifactor models are potentially applicable when
+<ol style="list-style-type: lower-alpha">
+<li>there is a general factor that is hypothesized to account for the commonality of the items;</li>
+<li>there are multiple domain specific factors, each of which is hypothesized to account for the unique influence of the specific domain over and above the general factor;</li>
+<li>researchers may be interested in the domain specific factors as well as the common factor that is of focal interest.</li>
+</ol></li>
+<li>In canonical bifactor model, the relations among the general and domain specific factors are assumed to be orthogonal, as the domain specific factors are related to the contribution that is over and above the general factor.</li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:bifactor-fig"></span>
+<div id="htmlwidget-13" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-13">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\nby1 [pos = \"4,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"9,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\nby7[pos = \"10,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\nby8[pos = \"11,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>]\nby9[pos = \"12,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>9<\/SUB><\/FONT>>]\n\n#Factors\nbF3[pos = \"5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF1[pos = \"8,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"11,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nbF1->bF1[dir=both,label=\"\",tailport = \"s\", headport = \"s\"] # &#x3D5\nbF2->bF2[dir=both,label=\"\",tailport = \"s\", headport = \"s\"]\nbF3->bF3[dir=both,label=\"\",tailport = \"s\", headport = \"s\"]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF1->by4 [label = \"\"]\nbF1->by5 [label = \"\"]\nbF1->by6 [label = \"\"]\nbF1->by7 [label = \"\"]\nbF1->by8 [label = \"\"]\nbF1->by9 [label = \"\"]\nbF2->by7 [label = \"1\"]\nbF2->by8 [label = \"\"]\nbF2->by9 [label = \"\"]\nbF3->by1 [label = \"1\"]\nbF3->by2 [label = \"\"]\nbF3->by3 [label = \"\"]\n\n#Errors\nby1e[pos = \"4,4!\", label = \"\",shape=none]\nby2e [pos = \"5,4!\", label = \"\",shape=none]\nby3e[pos = \"6,4!\", label = \"\",shape=none]\nby4e[pos = \"7,4!\", label = \"\",shape=none]\nby5e[pos = \"8,4!\", label = \"\",shape=none]\nby6e[pos = \"9,4!\", label = \"\",shape=none]\nby7e[pos = \"10,4!\", label = \"\",shape=none]\nby8e[pos = \"11,4!\", label = \"\",shape=none]\nby9e[pos = \"12,4!\", label = \"\",shape=none]\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\nby7e->by7\nby8e->by8\nby9e->by9\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 12: Bifactor Model
+</p>
+</div>
+<ul>
+<li>For every bifactor model, there is an equivalent full higher-order model with direct effects (factor loadings) from the second-order factor to every indicators, over and above the second-order effect on the lower order factors (see Figure <a href="#fig:ho-full-fig">13</a>).
+<ul>
+<li>A standard second-order model is a special case (constrained version) of the full higher-order model with the direct effects from the second-order factor to the observed variables eliminated. In other words, the standard higher-order model is more restricted than the full higher-order model, which is equivalent to the bifactor model.</li>
+<li>Consequently, the standard higher-order model is nested within the bifactor model (A is nested in B, B is equal to C, so that A is nested in C).</li>
+<li>Thus, likelihood ratio test can be given to compare bifactor and higher-order models</li>
+</ul></li>
+</ul>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:ho-full-fig"></span>
+<div id="htmlwidget-14" style="width:672px;height:480px;" class="grViz html-widget"></div>
+<script type="application/json" data-for="htmlwidget-14">{"x":{"diagram":"digraph model {\ngraph [layout = neato,\n       overlap = flase,\n       outputorder = edgesfirst,\n       fontsize = 12,\n       splines=true]\nnode [shape = rectangle]\n\nby1 [pos = \"4,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>]\nby2 [pos = \"5,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>]\nby3[pos = \"6,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>]\nby4[pos = \"7,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>]\nby5[pos = \"8,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>5<\/SUB><\/FONT>>]\nby6[pos = \"9,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>6<\/SUB><\/FONT>>]\nby7[pos = \"10,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>7<\/SUB><\/FONT>>]\nby8[pos = \"11,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>8<\/SUB><\/FONT>>]\nby9[pos = \"12,3!\", label = <y<FONT POINT-SIZE=\"8\"><SUB>9<\/SUB><\/FONT>>]\n\n#Factors\nbF1[pos = \"5,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>1<\/SUB><\/FONT>>,shape=circle]\nbF2[pos = \"8,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>2<\/SUB><\/FONT>>,shape=circle]\nbF3[pos = \"11,1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>3<\/SUB><\/FONT>>,shape=circle]\nbF4[pos = \"8,-1!\", label = <f<FONT POINT-SIZE=\"8\"><SUB>4<\/SUB><\/FONT>>,shape=circle]\nbF4->bF1 [label = \"1\"]\nbF4->bF2 [label = \"\"]\nbF4->bF3 [label = \"\"]\nbF4->bF4[dir=both,label = \"\",tailport = \"s\", headport = \"s\"]\n\nbf1e[pos = \"6,1!\", label = \"\",shape=none,width = 0.]\nbf2e[pos = \"9,1!\", label = \"\",shape=none,width = 0.2]\nbf3e[pos = \"12,1!\", label = \"\",shape=none,width = 0.2]\nbf1e->bF1 [label = \"\"]\nbf2e->bF2 [label = \"\"]\nbf3e->bF3 [label = \"\"]\n\n#Loadings\nbF1->by1 [label = \"1\"]\nbF1->by2 [label = \"\"]\nbF1->by3 [label = \"\"]\nbF2->by4 [label = \"1\"]\nbF2->by5 [label = \"\"]\nbF2->by6 [label = \"\"]\nbF3->by7 [label = \"1\"]\nbF3->by8 [label = \"\"]\nbF3->by9 [label = \"\"]\n\n# bF2->by3 [label = \"\"]\n# F1->y4 [label = \"\"]\n\n#Errors\nby1e[pos = \"4,4!\", label = \"\",shape=none]\nby2e[pos = \"5,4!\", label = \"\",shape=none]\nby3e[pos = \"6,4!\", label = \"\",shape=none]\nby4e[pos = \"7,4!\", label = \"\",shape=none]\nby5e[pos = \"8,4!\", label = \"\",shape=none]\nby6e[pos = \"9,4!\", label = \"\",shape=none]\nby7e[pos = \"10,4!\", label = \"\",shape=none]\nby8e[pos = \"11,4!\", label = \"\",shape=none]\nby9e[pos = \"12,4!\", label = \"\",shape=none]\n\nby1e->by1\nby2e->by2\nby3e->by3\nby4e->by4\nby5e->by5\nby6e->by6\nby7e->by7\nby8e->by8\nby9e->by9\n\n\n\nbF4->by1 [label = \"1\"]\nbF4->by2 [label = \"\"]\nbF4->by3 [label = \"\"]\nbF4->by4 [label = \"\"]\nbF4->by5 [label = \"\"]\nbF4->by6 [label = \"\"]\nbF4->by7 [label = \"\"]\nbF4->by8 [label = \"\"]\nbF4->by9 [label = \"\"]\n\n}","config":{"engine":"dot","options":null}},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 13: Full Higher-Order Model
+</p>
+</div>
+<ul>
+<li>An example to compare the above higher-order CFA and bifactor model:</li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:bifactor-tab">Table 9: </span>Sample Covariance Structure S, N = 500
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+y1
+</th>
+<th style="text-align:right;">
+y2
+</th>
+<th style="text-align:right;">
+y3
+</th>
+<th style="text-align:right;">
+y4
+</th>
+<th style="text-align:right;">
+y5
+</th>
+<th style="text-align:right;">
+y6
+</th>
+<th style="text-align:right;">
+y7
+</th>
+<th style="text-align:right;">
+y8
+</th>
+<th style="text-align:right;">
+y9
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+y1
+</td>
+<td style="text-align:right;">
+0.495
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y2
+</td>
+<td style="text-align:right;">
+0.243
+</td>
+<td style="text-align:right;">
+0.514
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y3
+</td>
+<td style="text-align:right;">
+0.268
+</td>
+<td style="text-align:right;">
+0.331
+</td>
+<td style="text-align:right;">
+0.523
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y4
+</td>
+<td style="text-align:right;">
+0.212
+</td>
+<td style="text-align:right;">
+0.201
+</td>
+<td style="text-align:right;">
+0.226
+</td>
+<td style="text-align:right;">
+0.534
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y5
+</td>
+<td style="text-align:right;">
+0.168
+</td>
+<td style="text-align:right;">
+0.203
+</td>
+<td style="text-align:right;">
+0.225
+</td>
+<td style="text-align:right;">
+0.192
+</td>
+<td style="text-align:right;">
+0.507
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y6
+</td>
+<td style="text-align:right;">
+0.219
+</td>
+<td style="text-align:right;">
+0.228
+</td>
+<td style="text-align:right;">
+0.243
+</td>
+<td style="text-align:right;">
+0.203
+</td>
+<td style="text-align:right;">
+0.195
+</td>
+<td style="text-align:right;">
+0.527
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y7
+</td>
+<td style="text-align:right;">
+0.202
+</td>
+<td style="text-align:right;">
+0.223
+</td>
+<td style="text-align:right;">
+0.223
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+<td style="text-align:right;">
+0.196
+</td>
+<td style="text-align:right;">
+0.213
+</td>
+<td style="text-align:right;">
+0.507
+</td>
+<td style="text-align:right;">
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y8
+</td>
+<td style="text-align:right;">
+0.188
+</td>
+<td style="text-align:right;">
+0.238
+</td>
+<td style="text-align:right;">
+0.197
+</td>
+<td style="text-align:right;">
+0.220
+</td>
+<td style="text-align:right;">
+0.183
+</td>
+<td style="text-align:right;">
+0.199
+</td>
+<td style="text-align:right;">
+0.319
+</td>
+<td style="text-align:right;">
+0.535
+</td>
+<td style="text-align:right;">
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+y9
+</td>
+<td style="text-align:right;">
+0.225
+</td>
+<td style="text-align:right;">
+0.258
+</td>
+<td style="text-align:right;">
+0.265
+</td>
+<td style="text-align:right;">
+0.241
+</td>
+<td style="text-align:right;">
+0.219
+</td>
+<td style="text-align:right;">
+0.226
+</td>
+<td style="text-align:right;">
+0.311
+</td>
+<td style="text-align:right;">
+0.267
+</td>
+<td style="text-align:right;">
+0.582
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Fit statistics for both models are acceptable, the more complex bifactor model is significantly better:
+<ul>
+<li>Bifactor: <span class="math inline">\(\chi_M^2 (21) =22.770\)</span>, <span class="math inline">\(p = .356\)</span>, <span class="math inline">\(RMSEA = .013\)</span> with the 90% confidence interval <span class="math inline">\((0, .041)\)</span>, <span class="math inline">\(CFI = .999\)</span>, <span class="math inline">\(SRMR = .017\)</span>, <span class="math inline">\(AIC=8223\)</span>, <span class="math inline">\(AIC=8324\)</span></li>
+<li>HO CFA: <span class="math inline">\(\chi_M^2 (24) =48.218\)</span>, <span class="math inline">\(p = .002\)</span>, <span class="math inline">\(RMSEA = .045\)</span> with the 90% confidence interval <span class="math inline">\((.026, .063)\)</span>, <span class="math inline">\(CFI = .985\)</span>, <span class="math inline">\(SRMR = .027\)</span>, <span class="math inline">\(AIC=8243\)</span>, <span class="math inline">\(AIC=8331\)</span></li>
+<li><span class="math inline">\(\chi_D^2(7)=25.448, ~p&lt;.001\)</span></li>
+</ul></li>
+<li>Parameter estimates for the bifactor model:
+<ul>
+<li>The standardized solution makes more sense to inform how the indicators load on the general and domain-specific factors</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-bifactor">Table 10: </span>Parameter Estimates for the Bifactor Model
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.631
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+18.64
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.099
+</td>
+<td style="text-align:right;">
+0.087
+</td>
+<td style="text-align:right;">
+12.57
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.680
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+21.88
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{31}\)</span>
+</td>
+<td style="text-align:right;">
+1.139
+</td>
+<td style="text-align:right;">
+0.086
+</td>
+<td style="text-align:right;">
+13.29
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.699
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+23.29
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{41}\)</span>
+</td>
+<td style="text-align:right;">
+1.022
+</td>
+<td style="text-align:right;">
+0.093
+</td>
+<td style="text-align:right;">
+10.99
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.620
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+19.05
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{51}\)</span>
+</td>
+<td style="text-align:right;">
+0.948
+</td>
+<td style="text-align:right;">
+0.089
+</td>
+<td style="text-align:right;">
+10.60
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.591
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+17.36
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{61}\)</span>
+</td>
+<td style="text-align:right;">
+1.044
+</td>
+<td style="text-align:right;">
+0.093
+</td>
+<td style="text-align:right;">
+11.22
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.638
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+20.15
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{71}\)</span>
+</td>
+<td style="text-align:right;">
+1.030
+</td>
+<td style="text-align:right;">
+0.093
+</td>
+<td style="text-align:right;">
+11.03
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.642
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+19.64
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{81}\)</span>
+</td>
+<td style="text-align:right;">
+0.997
+</td>
+<td style="text-align:right;">
+0.095
+</td>
+<td style="text-align:right;">
+10.54
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.604
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+17.45
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{91}\)</span>
+</td>
+<td style="text-align:right;">
+1.164
+</td>
+<td style="text-align:right;">
+0.101
+</td>
+<td style="text-align:right;">
+11.48
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.677
+</td>
+<td style="text-align:right;">
+0.031
+</td>
+<td style="text-align:right;">
+22.03
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{12}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.067
+</td>
+<td style="text-align:right;">
+2.47
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{22}\)</span>
+</td>
+<td style="text-align:right;">
+1.944
+</td>
+<td style="text-align:right;">
+0.705
+</td>
+<td style="text-align:right;">
+2.76
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.318
+</td>
+<td style="text-align:right;">
+0.097
+</td>
+<td style="text-align:right;">
+3.29
+</td>
+<td style="text-align:right;">
+0.001
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{32}\)</span>
+</td>
+<td style="text-align:right;">
+3.161
+</td>
+<td style="text-align:right;">
+1.799
+</td>
+<td style="text-align:right;">
+1.76
+</td>
+<td style="text-align:right;">
+0.079
+</td>
+<td style="text-align:right;">
+0.512
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+3.76
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{73}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.674
+</td>
+<td style="text-align:right;">
+0.130
+</td>
+<td style="text-align:right;">
+5.17
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{83}\)</span>
+</td>
+<td style="text-align:right;">
+0.509
+</td>
+<td style="text-align:right;">
+0.207
+</td>
+<td style="text-align:right;">
+2.46
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.334
+</td>
+<td style="text-align:right;">
+0.079
+</td>
+<td style="text-align:right;">
+4.22
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{93}\)</span>
+</td>
+<td style="text-align:right;">
+0.328
+</td>
+<td style="text-align:right;">
+0.141
+</td>
+<td style="text-align:right;">
+2.33
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.206
+</td>
+<td style="text-align:right;">
+0.059
+</td>
+<td style="text-align:right;">
+3.50
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Parameter estimates for the higher-order CFA model:
+<ul>
+<li>There is a negative variance estimate (i.e., <span class="math inline">\(c_{22}\)</span>, which is a Heywood case and suggests the model is likely misspecified.</li>
+</ul></li>
+</ul>
+<table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+<span id="tab:est-HO-CFA">Table 11: </span>Parameter Estimates for the Bifactor Model
+</caption>
+<thead>
+<tr>
+<th style="empty-cells: hide;border-bottom:hidden;" colspan="1">
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Unstandardized Solution
+</div>
+</th>
+<th style="border-bottom:hidden;padding-bottom:0; padding-left:3px;padding-right:3px;text-align: center; " colspan="4">
+<div style="border-bottom: 1px solid #ddd; padding-bottom: 5px; ">
+Standardized Solution
+</div>
+</th>
+</tr>
+<tr>
+<th style="text-align:left;">
+Par
+</th>
+<th style="text-align:right;">
+est
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+<th style="text-align:right;">
+est.std
+</th>
+<th style="text-align:right;">
+se
+</th>
+<th style="text-align:right;">
+z
+</th>
+<th style="text-align:right;">
+pvalue
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{11}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.664
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+22.256
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{21}\)</span>
+</td>
+<td style="text-align:right;">
+1.182
+</td>
+<td style="text-align:right;">
+0.084
+</td>
+<td style="text-align:right;">
+14.062
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.770
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+31.778
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{31}\)</span>
+</td>
+<td style="text-align:right;">
+1.245
+</td>
+<td style="text-align:right;">
+0.086
+</td>
+<td style="text-align:right;">
+14.441
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.804
+</td>
+<td style="text-align:right;">
+0.023
+</td>
+<td style="text-align:right;">
+35.539
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{42}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.614
+</td>
+<td style="text-align:right;">
+0.034
+</td>
+<td style="text-align:right;">
+18.082
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{52}\)</span>
+</td>
+<td style="text-align:right;">
+0.937
+</td>
+<td style="text-align:right;">
+0.088
+</td>
+<td style="text-align:right;">
+10.693
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.591
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+16.929
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{62}\)</span>
+</td>
+<td style="text-align:right;">
+1.028
+</td>
+<td style="text-align:right;">
+0.091
+</td>
+<td style="text-align:right;">
+11.304
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.636
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+19.227
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{73}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.793
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+33.511
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{83}\)</span>
+</td>
+<td style="text-align:right;">
+0.932
+</td>
+<td style="text-align:right;">
+0.061
+</td>
+<td style="text-align:right;">
+15.340
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.720
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+26.435
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(a_{93}\)</span>
+</td>
+<td style="text-align:right;">
+0.986
+</td>
+<td style="text-align:right;">
+0.063
+</td>
+<td style="text-align:right;">
+15.545
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.730
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+27.329
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{41}\)</span>
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.885
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+33.149
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{42}\)</span>
+</td>
+<td style="text-align:right;">
+1.102
+</td>
+<td style="text-align:right;">
+0.106
+</td>
+<td style="text-align:right;">
+10.428
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.014
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+31.918
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(b_{43}\)</span>
+</td>
+<td style="text-align:right;">
+1.161
+</td>
+<td style="text-align:right;">
+0.101
+</td>
+<td style="text-align:right;">
+11.476
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.849
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+30.562
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{11}\)</span>
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+4.095
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.217
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+4.582
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{22}\)</span>
+</td>
+<td style="text-align:right;">
+-0.006
+</td>
+<td style="text-align:right;">
+0.013
+</td>
+<td style="text-align:right;">
+-0.451
+</td>
+<td style="text-align:right;">
+0.652
+</td>
+<td style="text-align:right;">
+-0.029
+</td>
+<td style="text-align:right;">
+0.064
+</td>
+<td style="text-align:right;">
+-0.445
+</td>
+<td style="text-align:right;">
+0.656
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{33}\)</span>
+</td>
+<td style="text-align:right;">
+0.089
+</td>
+<td style="text-align:right;">
+0.017
+</td>
+<td style="text-align:right;">
+5.258
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+0.279
+</td>
+<td style="text-align:right;">
+0.047
+</td>
+<td style="text-align:right;">
+5.905
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+<span class="math inline">\(c_{44}\)</span>
+</td>
+<td style="text-align:right;">
+0.170
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+6.828
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+1.000
+</td>
+<td style="text-align:right;">
+0.000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="other-issues" class="section level2">
+<h2><strong>Other Issues</strong></h2>
+<div id="sample-size" class="section level3">
+<h3>Sample size</h3>
+<ul>
+<li><p>As the same as for other kinds of statistical methods, SEM results derived within larger samples have less sampling error than within smaller samples. Although determination of appropriate sample size is a critical issue in SEM, unfortunately, there is no consensus in the literature regarding what would be the appropriate sample size for SEM.</p></li>
+<li><p>SEM is basically a large-sample technique. Many researchers consider <span class="math inline">\(N=200\)</span> as the minimum sample size, although it’s usually agreed that the number can be smaller (e.g., 150) for simple CFA or path models.</p></li>
+<li><p>Another consideration is model complexity. That is, more complex models with more parameters require larger samples than more parsimonious models in order for the estimates to be comparably stable.</p></li>
+<li><p>Although there are no absolute standards in the literature about the relation between sample size and model complexity, a desirable goal is to have the ratio of the number of cases to the number of free parameters be a 10:1 ratio at least.</p>
+<ul>
+<li>Thus, a model with 20 parameters should have a minimum sample size of 200 cases.</li>
+</ul></li>
+<li><p>In practice, it would be sensible to meet both criteria when designing a research project. Sample size is also highly related to the statistical power of rejection of the null hypothesis when it is false.</p>
+<ul>
+<li>For a type II error of <span class="math inline">\(b\)</span>, the corresponding statistical power is <span class="math inline">\(1 − b\)</span></li>
+<li>For a model with smaller degree of freedom, larger sample size is needed to achieve the same level of power</li>
+</ul></li>
+<li><p>On the other hand, we need to be careful to interpret parameter estimates and testing when the sample size is large. Most of the test statistics described are sensitive to sample size; thus, even a trivial change in overall model fit due to adding or dropping a parameter could be statistically significant within a large sample.</p></li>
+<li><p>In addition to noting the statistical significance of a parameter estimate or modification index, the researcher should also consider the substantive meaning of the value.</p>
+<ul>
+<li>For instance, a factor loading or direct effect of .1 can be statistically significant based on either estimation or the modification index. However, it might just reflect the large sample size, and is substantively trivial.</li>
+</ul></li>
+</ul>
+</div>
+<div id="reporting-full-model-analysis" class="section level3">
+<h3>Reporting Full Model Analysis</h3>
+<ul>
+<li>One important goal of reporting is to ensure others can replicate your results and agree with your findings, even without using the same software. The following information and procedures are suggested in official report:
+<ul>
+<li>Model specification: Path diagram and/or structural equations with the parameter matrices
+<ul>
+<li>when multiple models are compared, provide specification for each one</li>
+<li>Explanation of possible identification issue preferred</li>
+<li>Substantive definitions of indicators and factors, preferably using tables</li>
+</ul></li>
+<li>Summary statistics such as sample size, sample covariance structure, mean, and skewness and kurtosis</li>
+<li>For model evaluation, these fit statistics are suggested (likely with others): <span class="math inline">\(\chi_M^2\)</span> with <span class="math inline">\(df\)</span> and <span class="math inline">\(p\)</span>-value; <span class="math inline">\(RMSEA\)</span> with the 90% CI; <span class="math inline">\(CFI\)</span>; <span class="math inline">\(SRMR\)</span>; <span class="math inline">\(AIC\)</span>; <span class="math inline">\(BIC\)</span></li>
+<li>For model estimation: parameter estimates (both unstd. and std.) with SE, <span class="math inline">\(z\)</span>-scores and <span class="math inline">\(p\)</span>-values
+<ul>
+<li>Explanation of parameter estimates preferred, e.g., if the magnitude of important estimates (e.g., loadings, direct effects) are substantively meaningful.</li>
+<li>In some cases, especially due to large sample size, parameter estimates can be statistically significant but substantively trivial (e.g., .1)</li>
+</ul></li>
+<li>For model comparisons, fit statistics for each model needed, plus LR testing for nested models or <span class="math inline">\(AIC\)</span> and <span class="math inline">\(BIC\)</span> comparisons for nonnested models</li>
+<li>For model modification, report any adjustments or changes to the original model, with substantive rationale</li>
+<li>For parameter testing, report any constrained parameters (e.g., indirect effect or parameter equality) and/or hypotheses testing with the Wald test statistics</li>
+</ul></li>
+</ul>
+</div>
+<div id="topics-in-sem-ii" class="section level3">
+<h3>Topics in SEM II</h3>
+<ul>
+<li>Measurement equivalence or invariance</li>
+<li>multiple-sample CFA and SEM</li>
+<li>CFA and SEM with categorical data or nonnormal data</li>
+<li>Robust Estimators for Data with nonignorable Missingness</li>
+<li>Interaction Effect and Latent Growth Model</li>
+</ul>
+</body>
+</div>
+</div>
+
+</main>
+
+  <footer>
+  <script src="//yihui.org/js/math-code.js"></script>
+<script async src="//mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+<script async src="//yihui.org/js/center-img.js"></script>
+
+  
+  <hr/>
+  © <a href="https://yihui.org">Yihui Xie</a> 2017 &ndash; 2020 | <a href="https://github.com/yihui">Github</a> | <a href="https://twitter.com/xieyihui">Twitter</a>
+  
+  </footer>
+  </body>
+</html>
+
